@@ -3,10 +3,13 @@
 #include "Parser.h"
 
 using std::cout;
+using std::string;
 using std::endl;
 
 int main(int argc, char **argv)
 {
+    cout << "started main, argc = " << argc << endl;
+
     if (argc != 2)
     {
         cout << "usage: " << argv[0] << " <config_path>" << endl;
@@ -19,8 +22,10 @@ int main(int argc, char **argv)
 
     // run simulation and store json state after each iteration
     vector<json> outPerIter = {Parser::makeJson(simulation)};
+    
     while (!simulation.shouldTerminate())
     {
+        cout << "inside the while" << endl;
         simulation.step();
         outPerIter.push_back(Parser::makeJson(simulation));
     }

@@ -1,18 +1,39 @@
 #include "Simulation.h"
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgents(agents) 
 {
-    // You can change the implementation of the constructor, but not the signature!
+    count = 10;
 }
 
 void Simulation::step()
 {
+    cout << "step taken" << endl;
+    count--;
+
+    int num = mGraph.getNumVertices();
+
+    for (int i = 0; i < num; i++)
+    {
+        mGraph.getParty(i);
+    }
+
     // TODO: implement this method
 }
 
 bool Simulation::shouldTerminate() const
 {
     // TODO implement this method
+    cout << "count: " << count << std::flush;
+
+    if (count > 0)
+    {
+        return false;
+    }
+
     return true;
 }
 
