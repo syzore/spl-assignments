@@ -3,8 +3,8 @@
 #include "Parser.h"
 
 using std::cout;
-using std::string;
 using std::endl;
+using std::string;
 
 int main(int argc, char **argv)
 {
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 
     // run simulation and store json state after each iteration
     vector<json> outPerIter = {Parser::makeJson(simulation)};
-    
+
     while (!simulation.shouldTerminate())
     {
         cout << "inside the while" << endl;

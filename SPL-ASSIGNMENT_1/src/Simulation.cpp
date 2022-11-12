@@ -4,37 +4,55 @@
 using std::cout;
 using std::endl;
 
-Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgents(agents) 
+Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgents(agents)
 {
     count = 10;
 }
 
+void Simulation::initializeCoalitions()
+{
+    coalitions = {};
+    for (int i = 0; i < mAgents.size(); i++)
+    {
+        Agent agent = mAgents.at(i);
+        coalitions.push_back({agent.getPartyId()});
+    }
+}
+
 void Simulation::step()
 {
-    cout << "step taken" << endl;
-    count--;
-
-    int num = mGraph.getNumVertices();
-
-    for (int i = 0; i < num; i++)
+    int numOfParties = mGraph.getNumVertices();
+    for (int i = 0; i < numOfParties; i++)
     {
-        mGraph.getParty(i);
+        Party party = mGraph.getParty(i);
+        if (party.getState() != Joined)
+            party.step(*this);
     }
 
-    // TODO: implement this method
+    int numOfAgents = mAgents.size();
+    for (int i = 0; i < numOfAgents; i++)
+    {
+        Agent agent = mAgents.at(i);
+        agent.step(*this);
+    }
 }
 
 bool Simulation::shouldTerminate() const
 {
-    // TODO implement this method
-    cout << "count: " << count << std::flush;
+    bool shouldTerminate = true;
 
-    if (count > 0)
+    int numOfParties = mGraph.getNumVertices();
+    for (int i = 0; i < numOfParties; i++)
     {
-        return false;
+        Party party = mGraph.getParty(i);
+        State state = party.getState();
+        if (state != Joined)
+        {
+            shouldTerminate = false;
+        }
     }
 
-    return true;
+    return shouldTerminate;
 }
 
 const Graph &Simulation::getGraph() const
@@ -57,5 +75,5 @@ const Party &Simulation::getParty(int partyId) const
 const vector<vector<int>> Simulation::getPartiesByCoalitions() const
 {
     // TODO: you MUST implement this method for getting proper output, read the documentation above.
-    return vector<vector<int>>();
+    return coalitions;
 }

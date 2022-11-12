@@ -1,7 +1,22 @@
 #pragma once
 
-class SelectionPolicy { };
+#include "JoinPolicy.h"
 
-class MandatesSelectionPolicy: public SelectionPolicy{ };
+class SelectionPolicy
+{
+public:
+    SelectionPolicy();
+    void select();
+};
 
-class EdgeWeightSelectionPolicy: public SelectionPolicy{ };
+class MandatesSelectionPolicy : public SelectionPolicy
+{
+public:
+    void select();
+};
+
+class EdgeWeightSelectionPolicy : public SelectionPolicy
+{
+public:
+    void select();
+};

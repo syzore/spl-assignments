@@ -1,7 +1,20 @@
 #pragma once
 
-class JoinPolicy {};
+class JoinPolicy
+{
+public:
+    JoinPolicy();
+    void join();
+};
 
-class MandatesJoinPolicy : public JoinPolicy {};
+class MandatesJoinPolicy : public JoinPolicy
+{
+public:
+    void join();
+};
 
-class LastOfferJoinPolicy : public JoinPolicy {};
+class LastOfferJoinPolicy : public JoinPolicy
+{
+public:
+    void join();
+};
