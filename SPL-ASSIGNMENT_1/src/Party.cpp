@@ -3,6 +3,10 @@
 #include "JoinPolicy.h"
 #include "Simulation.h"
 
+// TODO: add a function to party that called Party::suggest(int id) that stores the id's of the agents/agents' party id
+// to used after, if the join policy is last offer we take the last id, if the policy is by mendates we can go though the vector
+// alognside the coalitions vector and find the coalition with most mandates that is inside the vector.
+
 Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName(name), mMandates(mandates), mJoinPolicy(jp), mState(Waiting)
 {
     timer = 3;

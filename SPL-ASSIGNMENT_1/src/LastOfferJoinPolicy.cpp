@@ -3,3 +3,7 @@
 LastOfferJoinPolicy::LastOfferJoinPolicy()
 {
 }
+
+void LastOfferJoinPolicy::join()
+{
+}

@@ -6,7 +6,6 @@ using std::endl;
 
 Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgents(agents)
 {
-    count = 10;
 }
 
 void Simulation::initializeCoalitions()
@@ -17,6 +16,23 @@ void Simulation::initializeCoalitions()
         Agent agent = mAgents.at(i);
         coalitions.push_back({agent.getPartyId()});
     }
+}
+
+void Simulation::addPartyToCoalition(int partyId, int coalitionId)
+{
+    for (vector<int> &coalition : coalitions)
+    {
+        for (int id : coalition)
+        {
+            if (id == coalitionId)
+            {
+                coalition.insert(coalition.end(), partyId);
+                return;
+            }
+        }
+    }
+
+    cout << "no coalition found with party id of " << coalitionId << endl;
 }
 
 void Simulation::step()

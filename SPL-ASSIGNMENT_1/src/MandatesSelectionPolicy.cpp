@@ -4,3 +4,7 @@
 MandatesSelectionPolicy::MandatesSelectionPolicy()
 {
 }
+
+void MandatesSelectionPolicy::select()
+{
+}

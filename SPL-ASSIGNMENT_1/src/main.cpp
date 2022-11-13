@@ -8,8 +8,6 @@ using std::string;
 
 int main(int argc, char **argv)
 {
-    cout << "started main, argc = " << argc << endl;
-
     if (argc != 2)
     {
         cout << "usage: " << argv[0] << " <config_path>" << endl;
