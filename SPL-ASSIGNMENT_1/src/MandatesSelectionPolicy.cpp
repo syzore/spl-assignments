@@ -1,9 +1,9 @@
 #include "JoinPolicy.h";
 #include "SelectionPolicy.h";
 
-MandatesSelectionPolicy::MandatesSelectionPolicy() : SelectionPolicy()
-{
-}
+// MandatesSelectionPolicy::MandatesSelectionPolicy()
+// {
+// }
 
 void MandatesSelectionPolicy::select()
 {

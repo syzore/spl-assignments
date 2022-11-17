@@ -8,16 +8,14 @@
 class SelectionPolicy
 {
 public:
-    SelectionPolicy();
-    void select();
-
-    
+    SelectionPolicy(){};
+    virtual void select() = 0;
 };
 
 class MandatesSelectionPolicy : public SelectionPolicy
 {
 public:
-    MandatesSelectionPolicy();
+    MandatesSelectionPolicy() = default;
     void select();
 private:
     vector<int> alreadyOffered;
@@ -26,7 +24,7 @@ private:
 class EdgeWeightSelectionPolicy : public SelectionPolicy
 {
 public:
-    EdgeWeightSelectionPolicy();
+    EdgeWeightSelectionPolicy() = default;
     void select(Agent &agent, Simulation &s);
 private:
     vector<int> alreadyOffered;
