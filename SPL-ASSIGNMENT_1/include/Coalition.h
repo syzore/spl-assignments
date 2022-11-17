@@ -11,7 +11,8 @@ public:
     Coalition(Party &original);
     int getTotalMandates();
     void addParty(Party &p);
-    void addMandates(int m);
+    void setMandates(Party &p);
+    vector<int> getIdsVector() const;
 
 private:
     int totalMandates;

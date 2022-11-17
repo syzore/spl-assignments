@@ -4,36 +4,22 @@
 using std::cout;
 using std::endl;
 
-Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgents(agents)
+Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgents(agents), mCoalitions()
 {
 }
 
 void Simulation::initializeCoalitions()
 {
-    coalitions = {};
     for (int i = 0; i < mAgents.size(); i++)
     {
         Agent agent = mAgents.at(i);
-        coalitions.push_back({agent.getPartyId()});
+        Party originalParty = mGraph.getParty(agent.getPartyId());
+        Coalition coalition (originalParty);
+        mCoalitions.push_back(coalition);
     }
 }
 
-void Simulation::addPartyToCoalition(int partyId, int coalitionId)
-{
-    for (vector<int> &coalition : coalitions)
-    {
-        for (int id : coalition)
-        {
-            if (id == coalitionId)
-            {
-                coalition.insert(coalition.end(), partyId);
-                return;
-            }
-        }
-    }
 
-    cout << "no coalition found with party id of " << coalitionId << endl;
-}
 
 void Simulation::step()
 {
@@ -90,6 +76,10 @@ const Party &Simulation::getParty(int partyId) const
 /// At the simulation initialization - the result will be [[agent0.partyId], [agent1.partyId], ...]
 const vector<vector<int>> Simulation::getPartiesByCoalitions() const
 {
+    vector<vector<int>> coalitions = {{}};
+    for (Coalition c: mCoalitions){
+        coalitions.push_back(c.getIdsVector());
+    }
     // TODO: you MUST implement this method for getting proper output, read the documentation above.
     return coalitions;
 }

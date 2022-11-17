@@ -25,7 +25,7 @@ public:
     void step(Simulation &s);
     const string &getName() const;
     int timer;
-
+    const int getId() const;
 private:
     int mId;
     string mName;

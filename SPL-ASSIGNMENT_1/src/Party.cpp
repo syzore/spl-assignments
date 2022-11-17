@@ -51,3 +51,8 @@ void Party::step(Simulation &s)
         }
     }
 }
+
+const int Party::getId() const
+{
+return mId;
+}
