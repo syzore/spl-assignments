@@ -1,7 +1,7 @@
 #include "JoinPolicy.h";
 #include "SelectionPolicy.h";
 
-MandatesSelectionPolicy::MandatesSelectionPolicy()
+MandatesSelectionPolicy::MandatesSelectionPolicy() : SelectionPolicy()
 {
 }
 

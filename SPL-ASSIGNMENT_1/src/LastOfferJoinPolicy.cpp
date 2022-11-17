@@ -1,9 +1,10 @@
 #include "JoinPolicy.h";
 
-LastOfferJoinPolicy::LastOfferJoinPolicy()
+LastOfferJoinPolicy::LastOfferJoinPolicy() : JoinPolicy()
 {
 }
 
-void LastOfferJoinPolicy::join()
+void LastOfferJoinPolicy::join() 
 {
+    
 }

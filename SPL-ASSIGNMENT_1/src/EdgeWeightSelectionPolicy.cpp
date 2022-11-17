@@ -1,7 +1,6 @@
-#include "JoinPolicy.h";
-#include "SelectionPolicy.h";
+#include "SelectionPolicy.h"
 
-EdgeWeightSelectionPolicy::EdgeWeightSelectionPolicy()
+EdgeWeightSelectionPolicy::EdgeWeightSelectionPolicy() : SelectionPolicy()
 {
 }
 

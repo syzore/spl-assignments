@@ -1,10 +1,13 @@
-all: bin/cRace
+all: clean bin/cRace
 
-bin/cRace: bin/main.o bin/EdgeWeightSelectionPolicy.o bin/LastOfferJoinPolicy.o bin/MandatesJoinPolicy.o bin/MandatesSelectionPolicy.o bin/Agent.o bin/Graph.o bin/Parser.o bin/Party.o bin/Simulation.o
-	g++ -o bin/cRace bin/main.o bin/EdgeWeightSelectionPolicy.o bin/LastOfferJoinPolicy.o bin/MandatesJoinPolicy.o bin/MandatesSelectionPolicy.o bin/Agent.o bin/Graph.o bin/Parser.o bin/Party.o bin/Simulation.o
+bin/cRace: bin/main.o bin/EdgeWeightSelectionPolicy.o bin/LastOfferJoinPolicy.o bin/MandatesJoinPolicy.o bin/MandatesSelectionPolicy.o bin/Agent.o bin/Graph.o bin/Parser.o bin/Party.o bin/Simulation.o bin/Coalition.o 
+	g++ -o bin/cRace bin/main.o bin/EdgeWeightSelectionPolicy.o bin/LastOfferJoinPolicy.o bin/MandatesJoinPolicy.o bin/MandatesSelectionPolicy.o bin/Agent.o bin/Graph.o bin/Parser.o bin/Party.o bin/Simulation.o bin/Coalition.o 
 
 bin/main.o: src/main.cpp
 	g++ -g -Wall -Weffc++ -std=c++11 -c -Iinclude -o bin/main.o src/main.cpp
+
+bin/Coalition.o: src/Coalition.cpp
+	g++ -g -Wall -Weffc++ -std=c++11 -c -Iinclude -o bin/Coalition.o src/Coalition.cpp
 
 bin/EdgeWeightSelectionPolicy.o: src/EdgeWeightSelectionPolicy.cpp
 	g++ -g -Wall -Weffc++ -std=c++11 -c -Iinclude -o bin/EdgeWeightSelectionPolicy.o src/EdgeWeightSelectionPolicy.cpp
@@ -34,4 +37,4 @@ bin/Simulation.o: src/Simulation.cpp
 	g++ -g -Wall -Weffc++ -std=c++11 -c -Iinclude -o bin/Simulation.o src/Simulation.cpp
 
 clean:
-	rd /q bin
+	rm -f bin/*

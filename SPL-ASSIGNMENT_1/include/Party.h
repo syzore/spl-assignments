@@ -6,6 +6,7 @@ using std::string;
 class JoinPolicy;
 class Simulation;
 
+
 enum State
 {
     Waiting,
@@ -31,4 +32,5 @@ private:
     int mMandates;
     JoinPolicy *mJoinPolicy;
     State mState;
+    // 
 };
