@@ -1,8 +1,8 @@
 #include "SelectionPolicy.h"
 
-EdgeWeightSelectionPolicy::EdgeWeightSelectionPolicy() : SelectionPolicy()
-{
-}
+// EdgeWeightSelectionPolicy::EdgeWeightSelectionPolicy()
+// {
+// }
 
 void EdgeWeightSelectionPolicy::select()
 {

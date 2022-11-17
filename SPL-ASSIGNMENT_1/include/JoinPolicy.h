@@ -3,20 +3,20 @@
 class JoinPolicy
 {
 public:
-    JoinPolicy();
-    void join();
+    JoinPolicy(){};
+    virtual void join() = 0;
 };
 
 class MandatesJoinPolicy : public JoinPolicy
 {
 public:
-    MandatesJoinPolicy();
+    MandatesJoinPolicy() = default;
     void join();
 };
 
 class LastOfferJoinPolicy : public JoinPolicy
 {
 public:
-    LastOfferJoinPolicy();
+    LastOfferJoinPolicy() = default;
     void join();
 };

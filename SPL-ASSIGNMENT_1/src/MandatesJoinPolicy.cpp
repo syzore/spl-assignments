@@ -1,8 +1,8 @@
-#include "JoinPolicy.h";
+#include "JoinPolicy.h"
 
-MandatesJoinPolicy::MandatesJoinPolicy() : JoinPolicy()
-{
-}
+// MandatesJoinPolicy::MandatesJoinPolicy()
+// {
+// }
 
 void MandatesJoinPolicy::join()
 {
