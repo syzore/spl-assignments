@@ -15,7 +15,7 @@ class MandatesSelectionPolicy : public SelectionPolicy
 {
 public:
     MandatesSelectionPolicy() = default;
-    void select(Agent &agent, Simulation &s);
+    void select(Agent &agent, Simulation &s) override;
 
 private:
     vector<int> alreadyOffered;
@@ -28,5 +28,5 @@ public:
     void select(Agent &agent, Simulation &s) override;
 
 private:
-    vector<int> alreadyOffered;
+    vector<int> alreadyOffered; // saves the parties a given agent alreay offered
 };
