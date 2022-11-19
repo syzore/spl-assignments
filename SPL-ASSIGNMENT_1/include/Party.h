@@ -26,6 +26,7 @@ public:
     const string &getName() const;
     int timer;
     const int getId() const;
+    void Suggest(int partyId);
 private:
     int mId;
     string mName;
