@@ -5,7 +5,7 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
 {
     for (int partyId : offers)
     {
-        }
+    }
 }
 
 void MandatesJoinPolicy::addOffer(int partyId)

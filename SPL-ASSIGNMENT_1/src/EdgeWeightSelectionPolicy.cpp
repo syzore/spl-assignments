@@ -16,7 +16,7 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
     {
         if (g.getParty(i).getState() != Joined)
         {
-            if (!(std::find(alreadyOffered.begin(), alreadyOffered.end(), i) != alreadyOffered.end()))
+            if (std::find(alreadyOffered.begin(), alreadyOffered.end(), i) == alreadyOffered.end())
             {
                 int tempWeight = g.getEdgeWeight(i, agent.getPartyId());
                 if (tempWeight > maxWeight)
@@ -30,6 +30,6 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
     if (favorite.getId() != -1)
     {
         alreadyOffered.push_back(favorite.getId()); // add to alreadyOffered
-        // party.suggest
+        favorite.suggest(agent.getPartyId());
     }
 }

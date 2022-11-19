@@ -17,7 +17,7 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
         Party party = g.getParty(i);
         if (party.getState() != Joined)
         {
-            if (!(std::find(alreadyOffered.begin(), alreadyOffered.end(), i) != alreadyOffered.end()))
+            if (std::find(alreadyOffered.begin(), alreadyOffered.end(), i) == alreadyOffered.end())
             {
                 int tempMandates = party.getMandates();
                 if (tempMandates > maxMandates)
@@ -31,6 +31,6 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
     if (favorite.getId() != -1)
     {
         alreadyOffered.push_back(favorite.getId()); // add to alreadyOffered
-        favorite.suggest(agent.getPartyId());// party.suggest
+        favorite.suggest(agent.getPartyId());       // party.suggest
     }
 }

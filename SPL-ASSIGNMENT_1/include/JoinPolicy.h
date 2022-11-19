@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Simulation.h"
+
 class JoinPolicy
 {
 public:

@@ -1,5 +1,6 @@
 #include "Simulation.h"
 #include <iostream>
+#include <algorithm>
 
 using std::cout;
 using std::endl;
@@ -65,6 +66,18 @@ const vector<Agent> &Simulation::getAgents() const
 const Party &Simulation::getParty(int partyId) const
 {
     return mGraph.getParty(partyId);
+}
+
+Coalition &Simulation::getCoalitionByPartyId(int id) const
+{
+    for (Coalition c : mCoalitions)
+    {
+        vector<int> ids = c.getIdsVector();
+        if (std::find(ids.begin(), ids.end(), id) != ids.end())
+        {
+            return c;
+        }
+    }
 }
 
 /// This method returns a "coalition" vector, where each element is a vector of party IDs in the coalition.
