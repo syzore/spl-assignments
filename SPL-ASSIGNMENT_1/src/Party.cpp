@@ -58,7 +58,7 @@ const int Party::getId() const
     return mId;
 }
 
-void Party::Suggest (int partyId)
+void Party::suggest (int partyId)
 {
 
 }

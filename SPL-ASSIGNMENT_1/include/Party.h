@@ -26,7 +26,7 @@ public:
     int timer;
     const int getId() const;
     void join(Simulation &);
-    void Suggest(int partyId);
+    void suggest(int partyId);
 
 private:
     int mId;
