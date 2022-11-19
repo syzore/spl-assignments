@@ -1,10 +1,9 @@
 #include "Coalition.h"
-#include "Party.h"
+#include "Simulation.h"
 
-Coalition::Coalition(Party &original) : mParties()
+Coalition::Coalition() : mParties()
 {
-    mParties = {original};
-    totalMandates = original.getMandates();
+    totalMandates = 0;
 }
 
 int Coalition::getTotalMandates()
@@ -12,10 +11,15 @@ int Coalition::getTotalMandates()
     return totalMandates;
 }
 
-void Coalition::addParty(Party &p)
+void Coalition::addParty(Party &p, Simulation &s)
 {
     mParties.push_back(p);
     setMandates(p);
+
+    if (getTotalMandates() >= 61)
+    {
+        s.setTerminate(true);
+    }
 }
 
 void Coalition::setMandates(Party &p)

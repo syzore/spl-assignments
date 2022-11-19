@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Agent.h"
 
 using std::string;
 
@@ -26,7 +27,7 @@ public:
     int timer;
     const int getId() const;
     void join(Simulation &);
-    void suggest(int partyId);
+    void suggest(Agent &);
 
 private:
     int mId;
@@ -34,5 +35,4 @@ private:
     int mMandates;
     JoinPolicy *mJoinPolicy;
     State mState;
-    vector<int> offers;
 };

@@ -11,6 +11,7 @@
     "random": "cpp",
     "ostream": "cpp",
     "vector": "cpp",
-    "*.tcc": "cpp"
+    "*.tcc": "cpp",
+    "deque": "cpp"
   }
 }

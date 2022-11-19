@@ -31,6 +31,6 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
     if (favorite.getId() != -1)
     {
         alreadyOffered.push_back(favorite.getId()); // add to alreadyOffered
-        favorite.suggest(agent.getPartyId());       // party.suggest
+        favorite.suggest(agent);                    // party.suggest
     }
 }

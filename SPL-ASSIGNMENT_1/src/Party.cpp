@@ -58,7 +58,7 @@ const int Party::getId() const
     return mId;
 }
 
-void Party::suggest(int partyId)
+void Party::suggest(Agent &agent)
 {
-    (*mJoinPolicy).addOffer(partyId);
+    (*mJoinPolicy).addOffer(agent);
 }

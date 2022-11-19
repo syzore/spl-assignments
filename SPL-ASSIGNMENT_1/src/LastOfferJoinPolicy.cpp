@@ -3,14 +3,15 @@
 
 void LastOfferJoinPolicy::join(Party &p, Simulation &s)
 {
-    int idToJoin = offers.back();
+    Agent &lastOffered = offers.back();
+    int idToJoin = lastOffered.getPartyId();
     Coalition c = s.getCoalitionByPartyId(idToJoin);
-    c.addParty(p);
+    c.addParty(p, s);
 
-    Coalition *cc;
+    s.cloneAgent(lastOffered, p.getId());
 }
 
-void LastOfferJoinPolicy::addOffer(int partyId)
+void LastOfferJoinPolicy::addOffer(Agent &agent)
 {
-    offers.push_back(partyId);
+    offers.push_back(agent);
 }

@@ -7,10 +7,10 @@ class JoinPolicy
 public:
     JoinPolicy(){};
     virtual void join(Party &p, Simulation &s) = 0;
-    virtual void addOffer(int) = 0;
+    virtual void addOffer(Agent &) = 0;
 
 protected:
-    vector<int> offers;
+    vector<Agent &> offers;
 };
 
 class MandatesJoinPolicy : public JoinPolicy
@@ -18,7 +18,7 @@ class MandatesJoinPolicy : public JoinPolicy
 public:
     MandatesJoinPolicy() = default;
     void join(Party &p, Simulation &s);
-    void addOffer(int);
+    void addOffer(Agent &);
 };
 
 class LastOfferJoinPolicy : public JoinPolicy
@@ -26,5 +26,5 @@ class LastOfferJoinPolicy : public JoinPolicy
 public:
     LastOfferJoinPolicy() = default;
     void join(Party &p, Simulation &s);
-    void addOffer(int);
+    void addOffer(Agent &);
 };

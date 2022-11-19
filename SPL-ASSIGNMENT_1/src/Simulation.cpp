@@ -15,7 +15,9 @@ void Simulation::initializeCoalitions()
     {
         Agent agent = mAgents.at(i);
         Party originalParty = mGraph.getParty(agent.getPartyId());
-        Coalition coalition(originalParty);
+        Coalition coalition = Coalition();
+        coalition.addParty(originalParty, *this);
+        originalParty.setState(Joined);
         mCoalitions.push_back(coalition);
     }
 }
@@ -61,6 +63,15 @@ const Graph &Simulation::getGraph() const
 const vector<Agent> &Simulation::getAgents() const
 {
     return mAgents;
+}
+
+void Simulation::cloneAgent(Agent &a, int partyId)
+{
+    Agent clone = Agent(a);
+    clone.setPartyId(partyId);
+    clone.setId(getAgents().size());
+
+    mAgents.push_back(a);
 }
 
 const Party &Simulation::getParty(int partyId) const

@@ -21,9 +21,11 @@ public:
     const vector<Agent> &getAgents() const;
     const Party &getParty(int partyId) const;
     const vector<vector<int>> getPartiesByCoalitions() const;
+    void cloneAgent(Agent &a, int partyId);
     void reduceAvailableParties();
     void setTerminate(bool t);
     Coalition &getCoalitionByPartyId(int id) const;
+    void initializeCoalitions();
 
 private:
     Graph mGraph;
@@ -31,6 +33,4 @@ private:
     vector<Coalition> mCoalitions;
     int availableParties;
     bool terminate;
-
-    void initializeCoalitions();
 };
