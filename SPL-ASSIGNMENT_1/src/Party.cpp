@@ -7,7 +7,7 @@
 // to used after, if the join policy is last offer we take the last id, if the policy is by mendates we can go though the vector
 // alognside the coalitions vector and find the coalition with most mandates that is inside the vector.
 
-Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName(name), mMandates(mandates), mJoinPolicy(jp), mState(Waiting), offers()
+Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName(name), mMandates(mandates), mJoinPolicy(jp), mState(Waiting)
 {
     timer = 3;
 }
@@ -46,7 +46,7 @@ void Party::step(Simulation &s)
 
 void Party::join(Simulation &s)
 {
-    (*mJoinPolicy).join();
+    (*mJoinPolicy).join(*this, s);
 
     s.reduceAvailableParties();
 
@@ -58,7 +58,7 @@ const int Party::getId() const
     return mId;
 }
 
-void Party::Suggest (int partyId)
+void Party::suggest(int partyId)
 {
-
+    (*mJoinPolicy).addOffer(partyId);
 }

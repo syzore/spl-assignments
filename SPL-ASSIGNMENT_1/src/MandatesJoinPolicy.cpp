@@ -1,9 +1,15 @@
 #include "JoinPolicy.h"
+#include "Simulation.h"
 
-// MandatesJoinPolicy::MandatesJoinPolicy()
-// {
-// }
-
-void MandatesJoinPolicy::join()
+void MandatesJoinPolicy::join(Party &p, Simulation &s)
 {
+    for (int partyId : offers)
+    {
+        
+    }
+}
+
+void MandatesJoinPolicy::addOffer(int partyId)
+{
+    offers.push_back(partyId);
 }

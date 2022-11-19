@@ -23,6 +23,7 @@ public:
     const vector<vector<int>> getPartiesByCoalitions() const;
     void reduceAvailableParties();
     void setTerminate(bool t);
+    Coalition &getCoalitionByPartyId(int id) const;
 
 private:
     Graph mGraph;

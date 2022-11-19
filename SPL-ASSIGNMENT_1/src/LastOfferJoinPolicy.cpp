@@ -1,9 +1,13 @@
-#include "JoinPolicy.h";
+#include "JoinPolicy.h"
+#include "Simulation.h"
 
-// LastOfferJoinPolicy::LastOfferJoinPolicy()
-// {
-// }
-
-void LastOfferJoinPolicy::join()
+void LastOfferJoinPolicy::join(Party &p, Simulation &s)
 {
+    int idToJoin = offers.back();
+    
+}
+
+void LastOfferJoinPolicy::addOffer(int partyId)
+{
+    offers.push_back(partyId);
 }
