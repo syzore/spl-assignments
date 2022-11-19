@@ -9,14 +9,31 @@ Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgen
     // You can change the implementation of the constructor, but not the signature!
 }
 
+Agent::Agent(Agent& clone)
+{
+    mSelectionPolicy = clone.mSelectionPolicy;
+    mAgentId = -1;
+    mPartyId = -1;
+}
+
 int Agent::getId() const
 {
     return mAgentId;
 }
 
+void Agent::setId(int Id)
+{
+    mAgentId = Id;
+}
+
 int Agent::getPartyId() const
 {
     return mPartyId;
+}
+
+void Agent::setPartyId(int partyId)
+{
+    mPartyId = partyId;
 }
 
 void Agent::step(Simulation &sim)
