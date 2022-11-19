@@ -21,12 +21,15 @@ public:
     const vector<Agent> &getAgents() const;
     const Party &getParty(int partyId) const;
     const vector<vector<int>> getPartiesByCoalitions() const;
-
+    void reduceAvailableParties();
+    void setTerminate(bool t);
 
 private:
     Graph mGraph;
     vector<Agent> mAgents;
     vector<Coalition> mCoalitions;
+    int availableParties;
+    bool terminate;
 
     void initializeCoalitions();
 };

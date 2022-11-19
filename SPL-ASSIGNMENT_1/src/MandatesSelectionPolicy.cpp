@@ -5,6 +5,6 @@
 // {
 // }
 
-void MandatesSelectionPolicy::select()
+void MandatesSelectionPolicy::select(Agent &a, Simulation &s)
 {
 }

@@ -4,7 +4,7 @@
 using std::cout;
 using std::endl;
 
-Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgents(agents), mCoalitions()
+Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgents(agents), mCoalitions(), availableParties(graph.getNumVertices()), terminate(false)
 {
 }
 
@@ -14,12 +14,10 @@ void Simulation::initializeCoalitions()
     {
         Agent agent = mAgents.at(i);
         Party originalParty = mGraph.getParty(agent.getPartyId());
-        Coalition coalition (originalParty);
+        Coalition coalition(originalParty);
         mCoalitions.push_back(coalition);
     }
 }
-
-
 
 void Simulation::step()
 {
@@ -41,20 +39,17 @@ void Simulation::step()
 
 bool Simulation::shouldTerminate() const
 {
-    bool shouldTerminate = true;
+    return terminate || availableParties == 0;
+}
 
-    int numOfParties = mGraph.getNumVertices();
-    for (int i = 0; i < numOfParties; i++)
-    {
-        Party party = mGraph.getParty(i);
-        State state = party.getState();
-        if (state != Joined)
-        {
-            shouldTerminate = false;
-        }
-    }
+void Simulation::setTerminate(bool t)
+{
+    terminate = t;
+}
 
-    return shouldTerminate;
+void Simulation::reduceAvailableParties()
+{
+    availableParties--;
 }
 
 const Graph &Simulation::getGraph() const
@@ -77,7 +72,8 @@ const Party &Simulation::getParty(int partyId) const
 const vector<vector<int>> Simulation::getPartiesByCoalitions() const
 {
     vector<vector<int>> coalitions = {{}};
-    for (Coalition c: mCoalitions){
+    for (Coalition c : mCoalitions)
+    {
         coalitions.push_back(c.getIdsVector());
     }
     // TODO: you MUST implement this method for getting proper output, read the documentation above.

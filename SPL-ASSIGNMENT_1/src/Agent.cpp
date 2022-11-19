@@ -32,7 +32,7 @@ void Agent::step(Simulation &sim)
         }
     }
 
-    (*mSelectionPolicy).select();
+    (*mSelectionPolicy).select(*this, sim);
 
     // TODO: implement this method
 }

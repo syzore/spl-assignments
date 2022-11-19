@@ -6,7 +6,6 @@ using std::string;
 class JoinPolicy;
 class Simulation;
 
-
 enum State
 {
     Waiting,
@@ -26,11 +25,14 @@ public:
     const string &getName() const;
     int timer;
     const int getId() const;
+    void join(Simulation &);
+
 private:
     int mId;
     string mName;
     int mMandates;
     JoinPolicy *mJoinPolicy;
     State mState;
-    // 
+    vector<int> offers;
+    //
 };
