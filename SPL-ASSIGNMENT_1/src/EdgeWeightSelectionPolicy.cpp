@@ -40,7 +40,6 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
     if (selectedPartyId != -1)
     {
         Party selected = g.getParty(selectedPartyId);
-
         cout << "inside if" << endl;
 
         alreadyOffered.push_back(selectedPartyId); // add to alreadyOffered
@@ -48,6 +47,8 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
         cout << "after vector push" << endl;
 
         selected.suggest(agent);
+        s.updateAgent(agent);
+        s.setParty(selected);
     }
     else
     {

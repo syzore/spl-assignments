@@ -63,9 +63,26 @@ const Graph &Simulation::getGraph() const
     return mGraph;
 }
 
+void Simulation::setGraph(Graph &graph)
+{
+    mGraph = graph;
+}
+
 const vector<Agent> &Simulation::getAgents() const
 {
     return mAgents;
+}
+
+void Simulation::setAgents(vector<Agent> &agents)
+{
+    mAgents = agents;
+}
+
+void Simulation::updateAgent(Agent &agent)
+{
+    vector<Agent> agents = getAgents();
+    agents.at(agent.getId()) = agent;
+    setAgents(agents);
 }
 
 void Simulation::cloneAgent(Agent &a, int partyId)
@@ -82,12 +99,10 @@ const Party &Simulation::getParty(int partyId) const
     return mGraph.getParty(partyId);
 }
 
-void Simulation::setParty(Party &p)
+void Simulation::setParty(Party &party)
 {
-    mGraph.setParty(p);
+    mGraph.setParty(party);
 }
-
-
 
 Coalition &Simulation::getCoalitionByPartyId(int id) const
 {
