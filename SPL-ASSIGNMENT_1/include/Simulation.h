@@ -18,8 +18,10 @@ public:
     bool shouldTerminate() const;
 
     const Graph &getGraph() const;
+
     const vector<Agent> &getAgents() const;
     const Party &getParty(int partyId) const;
+    void setParty(Party &);
     const vector<vector<int>> getPartiesByCoalitions() const;
     void cloneAgent(Agent &a, int partyId);
     void reduceAvailableParties();

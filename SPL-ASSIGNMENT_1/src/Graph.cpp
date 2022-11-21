@@ -24,3 +24,8 @@ const Party &Graph::getParty(int partyId) const
 {
     return mVertices[partyId];
 }
+
+void Graph::setParty(Party &p)
+{
+    mVertices.at(p.getId()) = p;
+}

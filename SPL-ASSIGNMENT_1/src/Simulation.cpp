@@ -82,6 +82,13 @@ const Party &Simulation::getParty(int partyId) const
     return mGraph.getParty(partyId);
 }
 
+void Simulation::setParty(Party &p)
+{
+    mGraph.setParty(p);
+}
+
+
+
 Coalition &Simulation::getCoalitionByPartyId(int id) const
 {
     for (Coalition c : mCoalitions)

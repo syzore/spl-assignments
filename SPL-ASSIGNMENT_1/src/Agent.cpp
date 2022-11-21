@@ -15,20 +15,16 @@ Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgen
 // copy constructor
 Agent::Agent(const Agent &other)
 {
-    cout << "inside agent copy constructor" << endl;
-
     this->mAgentId = other.mAgentId;
     this->mPartyId = other.mPartyId;
 
-    cout << "mSelectionPolicy = " << mSelectionPolicy << endl;
-
     if (typeid(other.mSelectionPolicy) == typeid(MandatesSelectionPolicy))
     {
-        this->mSelectionPolicy = new MandatesSelectionPolicy;
+        mSelectionPolicy = new MandatesSelectionPolicy;
     }
     else
     {
-        this->mSelectionPolicy = new EdgeWeightSelectionPolicy;
+        mSelectionPolicy = new EdgeWeightSelectionPolicy;
     }
 }
 
@@ -97,17 +93,5 @@ void Agent::setPartyId(int partyId)
 
 void Agent::step(Simulation &sim)
 {
-    // Graph graph = sim.getGraph();
-    // int numOfParties = graph.getNumVertices();
-    // for (int i = 0; i < numOfParties; i++)
-    // {
-    //     Party party = graph.getParty(i);
-    //     State state = party.getState();
-    //     if (state != Joined)
-    //     {
-
-    //     }
-    // }
-
     (*mSelectionPolicy).select(*this, sim);
 }

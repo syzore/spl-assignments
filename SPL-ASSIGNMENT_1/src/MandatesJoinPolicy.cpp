@@ -10,6 +10,7 @@ MandatesJoinPolicy::MandatesJoinPolicy() : offers() {}
 
 void MandatesJoinPolicy::join(Party &p, Simulation &s)
 {
+    cout << "inside mandats join policy join" << endl;
     Coalition *favorite; // creats a dummy coalition to start with
     Agent *a;
     int mostMandates = -1;

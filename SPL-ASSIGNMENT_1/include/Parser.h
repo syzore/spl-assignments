@@ -24,3 +24,5 @@ private:
     static Agent parseAgent(const json &jAgent, int agentId);
     static Party parseParty(const json &jParty, const int id);
 };
+
+void test(Party &);

@@ -17,7 +17,7 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
     Graph g = s.getGraph();
     int total = g.getNumVertices();
     int maxMandates = -1;
-    Party *favorite;
+    int selectedPartyId = -1;
     for (int i = 0; i < total; i++) // finding favorite party by mandates parameter
     {
         Party party = g.getParty(i);
@@ -29,27 +29,22 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
                 if (tempMandates > maxMandates)
                 {
                     maxMandates = tempMandates;
-                    favorite = &party;
+                    selectedPartyId = party.getId();
                 }
             }
         }
     }
 
-    if (favorite == nullptr)
+    if (selectedPartyId != -1)
     {
-        cout << "favorite in MandatesSelectionPolicy is null" << endl;
-        return;
-    }
-    if (favorite->getId() != -1)
-    {
-        alreadyOffered.push_back(favorite->getId()); // add to alreadyOffered
-        favorite->suggest(agent);                    // party.suggest
+        Party selected = g.getParty(selectedPartyId);
+        alreadyOffered.push_back(selectedPartyId); // add to alreadyOffered
+        cout << "Selected party state = " << selected.getState() << endl;
+        selected.suggest(agent); // party.suggest
+        cout << "Selected party state after suggest = " << selected.getState() << endl;
     }
     else
     {
         cout << "didnt find a new favorite in MandatesSelectionPolicy select" << endl;
     }
-
-    favorite = nullptr;
-    delete favorite;
 }

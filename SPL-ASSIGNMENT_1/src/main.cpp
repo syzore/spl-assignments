@@ -22,6 +22,21 @@ int main(int argc, char **argv)
     Simulation simulation = Parser::readSimulation(argv[1]);
     cout << "after creating the sim" << endl;
 
+    Graph g = simulation.getGraph();
+
+    Party p = g.getParty(1);
+
+    cout << "test " << p.getState() << endl;
+
+    test(p);
+    g.setParty(p);
+
+    cout << "test2 " << p.getState() << endl;
+
+    Party p2 = g.getParty(1);
+
+    cout << "test3 " << p2.getState() << endl;
+
     simulation.initializeCoalitions();
     // run simulation and store json state after each iteration
     json sim = Parser::makeJson(simulation);
@@ -51,4 +66,9 @@ int main(int argc, char **argv)
     outputFile << std::setw(4) << json(outPerIter) << endl;
 
     return 0;
+}
+
+void test(Party &p)
+{
+    p.setState(CollectingOffers);
 }

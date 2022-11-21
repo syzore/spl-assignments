@@ -19,11 +19,11 @@ Party::Party(const Party &other)
     this->mMandates = other.mMandates;
     if (typeid(other.mJoinPolicy) == typeid(MandatesJoinPolicy))
     {
-        this->mJoinPolicy = new MandatesJoinPolicy;
+        mJoinPolicy = new MandatesJoinPolicy;
     }
     else
     {
-        this->mJoinPolicy = new LastOfferJoinPolicy;
+        mJoinPolicy = new LastOfferJoinPolicy;
     }
     this->mState = other.mState;
     this->timer = other.timer;
@@ -126,15 +126,9 @@ const int Party::getId() const
 
 void Party::suggest(Agent &agent)
 {
-    cout << "inside suggest" << endl;
-
     if (mState == Waiting)
     {
-        mState = CollectingOffers;
-        cout << "party #" << mId << " changes state to Collecting Offers" << endl;
+        setState(CollectingOffers);
     }
-    cout << "after waiting if" << endl;
-
-    cout << "joinPolicy = " << mJoinPolicy << endl;
     (*mJoinPolicy).addOffer(agent);
 }
