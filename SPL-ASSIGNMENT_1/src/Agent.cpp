@@ -5,10 +5,59 @@
 
 using std::cout;
 using std::endl;
+using std::move;
 
 Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgentId(agentId), mPartyId(partyId), mSelectionPolicy(selectionPolicy)
 {
     // You can change the implementation of the constructor, but not the signature!
+}
+
+Agent::Agent (const Agent& other)
+{
+    this->mAgentId = other.mAgentId;
+    this->mPartyId = other.mPartyId;
+    if (typeid(*mSelectionPolicy) == typeid(MandatesSelectionPolicy))
+    {
+        this->mSelectionPolicy = new MandatesSelectionPolicy;
+    }
+    else
+    {
+        this->mSelectionPolicy = new EdgeWeightSelectionPolicy;
+    }
+}
+
+Agent::Agent(Agent&& other)
+{
+    this->mAgentId = other.mAgentId;
+    this->mPartyId = other.mPartyId;
+    if (typeid(*mSelectionPolicy) == typeid(MandatesSelectionPolicy))
+    {
+        this->mSelectionPolicy = new MandatesSelectionPolicy;
+    }
+    else
+    {
+        this->mSelectionPolicy = new EdgeWeightSelectionPolicy;
+    }
+    other.mSelectionPolicy = nullptr;
+}
+
+Agent &Agent::operator=(const Agent &other)
+{
+    if (this != &other)
+    {
+        *mSelectionPolicy = *(other.mSelectionPolicy);
+        this->mAgentId = other.mAgentId;
+        this->mPartyId = other.mPartyId;
+    }
+    return *this;
+}
+
+Agent &Agent::operator=(Agent &&other)
+{
+    *mSelectionPolicy = *(other.mSelectionPolicy);
+    this->mAgentId = move(other.mAgentId);
+    this->mPartyId = move(other.mPartyId);
+    return *this;
 }
 
 Agent::Agent(const Agent &clone)
