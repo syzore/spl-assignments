@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
-#include "Agent.h"
 
 using std::string;
 
+class Agent;
 class JoinPolicy;
 class Simulation;
 

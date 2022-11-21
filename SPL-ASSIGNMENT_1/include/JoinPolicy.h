@@ -1,22 +1,26 @@
 #pragma once
 
-#include "Simulation.h"
+#include <vector>
+
+class Simulation;
+class Party;
+class Agent;
 
 class JoinPolicy
 {
 public:
-    JoinPolicy(){};
+    JoinPolicy() : offers(){};
     virtual void join(Party &p, Simulation &s) = 0;
     virtual void addOffer(Agent &) = 0;
 
 protected:
-    vector<Agent &> offers;
+    std::vector<Agent> offers;
 };
 
 class MandatesJoinPolicy : public JoinPolicy
 {
 public:
-    MandatesJoinPolicy() = default;
+    MandatesJoinPolicy() : JoinPolicy(){};
     void join(Party &p, Simulation &s);
     void addOffer(Agent &);
 };
@@ -24,7 +28,7 @@ public:
 class LastOfferJoinPolicy : public JoinPolicy
 {
 public:
-    LastOfferJoinPolicy() = default;
+    LastOfferJoinPolicy() : JoinPolicy(){};
     void join(Party &p, Simulation &s);
     void addOffer(Agent &);
 };

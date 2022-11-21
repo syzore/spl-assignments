@@ -1,5 +1,8 @@
 #include "Parser.h"
 
+using std::cout;
+using std::endl;
+
 Simulation Parser::readSimulation(const string &path)
 {
     std::ifstream inFile(path);
@@ -74,31 +77,38 @@ Graph Parser::parseGraph(const json &jGraph, const vector<Party> &parties)
 
 Simulation Parser::parseSimulation(const json &jSimulation)
 {
+    cout << "inside parse simulation" << endl;
     // create agents list
     vector<Agent> agents;
     for (unsigned int i = 0; i < jSimulation["agents"].size(); ++i)
         agents.push_back(parseAgent(jSimulation["agents"][i], i));
+    cout << "after agents" << endl;
 
     // create parties list
     vector<Party> parties;
     for (unsigned int i = 0; i < jSimulation["parties"].size(); ++i)
         parties.push_back(parseParty(jSimulation["parties"][i], i));
 
+    cout << "after parties" << endl;
     // change the state for the parties that are initialized with agent
     for (auto &agent : agents)
         parties[agent.getPartyId()].setState(State::Joined);
 
+    cout << "after party state assignment" << endl;
     // verify that the number of mandates sums to 120
     int mandatesSum = 0;
     for (auto &party : parties)
         mandatesSum += party.getMandates();
+    cout << "after party get mendates" << endl;
     if (mandatesSum != 120)
         throw std::invalid_argument("The parties mandates sum is not 120");
 
     // create graph
     Graph g = parseGraph(jSimulation["graph"], parties);
-
-    return Simulation(g, agents);
+    cout << "after parse graph" << endl;
+    Simulation sim = Simulation(g, agents);
+    cout << "after creating simulation" << endl;
+    return sim;
 }
 
 string stateToString(State state)

@@ -17,9 +17,13 @@ int main(int argc, char **argv)
     // read simulation from config file
     const string config_path = argv[1];
 
-    Simulation simulation = Parser::readSimulation(argv[1]);
-    simulation.initializeCoalitions();
+    cout << "before creating the sim" << endl;
 
+    Simulation simulation = Parser::readSimulation(argv[1]);
+    cout << "after creating the sim" << endl;
+
+    simulation.initializeCoalitions();
+    cout << "after initializing coalitions" << endl;
     // run simulation and store json state after each iteration
     vector<json> outPerIter = {Parser::makeJson(simulation)};
 

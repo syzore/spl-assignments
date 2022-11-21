@@ -1,15 +1,13 @@
 #include "Agent.h"
-#include "SelectionPolicy.h"
-#include "JoinPolicy.h"
-#include "Graph.h"
 #include "Simulation.h"
+#include "SelectionPolicy.h"
 
 Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgentId(agentId), mPartyId(partyId), mSelectionPolicy(selectionPolicy)
 {
     // You can change the implementation of the constructor, but not the signature!
 }
 
-Agent::Agent(Agent& clone)
+Agent::Agent(const Agent &clone)
 {
     mSelectionPolicy = clone.mSelectionPolicy;
     mAgentId = -1;

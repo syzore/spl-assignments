@@ -17,7 +17,6 @@ void Simulation::initializeCoalitions()
         Party originalParty = mGraph.getParty(agent.getPartyId());
         Coalition coalition = Coalition();
         coalition.addParty(originalParty, *this);
-        originalParty.setState(Joined);
         mCoalitions.push_back(coalition);
     }
 }

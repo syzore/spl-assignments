@@ -1,9 +1,12 @@
 #pragma once
 
 #include <vector>
-#include "Party.h"
+// #include "Simulation.h"
 
 using std::vector;
+
+class Simulation;
+class Party;
 
 class Coalition
 {

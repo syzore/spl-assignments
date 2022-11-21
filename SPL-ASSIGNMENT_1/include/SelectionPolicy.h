@@ -1,9 +1,8 @@
 #pragma once
 
-#include "JoinPolicy.h"
-#include "Agent.h"
 #include "Simulation.h"
 
+class Agent;
 class SelectionPolicy
 {
 public:
@@ -14,7 +13,7 @@ public:
 class MandatesSelectionPolicy : public SelectionPolicy
 {
 public:
-    MandatesSelectionPolicy() = default;
+    MandatesSelectionPolicy();
     void select(Agent &agent, Simulation &s) override;
 
 private:
@@ -24,7 +23,7 @@ private:
 class EdgeWeightSelectionPolicy : public SelectionPolicy
 {
 public:
-    EdgeWeightSelectionPolicy() = default;
+    EdgeWeightSelectionPolicy();
     void select(Agent &agent, Simulation &s) override;
 
 private:

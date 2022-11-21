@@ -1,5 +1,6 @@
 #include "SelectionPolicy.h"
 #include <algorithm>
+
 using std::vector;
 
 MandatesSelectionPolicy::MandatesSelectionPolicy() : SelectionPolicy(), alreadyOffered()
