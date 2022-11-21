@@ -17,7 +17,7 @@ Party::Party(const Party &other)
     this->mId = other.mId;
     this->mName = other.getName();
     this->mMandates = other.mMandates;
-    if (typeid(*mJoinPolicy) == typeid(MandatesJoinPolicy))
+    if (typeid(other.mJoinPolicy) == typeid(MandatesJoinPolicy))
     {
         this->mJoinPolicy = new MandatesJoinPolicy;
     }
@@ -34,7 +34,7 @@ Party::Party(Party &&other)
     this->mId = other.mId;
     this->mName = other.getName();
     this->mMandates = other.mMandates;
-    if (typeid(*mJoinPolicy) == typeid(MandatesJoinPolicy))
+    if (typeid(other.mJoinPolicy) == typeid(MandatesJoinPolicy))
     {
         this->mJoinPolicy = new MandatesJoinPolicy;
     }
