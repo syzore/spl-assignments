@@ -72,7 +72,7 @@ void Simulation::cloneAgent(Agent &a, int partyId)
     clone.setPartyId(partyId);
     clone.setId(getAgents().size());
 
-    mAgents.push_back(a);
+    mAgents.push_back(clone);
 }
 
 const Party &Simulation::getParty(int partyId) const

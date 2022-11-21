@@ -17,9 +17,7 @@
     {
       "cwd": "/workspaces/spl-assignments/SPL-ASSIGNMENT_1/bin",
       "binaryPath": "/workspaces/spl-assignments/SPL-ASSIGNMENT_1/bin/cRace",
-      "binaryArgs": [
-        "/workspaces/spl-assignments/SPL-ASSIGNMENT_1/tests/01.json"
-      ]
+      "binaryArgs": ["/workspaces/spl-assignments/SPL-ASSIGNMENT_1/tests/01.json"]
     }
   ],
   "files.associations": {
