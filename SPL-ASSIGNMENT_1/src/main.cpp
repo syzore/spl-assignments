@@ -23,13 +23,25 @@ int main(int argc, char **argv)
     cout << "after creating the sim" << endl;
 
     simulation.initializeCoalitions();
-    cout << "after initializing coalitions" << endl;
     // run simulation and store json state after each iteration
+    json sim = Parser::makeJson(simulation);
+    cout << "initial simulation " << sim << endl;
+
     vector<json> outPerIter = {Parser::makeJson(simulation)};
+
+    int i = 0;
 
     while (!simulation.shouldTerminate())
     {
         simulation.step();
+        cout << "iteration #" << i << endl;
+        i++;
+        json sim = Parser::makeJson(simulation);
+        cout << sim << endl;
+
+        if (i == 10)
+            break;
+
         outPerIter.push_back(Parser::makeJson(simulation));
     }
 

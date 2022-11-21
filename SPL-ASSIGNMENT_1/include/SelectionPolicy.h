@@ -6,7 +6,7 @@ class Agent;
 class SelectionPolicy
 {
 public:
-    SelectionPolicy(){};
+    SelectionPolicy() = default;
     virtual void select(Agent &agent, Simulation &s) = 0;
 };
 

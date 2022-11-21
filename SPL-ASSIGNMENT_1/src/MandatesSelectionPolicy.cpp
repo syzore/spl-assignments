@@ -1,6 +1,9 @@
 #include "SelectionPolicy.h"
 #include <algorithm>
+#include <iostream>
 
+using std::cout;
+using std::endl;
 using std::vector;
 
 MandatesSelectionPolicy::MandatesSelectionPolicy() : SelectionPolicy(), alreadyOffered()
@@ -9,11 +12,13 @@ MandatesSelectionPolicy::MandatesSelectionPolicy() : SelectionPolicy(), alreadyO
 
 void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
 {
+    cout << "inside mandates selection policy" << endl;
+
     Graph g = s.getGraph();
     int total = g.getNumVertices();
     int maxMandates = -1;
-    Party favorite = Party(-1, "dummy", 0, nullptr); // createing a dummy party
-    for (int i = 0; i < total; i++)                  // finding favorite party by mandates parameter
+    Party *favorite;
+    for (int i = 0; i < total; i++) // finding favorite party by mandates parameter
     {
         Party party = g.getParty(i);
         if (party.getState() != Joined)
@@ -24,14 +29,27 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
                 if (tempMandates > maxMandates)
                 {
                     maxMandates = tempMandates;
-                    favorite = party;
+                    favorite = &party;
                 }
             }
         }
     }
-    if (favorite.getId() != -1)
+
+    if (favorite == nullptr)
     {
-        alreadyOffered.push_back(favorite.getId()); // add to alreadyOffered
-        favorite.suggest(agent);                    // party.suggest
+        cout << "favorite in MandatesSelectionPolicy is null" << endl;
+        return;
     }
+    if (favorite->getId() != -1)
+    {
+        alreadyOffered.push_back(favorite->getId()); // add to alreadyOffered
+        favorite->suggest(agent);                    // party.suggest
+    }
+    else
+    {
+        cout << "didnt find a new favorite in MandatesSelectionPolicy select" << endl;
+    }
+
+    favorite = nullptr;
+    delete favorite;
 }

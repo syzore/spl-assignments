@@ -1,5 +1,12 @@
+#include <iostream>
+
 #include "JoinPolicy.h"
 #include "Simulation.h"
+
+using std::cout;
+using std::endl;
+
+MandatesJoinPolicy::MandatesJoinPolicy() : offers() {}
 
 void MandatesJoinPolicy::join(Party &p, Simulation &s)
 {
@@ -27,5 +34,6 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
 
 void MandatesJoinPolicy::addOffer(Agent &agent)
 {
+    cout << "inside mandates join policy add offer" << endl;
     offers.push_back(agent);
 }

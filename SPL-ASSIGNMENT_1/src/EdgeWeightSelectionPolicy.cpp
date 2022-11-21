@@ -1,5 +1,9 @@
 #include "SelectionPolicy.h"
 #include <algorithm>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 using std::vector;
 
 EdgeWeightSelectionPolicy::EdgeWeightSelectionPolicy() : SelectionPolicy(), alreadyOffered()
@@ -8,13 +12,16 @@ EdgeWeightSelectionPolicy::EdgeWeightSelectionPolicy() : SelectionPolicy(), alre
 
 void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
 {
+    cout << "inside EdgeWeightSelectionPolicy" << endl;
+
     Graph g = s.getGraph();
     int total = g.getNumVertices();
     int maxWeight = -1;
-    Party favorite = Party(-1, "dummy", 0, nullptr); // createing a dummy party
-    for (int i = 0; i < total; i++)                  // finding favorite party by edge weight parameter
+    Party *favorite;
+    for (int i = 0; i < total; i++) // finding favorite party by edge weight parameter
     {
-        if (g.getParty(i).getState() != Joined)
+        Party party = g.getParty(i);
+        if (party.getState() != Joined)
         {
             if (std::find(alreadyOffered.begin(), alreadyOffered.end(), i) == alreadyOffered.end())
             {
@@ -22,14 +29,33 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
                 if (tempWeight > maxWeight)
                 {
                     maxWeight = tempWeight;
-                    favorite = g.getParty(i);
+                    favorite = &party;
                 }
             }
         }
     }
-    if (favorite.getId() != -1)
+
+    cout << "after for loop" << endl;
+
+    if (favorite == nullptr)
+        return;
+
+    int partyId = favorite->getId();
+    if (partyId != -1)
     {
-        alreadyOffered.push_back(favorite.getId()); // add to alreadyOffered
-        favorite.suggest(agent);
+        cout << "inside if" << endl;
+
+        alreadyOffered.push_back(partyId); // add to alreadyOffered
+
+        cout << "after vector push" << endl;
+
+        favorite->suggest(agent);
     }
+    else
+    {
+        cout << "didnt find a new favorite in select" << endl;
+    }
+
+    favorite = nullptr;
+    delete favorite;
 }

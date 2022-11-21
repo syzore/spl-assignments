@@ -9,26 +9,29 @@ class Agent;
 class JoinPolicy
 {
 public:
-    JoinPolicy() : offers(){};
+    JoinPolicy() = default;
     virtual void join(Party &p, Simulation &s) = 0;
     virtual void addOffer(Agent &) = 0;
-
-protected:
-    std::vector<Agent> offers;
 };
 
 class MandatesJoinPolicy : public JoinPolicy
 {
 public:
-    MandatesJoinPolicy() : JoinPolicy(){};
+    MandatesJoinPolicy();
     void join(Party &p, Simulation &s);
     void addOffer(Agent &);
+
+private:
+    std::vector<Agent> offers;
 };
 
 class LastOfferJoinPolicy : public JoinPolicy
 {
 public:
-    LastOfferJoinPolicy() : JoinPolicy(){};
+    LastOfferJoinPolicy();
     void join(Party &p, Simulation &s);
     void addOffer(Agent &);
+
+private:
+    std::vector<Agent> offers;
 };
