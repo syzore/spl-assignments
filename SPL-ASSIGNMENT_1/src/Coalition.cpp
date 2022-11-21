@@ -1,9 +1,8 @@
 #include "Coalition.h"
 #include "Simulation.h"
 
-Coalition::Coalition() : mParties()
+Coalition::Coalition() : mParties(), totalMandates()
 {
-    totalMandates = 0;
 }
 
 int Coalition::getTotalMandates()

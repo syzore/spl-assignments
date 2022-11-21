@@ -9,6 +9,7 @@ class Agent
 public:
     Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy);
     Agent(const Agent &clone);
+    ~Agent();
 
     int getPartyId() const;
     void setPartyId(int partyId);

@@ -11,6 +11,7 @@ Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgen
 
 void Simulation::initializeCoalitions()
 {
+    // availableParties = mGraph.getNumVertices();
     for (int i = 0; i < mAgents.size(); i++)
     {
         Agent agent = mAgents.at(i);
@@ -18,6 +19,7 @@ void Simulation::initializeCoalitions()
         Coalition coalition = Coalition();
         coalition.addParty(originalParty, *this);
         mCoalitions.push_back(coalition);
+        reduceAvailableParties();
     }
 }
 

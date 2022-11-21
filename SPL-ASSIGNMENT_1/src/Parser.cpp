@@ -9,7 +9,9 @@ Simulation Parser::readSimulation(const string &path)
     if (!inFile.is_open())
         throw std::invalid_argument("Could not open file " + path);
     json jSimulation = json::parse(inFile);
-    return parseSimulation(jSimulation);
+    Simulation sim = parseSimulation(jSimulation);
+    cout << "after parsing sim" << endl;
+    return sim;
 }
 
 Agent Parser::parseAgent(const json &jAgent, int agentId)
@@ -108,6 +110,8 @@ Simulation Parser::parseSimulation(const json &jSimulation)
     cout << "after parse graph" << endl;
     Simulation sim = Simulation(g, agents);
     cout << "after creating simulation" << endl;
+    json json1 = makeJson(sim);
+    cout << "after making json" << json1 << endl;
     return sim;
 }
 

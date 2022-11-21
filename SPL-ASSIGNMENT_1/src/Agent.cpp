@@ -1,6 +1,10 @@
+#include <iostream>
 #include "Agent.h"
 #include "Simulation.h"
 #include "SelectionPolicy.h"
+
+using std::cout;
+using std::endl;
 
 Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgentId(agentId), mPartyId(partyId), mSelectionPolicy(selectionPolicy)
 {
@@ -10,8 +14,14 @@ Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgen
 Agent::Agent(const Agent &clone)
 {
     mSelectionPolicy = clone.mSelectionPolicy;
-    mAgentId = -1;
-    mPartyId = -1;
+    mAgentId = clone.getId();
+    mPartyId = clone.getPartyId();
+}
+
+Agent::~Agent()
+{
+    mSelectionPolicy = nullptr;
+    delete mSelectionPolicy;
 }
 
 int Agent::getId() const

@@ -3,12 +3,23 @@
     {
       "cwd": "d:\\Users\\Aviv\\University\\SPL-ASSIGNMENTS\\SPL-ASSIGNMENT_1\\bin",
       "binaryPath": "d:\\Users\\Aviv\\University\\SPL-ASSIGNMENTS\\SPL-ASSIGNMENT_1\\bin\\cRace",
-      "binaryArgs": []
+      "binaryArgs": [
+        "/workspaces/spl-assignments/SPL-ASSIGNMENT_1/tests/01.json"
+      ]
     },
     {
       "cwd": "/workspaces/spl-assignments/SPL-ASSIGNMENT_1/bin",
       "binaryPath": "/workspaces/spl-assignments/SPL-ASSIGNMENT_1/bin/cRace",
-      "binaryArgs": []
+      "binaryArgs": [
+        "/workspaces/spl-assignments/SPL-ASSIGNMENT_1/tests/01.json"
+      ]
+    },
+    {
+      "cwd": "/workspaces/spl-assignments/SPL-ASSIGNMENT_1/bin",
+      "binaryPath": "/workspaces/spl-assignments/SPL-ASSIGNMENT_1/bin/cRace",
+      "binaryArgs": [
+        "/workspaces/spl-assignments/SPL-ASSIGNMENT_1/tests/01.json"
+      ]
     }
   ],
   "files.associations": {

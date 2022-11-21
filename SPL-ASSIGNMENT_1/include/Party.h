@@ -18,6 +18,7 @@ class Party
 {
 public:
     Party(int id, string name, int mandates, JoinPolicy *);
+    ~Party();
 
     State getState() const;
     void setState(State state);

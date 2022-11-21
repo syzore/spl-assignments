@@ -3,8 +3,8 @@
 
 void MandatesJoinPolicy::join(Party &p, Simulation &s)
 {
-    Coalition *favorite = nullptr; // creats a dummy coalition to start with
-    Agent *a = nullptr;
+    Coalition *favorite; // creats a dummy coalition to start with
+    Agent *a;
     int mostMandates = -1;
     for (Agent &agent : offers)
     {
@@ -13,7 +13,8 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
         if (coalitionMandates > mostMandates)
         {
             mostMandates = coalitionMandates;
-            favorite = &temp;
+            Coalition *pointer = &temp;
+            favorite = pointer;
             a = &agent;
         }
     }

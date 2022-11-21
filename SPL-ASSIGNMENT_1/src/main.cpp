@@ -29,7 +29,6 @@ int main(int argc, char **argv)
 
     while (!simulation.shouldTerminate())
     {
-        cout << "inside the while" << endl;
         simulation.step();
         outPerIter.push_back(Parser::makeJson(simulation));
     }

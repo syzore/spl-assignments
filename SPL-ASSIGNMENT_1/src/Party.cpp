@@ -1,10 +1,21 @@
+#include <iostream>
+
 #include "Party.h"
 #include "Simulation.h"
 #include "JoinPolicy.h"
 
+using std::cout;
+using std::endl;
+
 Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName(name), mMandates(mandates), mJoinPolicy(jp), mState(Waiting)
 {
     timer = 3;
+}
+
+Party::~Party()
+{
+    mJoinPolicy = nullptr;
+    delete mJoinPolicy;
 }
 
 State Party::getState() const
