@@ -26,6 +26,7 @@ Agent Parser::parseAgent(const json &jAgent, int agentId)
         throw std::invalid_argument("Invalid selection policy");
 
     int partyId = jAgent["party_id"];
+
     return Agent(agentId, partyId, sp);
 }
 

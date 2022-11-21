@@ -12,10 +12,13 @@ Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgen
     // You can change the implementation of the constructor, but not the signature!
 }
 
-Agent::Agent (const Agent& other)
+Agent::Agent(const Agent &other)
 {
     this->mAgentId = other.mAgentId;
     this->mPartyId = other.mPartyId;
+
+    cout << "mSelectionPolicy = " << mSelectionPolicy << endl;
+
     if (typeid(*mSelectionPolicy) == typeid(MandatesSelectionPolicy))
     {
         this->mSelectionPolicy = new MandatesSelectionPolicy;
@@ -26,7 +29,7 @@ Agent::Agent (const Agent& other)
     }
 }
 
-Agent::Agent(Agent&& other)
+Agent::Agent(Agent &&other)
 {
     this->mAgentId = other.mAgentId;
     this->mPartyId = other.mPartyId;
@@ -58,13 +61,6 @@ Agent &Agent::operator=(Agent &&other)
     this->mAgentId = move(other.mAgentId);
     this->mPartyId = move(other.mPartyId);
     return *this;
-}
-
-Agent::Agent(const Agent &clone)
-{
-    mSelectionPolicy = clone.mSelectionPolicy;
-    mAgentId = clone.getId();
-    mPartyId = clone.getPartyId();
 }
 
 Agent::~Agent()
