@@ -33,6 +33,8 @@ void Simulation::step()
             party.step(*this);
     }
 
+    cout << "inside simulation step after parties" << endl;
+
     int numOfAgents = mAgents.size();
     for (int i = 0; i < numOfAgents; i++)
     {
@@ -72,7 +74,7 @@ void Simulation::cloneAgent(Agent &a, int partyId)
     clone.setPartyId(partyId);
     clone.setId(getAgents().size());
 
-    mAgents.push_back(a);
+    mAgents.push_back(clone);
 }
 
 const Party &Simulation::getParty(int partyId) const
@@ -96,7 +98,7 @@ Coalition &Simulation::getCoalitionByPartyId(int id) const
 /// At the simulation initialization - the result will be [[agent0.partyId], [agent1.partyId], ...]
 const vector<vector<int>> Simulation::getPartiesByCoalitions() const
 {
-    vector<vector<int>> coalitions = {{}};
+    vector<vector<int>> coalitions = {};
     for (Coalition c : mCoalitions)
     {
         coalitions.push_back(c.getIdsVector());

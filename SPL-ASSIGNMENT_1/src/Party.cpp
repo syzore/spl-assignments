@@ -7,9 +7,8 @@
 using std::cout;
 using std::endl;
 
-Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName(name), mMandates(mandates), mJoinPolicy(jp), mState(Waiting)
+Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName(name), mMandates(mandates), mJoinPolicy(jp), mState(Waiting), timer(3)
 {
-    timer = 3;
 }
 
 Party::~Party()
@@ -66,5 +65,15 @@ const int Party::getId() const
 
 void Party::suggest(Agent &agent)
 {
+    cout << "inside suggest" << endl;
+
+    if (mState == Waiting)
+    {
+        mState = CollectingOffers;
+        cout << "party #" << mId << " changes state to Collecting Offers" << endl;
+    }
+    cout << "after waiting if" << endl;
+
+    cout << "joinPolicy = " << mJoinPolicy << endl;
     (*mJoinPolicy).addOffer(agent);
 }

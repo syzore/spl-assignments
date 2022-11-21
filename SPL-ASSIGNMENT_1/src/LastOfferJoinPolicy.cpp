@@ -1,5 +1,11 @@
+#include <iostream>
 #include "JoinPolicy.h"
 #include "Simulation.h"
+
+using std::cout;
+using std::endl;
+
+LastOfferJoinPolicy::LastOfferJoinPolicy() : offers() {}
 
 void LastOfferJoinPolicy::join(Party &p, Simulation &s)
 {
@@ -13,5 +19,6 @@ void LastOfferJoinPolicy::join(Party &p, Simulation &s)
 
 void LastOfferJoinPolicy::addOffer(Agent &agent)
 {
+    cout << "inside last offer join policy add offer" << endl;
     offers.push_back(agent);
 }
