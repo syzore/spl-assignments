@@ -6,9 +6,70 @@
 
 using std::cout;
 using std::endl;
+using std::move;
 
 Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName(name), mMandates(mandates), mJoinPolicy(jp), mState(Waiting), timer(3)
 {
+}
+
+Party::Party(const Party &other)
+{
+    this->mId = other.mId;
+    this->mName = other.getName();
+    this->mMandates = other.mMandates;
+    if (typeid(*mJoinPolicy) == typeid(MandatesJoinPolicy))
+    {
+        this->mJoinPolicy = new MandatesJoinPolicy;
+    }
+    else
+    {
+        this->mJoinPolicy = new LastOfferJoinPolicy;
+    }
+    this->mState = other.mState;
+    this->timer = other.timer;
+}
+
+Party::Party(Party &&other)
+{
+    this->mId = other.mId;
+    this->mName = other.getName();
+    this->mMandates = other.mMandates;
+    if (typeid(*mJoinPolicy) == typeid(MandatesJoinPolicy))
+    {
+        this->mJoinPolicy = new MandatesJoinPolicy;
+    }
+    else
+    {
+        this->mJoinPolicy = new LastOfferJoinPolicy;
+    }
+    this->mState = other.mState;
+    this->timer = other.timer;
+    other.mJoinPolicy = nullptr;
+}
+
+Party &Party::operator=(const Party &other)
+{
+    if (this != &other)
+    {
+        *mJoinPolicy = *(other.mJoinPolicy);
+        this->mId = other.mId;
+        this->mName = other.getName();
+        this->mMandates = other.mMandates;
+        this->mState = other.mState;
+        this->timer = other.timer;
+    }
+    return *this;
+}
+
+Party &Party::operator=(Party &&other)
+{
+    *mJoinPolicy = *(other.mJoinPolicy);
+    this->mId = move(other.mId);
+    this->mName = move(other.getName());
+    this->mMandates = move(other.mMandates);
+    this->mState = move(other.mState);
+    this->timer = move(other.timer);
+    return *this;
 }
 
 Party::~Party()
