@@ -41,7 +41,16 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
         alreadyOffered.push_back(selectedPartyId); // add to alreadyOffered
         cout << "Selected party state = " << selected.getState() << endl;
         selected.suggest(agent); // party.suggest
-        cout << "Selected party state after suggest = " << selected.getState() << endl;
+
+        cout << "printing number of offerrs in mandates SP" << endl;
+        selected.printNumberOfOffers();
+
+        s.updateAgent(agent);
+        s.setParty(selected);
+
+        Party testP = s.getParty(selected.getId());
+        cout << "printing number of offers TEST in mandates SP" << endl;
+        testP.printNumberOfOffers();
     }
     else
     {

@@ -33,6 +33,7 @@ public:
     const int getId() const;
     void join(Simulation &);
     void suggest(Agent &);
+    void printNumberOfOffers() const;
 
 private:
     int mId;

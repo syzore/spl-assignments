@@ -11,6 +11,8 @@ void LastOfferJoinPolicy::join(Party &p, Simulation &s)
 {
     cout << "inside last offer join" << endl;
 
+    cout << "number of offers = " << offers.size() << endl;
+
     Agent &lastOffered = offers.back();
     int idToJoin = lastOffered.getPartyId();
     Coalition c = s.getCoalitionByPartyId(idToJoin);
@@ -23,4 +25,9 @@ void LastOfferJoinPolicy::addOffer(Agent &agent)
 {
     cout << "inside last offer join policy add offer" << endl;
     offers.push_back(agent);
+}
+
+int LastOfferJoinPolicy::getOffersSize() const
+{
+    return offers.size();
 }

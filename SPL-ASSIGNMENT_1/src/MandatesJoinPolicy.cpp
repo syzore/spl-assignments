@@ -38,3 +38,8 @@ void MandatesJoinPolicy::addOffer(Agent &agent)
     cout << "inside mandates join policy add offer" << endl;
     offers.push_back(agent);
 }
+
+int MandatesJoinPolicy::getOffersSize() const
+{
+    return offers.size();
+}

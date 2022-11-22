@@ -107,6 +107,7 @@ void Party::step(Simulation &s)
         {
             join(s);
         }
+        s.setParty(*this);
     }
 }
 
@@ -130,5 +131,15 @@ void Party::suggest(Agent &agent)
     {
         setState(CollectingOffers);
     }
-    (*mJoinPolicy).addOffer(agent);
+    mJoinPolicy->addOffer(agent);
+
+    cout << "printing number of offers in suggest" << endl;
+    printNumberOfOffers();
+}
+
+void Party::printNumberOfOffers() const
+{
+    int offersSize = mJoinPolicy->getOffersSize();
+
+    cout << "join policy num offers = " << offersSize << endl;
 }

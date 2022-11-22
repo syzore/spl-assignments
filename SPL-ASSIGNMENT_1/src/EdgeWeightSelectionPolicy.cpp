@@ -47,8 +47,16 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
         cout << "after vector push" << endl;
 
         selected.suggest(agent);
+
+        cout << "printing number of offerrs in edge weight SP" << endl;
+        selected.printNumberOfOffers();
+
         s.updateAgent(agent);
         s.setParty(selected);
+
+        Party testP = s.getParty(selected.getId());
+        cout << "printing number of offers TEST in edge weight SP" << endl;
+        testP.printNumberOfOffers();
     }
     else
     {
