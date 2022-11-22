@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-MandatesSelectionPolicy::MandatesSelectionPolicy() : SelectionPolicy(), alreadyOffered()
+MandatesSelectionPolicy::MandatesSelectionPolicy() : SelectionPolicy()
 {
 }
 
@@ -18,6 +18,7 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
     int total = g.getNumVertices();
     int maxMandates = -1;
     int selectedPartyId = -1;
+    vector<int> alreadyOffered = agent.getMAlreadyOffered();
     for (int i = 0; i < total; i++) // finding favorite party by mandates parameter
     {
         Party party = g.getParty(i);

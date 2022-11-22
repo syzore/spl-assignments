@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
-
+#include <vector>
+using std::vector;
 using std::string;
 
 class Agent;
@@ -34,11 +35,15 @@ public:
     void join(Simulation &);
     void suggest(Agent &);
     void printNumberOfOffers() const;
+    void addOffer(Agent &);
+    vector<int> getMOffers() ;
+    int getOffersSize() const;
 
 private:
     int mId;
     string mName;
     int mMandates;
     JoinPolicy *mJoinPolicy;
+    vector<int> mOffers;
     State mState;
 };

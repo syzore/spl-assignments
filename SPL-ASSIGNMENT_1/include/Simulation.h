@@ -20,6 +20,7 @@ public:
     const Graph &getGraph() const;
     void setGraph(Graph &);
     const vector<Agent> &getAgents() const;
+    Agent getAgentByPartyId(int partyId);
     void setAgents(vector<Agent> &);
     void updateAgent(Agent &);
     const Party &getParty(int partyId) const;

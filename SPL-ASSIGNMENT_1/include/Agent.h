@@ -19,9 +19,11 @@ public:
     int getId() const;
     void setId(int Id);
     void step(Simulation &sim);
+    vector<int> getMAlreadyOffered() const;
 
 private:
     int mAgentId;
     int mPartyId;
     SelectionPolicy *mSelectionPolicy;
+    vector<int> mAlreadyOffered; // saves the parties a given agent alreay offered
 };

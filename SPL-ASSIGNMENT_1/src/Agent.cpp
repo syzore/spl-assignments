@@ -6,8 +6,9 @@
 using std::cout;
 using std::endl;
 using std::move;
+using std::vector;
 
-Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgentId(agentId), mPartyId(partyId), mSelectionPolicy(selectionPolicy)
+Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgentId(agentId), mPartyId(partyId), mSelectionPolicy(selectionPolicy), mAlreadyOffered() 
 {
     // You can change the implementation of the constructor, but not the signature!
 }
@@ -26,6 +27,7 @@ Agent::Agent(const Agent &other)
     {
         mSelectionPolicy = new EdgeWeightSelectionPolicy;
     }
+    this->mAlreadyOffered = other.mAlreadyOffered;
 }
 
 Agent::Agent(Agent &&other)
@@ -42,6 +44,8 @@ Agent::Agent(Agent &&other)
         this->mSelectionPolicy = new EdgeWeightSelectionPolicy;
     }
     other.mSelectionPolicy = nullptr;
+    this->mAlreadyOffered = other.mAlreadyOffered;  
+    cout << "finish agent move constructor" << endl;
 }
 
 Agent &Agent::operator=(const Agent &other)
@@ -53,6 +57,7 @@ Agent &Agent::operator=(const Agent &other)
         this->mAgentId = other.mAgentId;
         this->mPartyId = other.mPartyId;
     }
+    this->mAlreadyOffered = other.mAlreadyOffered;
     return *this;
 }
 
@@ -62,6 +67,7 @@ Agent &Agent::operator=(Agent &&other)
     *mSelectionPolicy = *(other.mSelectionPolicy);
     this->mAgentId = move(other.mAgentId);
     this->mPartyId = move(other.mPartyId);
+    this->mAlreadyOffered = other.mAlreadyOffered;
     return *this;
 }
 
@@ -94,4 +100,9 @@ void Agent::setPartyId(int partyId)
 void Agent::step(Simulation &sim)
 {
     (*mSelectionPolicy).select(*this, sim);
+}
+
+vector<int> Agent::getMAlreadyOffered() const
+{
+    return mAlreadyOffered;
 }

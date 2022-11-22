@@ -17,7 +17,7 @@ public:
     virtual void select(Agent &agent, Simulation &s) override;
 
 private:
-    vector<int> alreadyOffered;
+    //vector<int> alreadyOffered;
 };
 
 class EdgeWeightSelectionPolicy : public SelectionPolicy
@@ -27,5 +27,5 @@ public:
     virtual void select(Agent &agent, Simulation &s) override;
 
 private:
-    vector<int> alreadyOffered; // saves the parties a given agent alreay offered
+    //vector<int> alreadyOffered; // saves the parties a given agent alreay offered
 };

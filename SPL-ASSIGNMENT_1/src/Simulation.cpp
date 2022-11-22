@@ -73,6 +73,15 @@ const vector<Agent> &Simulation::getAgents() const
     return mAgents;
 }
 
+Agent Simulation::getAgentByPartyId(int partyId)
+{
+vector<Agent> agents = getAgents();
+for (Agent agent: agents)
+{
+    if (agent.getPartyId() == partyId)
+        return agent;
+}
+}
 void Simulation::setAgents(vector<Agent> &agents)
 {
     mAgents = agents;

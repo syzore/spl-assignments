@@ -12,6 +12,7 @@ class Coalition
 {
 public:
     Coalition();
+    Coalition(const Coalition &);                                   // copy constructor
     int getTotalMandates();
     void addParty(Party &p, Simulation &s);
     void setMandates(Party &p);

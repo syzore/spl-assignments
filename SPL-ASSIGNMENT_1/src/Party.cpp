@@ -7,8 +7,9 @@
 using std::cout;
 using std::endl;
 using std::move;
+using std::vector;
 
-Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName(name), mMandates(mandates), mJoinPolicy(jp), mState(Waiting), timer(3)
+Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName(name), mMandates(mandates), mJoinPolicy(jp), mState(Waiting), timer(3), mOffers()
 {
 }
 
@@ -27,6 +28,7 @@ Party::Party(const Party &other)
     }
     this->mState = other.mState;
     this->timer = other.timer;
+    this->mOffers = other.mOffers;
 }
 
 Party::Party(Party &&other)
@@ -44,6 +46,7 @@ Party::Party(Party &&other)
     }
     this->mState = other.mState;
     this->timer = other.timer;
+    this->mOffers = other.mOffers;
     other.mJoinPolicy = nullptr;
 }
 
@@ -57,6 +60,7 @@ Party &Party::operator=(const Party &other)
         this->mMandates = other.mMandates;
         this->mState = other.mState;
         this->timer = other.timer;
+        this->mOffers = other.mOffers;
     }
     return *this;
 }
@@ -69,6 +73,7 @@ Party &Party::operator=(Party &&other)
     this->mMandates = move(other.mMandates);
     this->mState = move(other.mState);
     this->timer = move(other.timer);
+    this->mOffers = other.mOffers;
     return *this;
 }
 
@@ -131,7 +136,7 @@ void Party::suggest(Agent &agent)
     {
         setState(CollectingOffers);
     }
-    mJoinPolicy->addOffer(agent);
+    addOffer(agent);
 
     cout << "printing number of offers in suggest" << endl;
     printNumberOfOffers();
@@ -139,7 +144,21 @@ void Party::suggest(Agent &agent)
 
 void Party::printNumberOfOffers() const
 {
-    int offersSize = mJoinPolicy->getOffersSize();
+    cout << "join policy num offers = " << getOffersSize() << endl;
+}
 
-    cout << "join policy num offers = " << offersSize << endl;
+void Party::addOffer(Agent &agent)
+{
+    int id = agent.getPartyId();
+    mOffers.push_back(id);
+}
+
+vector<int> Party::getMOffers() 
+{
+    return mOffers;
+}
+
+int Party::getOffersSize() const
+{
+    return mOffers.size();
 }
