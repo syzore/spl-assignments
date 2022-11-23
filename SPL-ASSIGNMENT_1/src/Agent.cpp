@@ -8,7 +8,7 @@ using std::endl;
 using std::move;
 using std::vector;
 
-Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgentId(agentId), mPartyId(partyId), mSelectionPolicy(selectionPolicy), mAlreadyOffered() 
+Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgentId(agentId), mPartyId(partyId), mSelectionPolicy(selectionPolicy), mAlreadyOffered()
 {
     // You can change the implementation of the constructor, but not the signature!
 }
@@ -32,7 +32,7 @@ Agent::Agent(const Agent &other)
 
 Agent::Agent(Agent &&other)
 {
-    cout << "inside agent move constructor" << endl;
+    // cout << "inside agent move constructor" << endl;
     this->mAgentId = other.mAgentId;
     this->mPartyId = other.mPartyId;
     if (typeid(other.mSelectionPolicy) == typeid(MandatesSelectionPolicy))
@@ -44,13 +44,12 @@ Agent::Agent(Agent &&other)
         this->mSelectionPolicy = new EdgeWeightSelectionPolicy;
     }
     other.mSelectionPolicy = nullptr;
-    this->mAlreadyOffered = other.mAlreadyOffered;  
-    cout << "finish agent move constructor" << endl;
+    this->mAlreadyOffered = other.mAlreadyOffered;
 }
 
 Agent &Agent::operator=(const Agent &other)
 {
-    cout << "inside agent copy assignment" << endl;
+    // cout << "inside agent copy assignment" << endl;
     if (this != &other)
     {
         *mSelectionPolicy = *(other.mSelectionPolicy);
@@ -63,7 +62,7 @@ Agent &Agent::operator=(const Agent &other)
 
 Agent &Agent::operator=(Agent &&other)
 {
-    cout << "inside agent move assignment" << endl;
+    // cout << "inside agent move assignment" << endl;
     *mSelectionPolicy = *(other.mSelectionPolicy);
     this->mAgentId = move(other.mAgentId);
     this->mPartyId = move(other.mPartyId);
@@ -105,4 +104,10 @@ void Agent::step(Simulation &sim)
 vector<int> Agent::getMAlreadyOffered() const
 {
     return mAlreadyOffered;
+}
+
+void Agent::addToAlreadyOffered(int id)
+{
+    cout << "added offer, party id = " << id << ", to agent id = " << mAgentId << endl;
+    mAlreadyOffered.push_back(id);
 }

@@ -20,6 +20,7 @@ public:
     void setId(int Id);
     void step(Simulation &sim);
     vector<int> getMAlreadyOffered() const;
+    void addToAlreadyOffered(int);
 
 private:
     int mAgentId;

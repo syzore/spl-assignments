@@ -5,17 +5,50 @@
 using std::cout;
 using std::endl;
 
+// constructor
 Coalition::Coalition() : mParties(), totalMandates()
 {
 }
 
-Coalition::Coalition(const Coalition &other) 
+// destructor
+Coalition::~Coalition()
 {
-    cout << "other coalition total mandates: " << other.totalMandates << endl; 
-    totalMandates = other.totalMandates;
-    this->mParties = other.mParties;
 }
-int Coalition::getTotalMandates()
+
+// copy constructor
+Coalition::Coalition(const Coalition &other) : mParties(), totalMandates()
+{
+    totalMandates = other.getTotalMandates();
+    mParties = other.mParties;
+}
+
+// move constructor
+Coalition::Coalition(Coalition &&other) : mParties(), totalMandates()
+{
+    // cout << "move constructor was called inside Coalition" << endl;
+    totalMandates = other.getTotalMandates();
+    mParties = std::move(other.mParties);
+}
+
+// copy assignment
+Coalition &Coalition::operator=(const Coalition &rhs)
+{
+    // cout << "copy assignment was called inside Coalition" << endl;
+    totalMandates = rhs.getTotalMandates();
+    mParties = rhs.mParties;
+    return *this;
+}
+
+// move assignment
+Coalition &Coalition::operator=(Coalition &&rhs)
+{
+    // cout << "move assignment was called inside Coalition" << endl;
+    totalMandates = std::move(rhs.totalMandates);
+    mParties = std::move(rhs.mParties);
+    return *this;
+}
+
+int Coalition::getTotalMandates() const
 {
     return totalMandates;
 }

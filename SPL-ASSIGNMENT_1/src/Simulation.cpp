@@ -11,7 +11,6 @@ Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgen
 
 void Simulation::initializeCoalitions()
 {
-    // availableParties = mGraph.getNumVertices();
     for (int i = 0; i < mAgents.size(); i++)
     {
         Agent agent = mAgents.at(i);
@@ -32,8 +31,6 @@ void Simulation::step()
         if (party.getState() != Joined)
             party.step(*this);
     }
-
-    cout << "inside simulation step after parties" << endl;
 
     int numOfAgents = mAgents.size();
     for (int i = 0; i < numOfAgents; i++)
@@ -75,12 +72,12 @@ const vector<Agent> &Simulation::getAgents() const
 
 Agent Simulation::getAgentByPartyId(int partyId)
 {
-vector<Agent> agents = getAgents();
-for (Agent agent: agents)
-{
-    if (agent.getPartyId() == partyId)
-        return agent;
-}
+    vector<Agent> agents = getAgents();
+    for (Agent agent : agents)
+    {
+        if (agent.getPartyId() == partyId)
+            return agent;
+    }
 }
 void Simulation::setAgents(vector<Agent> &agents)
 {
@@ -113,16 +110,24 @@ void Simulation::setParty(Party &party)
     mGraph.setParty(party);
 }
 
-Coalition &Simulation::getCoalitionByPartyId(int id) const
+const Coalition &Simulation::getCoalitionByPartyId(int id) const
 {
-    for (Coalition c : mCoalitions)
+    int selectedIndex = -1;
+    for (int i = 0; i < mCoalitions.size(); i++)
     {
+        Coalition c = mCoalitions.at(i);
         vector<int> ids = c.getIdsVector();
+        for (int iid : ids)
+        {
+            cout << iid << endl;
+        }
         if (std::find(ids.begin(), ids.end(), id) != ids.end())
         {
-            return c;
+            selectedIndex = i;
         }
     }
+
+    return mCoalitions.at(selectedIndex);
 }
 
 /// This method returns a "coalition" vector, where each element is a vector of party IDs in the coalition.

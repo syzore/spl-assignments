@@ -153,7 +153,7 @@ void Party::addOffer(Agent &agent)
     mOffers.push_back(id);
 }
 
-vector<int> Party::getMOffers() 
+vector<int> Party::getMOffers()
 {
     return mOffers;
 }

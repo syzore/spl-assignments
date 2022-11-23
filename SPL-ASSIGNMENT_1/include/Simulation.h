@@ -29,7 +29,7 @@ public:
     void cloneAgent(Agent &a, int partyId);
     void reduceAvailableParties();
     void setTerminate(bool t);
-    Coalition &getCoalitionByPartyId(int id) const;
+    const Coalition &getCoalitionByPartyId(int id) const;
     void initializeCoalitions();
 
 private:
