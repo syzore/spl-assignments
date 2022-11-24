@@ -30,6 +30,7 @@ public:
     void reduceAvailableParties();
     void setTerminate(bool t);
     const Coalition &getCoalitionByPartyId(int id) const;
+    void setCoalition(Coalition &);
     void initializeCoalitions();
 
 private:

@@ -14,7 +14,7 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
 {
     Graph g = s.getGraph();
     int total = g.getNumVertices();
-    int maxWeight = -1;
+    int maxWeight = 0;
     int selectedPartyId = -1;
     vector<int> alreadyOffered = agent.getMAlreadyOffered();
     for (int i = 0; i < total; i++)
