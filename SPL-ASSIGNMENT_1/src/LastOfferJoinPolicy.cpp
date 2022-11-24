@@ -21,7 +21,11 @@ void LastOfferJoinPolicy::join(Party &p, Simulation &s)
     Coalition c = s.getCoalitionByPartyId(partyId);
     c.addParty(p, s);
     s.setCoalition(c);
-    s.cloneAgent(agent, lastOffered);
+    int size = s.getAgents().size();
+    cout << "getAgents.size is: " << size << endl;
+    s.cloneAgent(agent, p.getId());
+    size = s.getAgents().size();
+    cout << "getAgents.size now is: " << size << endl;
 }
 
 LastOfferJoinPolicy* LastOfferJoinPolicy::clone() const

@@ -35,8 +35,8 @@ int main(int argc, char **argv)
         json sim = Parser::makeJson(simulation);
         cout << sim << endl;
 
-        // if (i == 10)
-        //     break;
+         if (i == 10)
+             break;
 
         outPerIter.push_back(Parser::makeJson(simulation));
     }
