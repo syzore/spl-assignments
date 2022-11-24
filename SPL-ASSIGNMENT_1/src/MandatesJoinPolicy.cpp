@@ -11,8 +11,8 @@ MandatesJoinPolicy::MandatesJoinPolicy() : JoinPolicy() {}
 void MandatesJoinPolicy::join(Party &p, Simulation &s)
 {
     cout << "inside mandats join policy join" << endl;
-    Coalition *favorite; // creats a dummy coalition to start with
-    Agent *a;
+    int coalitionId = -1;
+    int agentId = -1;
     int mostMandates = -1;
     // vector<Agent> offers = p.getMOffers();
     vector<int> offers = p.getMOffers();
@@ -24,16 +24,17 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
         if (coalitionMandates > mostMandates)
         {
             mostMandates = coalitionMandates;
-            Coalition *pointer = &temp;
-            favorite = pointer;
-            a = &agent;
+            coalitionId = temp.getCoalitionId();
+            agentId = agent.getId();
         }
     }
 
-    if (a != nullptr)
-        s.cloneAgent(*a, p.getId());
-
-    favorite->addParty(p, s);
+    if (agentId != -1){
+        Agent a = s.getAgents().at(agentId);
+        s.cloneAgent(a, p.getId());
+    } 
+    
+    s.getCoalitionById(coalitionId)->addParty(p, s);
 }
 
 MandatesJoinPolicy* MandatesJoinPolicy::clone() const
