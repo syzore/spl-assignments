@@ -15,7 +15,7 @@ void Simulation::initializeCoalitions()
     {
         Agent agent = mAgents.at(i);
         Party originalParty = mGraph.getParty(agent.getPartyId());
-        Coalition coalition = Coalition();
+        Coalition coalition = Coalition(i);
         coalition.addParty(originalParty, *this);
         mCoalitions.push_back(coalition);
         reduceAvailableParties();
@@ -117,7 +117,7 @@ const Coalition &Simulation::getCoalitionByPartyId(int id) const
     {
         Coalition c = mCoalitions.at(i);
         vector<int> ids = c.getIdsVector();
-        
+
         if (std::find(ids.begin(), ids.end(), id) != ids.end())
         {
             selectedIndex = i;
@@ -125,6 +125,11 @@ const Coalition &Simulation::getCoalitionByPartyId(int id) const
     }
 
     return mCoalitions.at(selectedIndex);
+}
+
+void Simulation::setCoalition(Coalition &c)
+{
+    mCoalitions.at(c.getCoalitionId()) = c;
 }
 
 /// This method returns a "coalition" vector, where each element is a vector of party IDs in the coalition.

@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 
 // constructor
-Coalition::Coalition() : mParties(), totalMandates()
+Coalition::Coalition(int id) : mParties(), totalMandates(), id(id)
 {
 }
 
@@ -16,18 +16,17 @@ Coalition::~Coalition()
 }
 
 // copy constructor
-Coalition::Coalition(const Coalition &other) : mParties(), totalMandates()
+Coalition::Coalition(const Coalition &other) : mParties(other.mParties), totalMandates(other.getTotalMandates()), id(other.id)
 {
-    totalMandates = other.getTotalMandates();
-    mParties = other.mParties;
 }
 
 // move constructor
 Coalition::Coalition(Coalition &&other) : mParties(), totalMandates()
 {
     // cout << "move constructor was called inside Coalition" << endl;
-    totalMandates = other.getTotalMandates();
+    totalMandates = std::move(other.getTotalMandates());
     mParties = std::move(other.mParties);
+    id = std::move(other.id);
 }
 
 // copy assignment
@@ -36,6 +35,7 @@ Coalition &Coalition::operator=(const Coalition &rhs)
     // cout << "copy assignment was called inside Coalition" << endl;
     totalMandates = rhs.getTotalMandates();
     mParties = rhs.mParties;
+    id = rhs.id;
     return *this;
 }
 
@@ -45,6 +45,7 @@ Coalition &Coalition::operator=(Coalition &&rhs)
     // cout << "move assignment was called inside Coalition" << endl;
     totalMandates = std::move(rhs.totalMandates);
     mParties = std::move(rhs.mParties);
+    id = std::move(rhs.id);
     return *this;
 }
 
@@ -77,4 +78,9 @@ vector<int> Coalition::getIdsVector() const
         output.push_back(p.getId());
     }
     return output;
+}
+
+const int Coalition::getCoalitionId() const
+{
+    return id;
 }

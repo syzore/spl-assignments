@@ -14,7 +14,7 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
     Coalition *favorite; // creats a dummy coalition to start with
     Agent *a;
     int mostMandates = -1;
-    //vector<Agent> offers = p.getMOffers();
+    // vector<Agent> offers = p.getMOffers();
     vector<int> offers = p.getMOffers();
     for (int i : offers)
     {
@@ -34,15 +34,5 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
         s.cloneAgent(*a, p.getId());
 
     favorite->addParty(p, s);
+    s.setCoalition(*favorite);
 }
-
-// void MandatesJoinPolicy::addOffer(Agent &agent)
-// {
-//     cout << "inside mandates join policy add offer" << endl;
-//     offers.push_back(agent);
-// }
-
-// int MandatesJoinPolicy::getOffersSize() const
-// {
-//     return offers.size();
-// }

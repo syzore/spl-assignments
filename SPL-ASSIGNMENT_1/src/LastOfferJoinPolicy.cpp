@@ -18,16 +18,8 @@ void LastOfferJoinPolicy::join(Party &p, Simulation &s)
     int lastOffered = offers.back();
     Agent agent = s.getAgentByPartyId(lastOffered);
     int partyId = agent.getPartyId();
-    Coalition c = std::move(s.getCoalitionByPartyId(partyId));
-    cout << "after getCoalitionByPartyId" << endl;
+    Coalition c = s.getCoalitionByPartyId(partyId);
     c.addParty(p, s);
-    cout << "Coalition c added Party p" << endl;
+    s.setCoalition(c);
     s.cloneAgent(agent, lastOffered);
-    cout << "cloneAgent done" << endl;
 }
-
-// void LastOfferJoinPolicy::addOffer(Agent &agent)
-// {
-//     cout << "inside last offer join policy add offer" << endl;
-//     offers.push_back(agent);
-// }

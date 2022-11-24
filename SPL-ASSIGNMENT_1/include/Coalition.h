@@ -11,7 +11,7 @@ class Party;
 class Coalition
 {
 public:
-    Coalition();                             // constructor
+    Coalition(int);                          // constructor
     ~Coalition();                            // destructor
     Coalition(const Coalition &);            // copy constructor
     Coalition(Coalition &&);                 // move contructor
@@ -22,8 +22,10 @@ public:
     void addParty(Party &p, Simulation &s);
     void setMandates(Party &p);
     vector<int> getIdsVector() const;
+    const int getCoalitionId() const;
 
 private:
     int totalMandates;
+    int id;
     vector<Party> mParties;
 };
