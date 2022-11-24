@@ -47,3 +47,8 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
         cout << "didnt find a new favorite in select" << endl;
     }
 }
+
+EdgeWeightSelectionPolicy* EdgeWeightSelectionPolicy::clone() const
+{
+    return new EdgeWeightSelectionPolicy;
+}

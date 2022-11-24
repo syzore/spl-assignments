@@ -26,6 +26,11 @@ void LastOfferJoinPolicy::join(Party &p, Simulation &s)
     cout << "cloneAgent done" << endl;
 }
 
+LastOfferJoinPolicy* LastOfferJoinPolicy::clone() const
+{
+ return new LastOfferJoinPolicy;
+}
+
 // void LastOfferJoinPolicy::addOffer(Agent &agent)
 // {
 //     cout << "inside last offer join policy add offer" << endl;

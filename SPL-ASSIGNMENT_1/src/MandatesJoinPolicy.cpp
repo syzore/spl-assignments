@@ -36,6 +36,11 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
     favorite->addParty(p, s);
 }
 
+MandatesJoinPolicy* MandatesJoinPolicy::clone() const
+{
+ return new MandatesJoinPolicy;
+}
+
 // void MandatesJoinPolicy::addOffer(Agent &agent)
 // {
 //     cout << "inside mandates join policy add offer" << endl;

@@ -16,29 +16,22 @@ Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgen
 // copy constructor
 Agent::Agent(const Agent &other)
 {
-    this->mAgentId = other.mAgentId;
-    this->mPartyId = other.mPartyId;
+    mAgentId = other.mAgentId;
+    mPartyId = other.mPartyId;
 
-    mSelectionPolicy = other.mSelectionPolicy->clone;
+    mSelectionPolicy = other.mSelectionPolicy->clone();
 
-    this->mAlreadyOffered = other.mAlreadyOffered;
+    mAlreadyOffered = other.mAlreadyOffered;
 }
 
 Agent::Agent(Agent &&other)
 {
     // cout << "inside agent move constructor" << endl;
-    this->mAgentId = other.mAgentId;
-    this->mPartyId = other.mPartyId;
-    if (typeid(other.mSelectionPolicy) == typeid(MandatesSelectionPolicy))
-    {
-        this->mSelectionPolicy = new MandatesSelectionPolicy;
-    }
-    else
-    {
-        this->mSelectionPolicy = new EdgeWeightSelectionPolicy;
-    }
+    mAgentId = other.mAgentId;
+    mPartyId = other.mPartyId;
+    mSelectionPolicy = other.mSelectionPolicy;
     other.mSelectionPolicy = nullptr;
-    this->mAlreadyOffered = other.mAlreadyOffered;
+    mAlreadyOffered = other.mAlreadyOffered;
 }
 
 Agent &Agent::operator=(const Agent &other)
@@ -46,10 +39,10 @@ Agent &Agent::operator=(const Agent &other)
     // cout << "inside agent copy assignment" << endl;
     if (this != &other)
     {
-        *mSelectionPolicy = *(other.mSelectionPolicy);
-        this->mAgentId = other.mAgentId;
-        this->mPartyId = other.mPartyId;
-        this->mAlreadyOffered = other.mAlreadyOffered;
+        mSelectionPolicy = other.mSelectionPolicy->clone();
+        mAgentId = other.mAgentId;
+        mPartyId = other.mPartyId;
+        mAlreadyOffered = other.mAlreadyOffered;
     }
     return *this;
 }
@@ -57,10 +50,10 @@ Agent &Agent::operator=(const Agent &other)
 Agent &Agent::operator=(Agent &&other)
 {
     // cout << "inside agent move assignment" << endl;
-    *mSelectionPolicy = *(other.mSelectionPolicy);
-    this->mAgentId = move(other.mAgentId);
-    this->mPartyId = move(other.mPartyId);
-    this->mAlreadyOffered = other.mAlreadyOffered;
+    mSelectionPolicy = other.mSelectionPolicy;
+    mAgentId = move(other.mAgentId);
+    mPartyId = move(other.mPartyId);
+    mAlreadyOffered = other.mAlreadyOffered;
 
     other.mSelectionPolicy = nullptr;
     delete other.mSelectionPolicy;

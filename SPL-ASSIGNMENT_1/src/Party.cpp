@@ -15,38 +15,24 @@ Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName
 
 Party::Party(const Party &other)
 {
-    this->mId = other.mId;
-    this->mName = other.getName();
-    this->mMandates = other.mMandates;
-    if (typeid(other.mJoinPolicy) == typeid(MandatesJoinPolicy))
-    {
-        mJoinPolicy = new MandatesJoinPolicy;
-    }
-    else
-    {
-        mJoinPolicy = new LastOfferJoinPolicy;
-    }
-    this->mState = other.mState;
-    this->timer = other.timer;
-    this->mOffers = other.mOffers;
+    mId = other.mId;
+    mName = other.getName();
+    mMandates = other.mMandates;
+    mJoinPolicy = other.mJoinPolicy->clone();
+    mState = other.mState;
+    timer = other.timer;
+    mOffers = other.mOffers;
 }
 
 Party::Party(Party &&other)
 {
-    this->mId = other.mId;
-    this->mName = other.getName();
-    this->mMandates = other.mMandates;
-    if (typeid(other.mJoinPolicy) == typeid(MandatesJoinPolicy))
-    {
-        this->mJoinPolicy = new MandatesJoinPolicy;
-    }
-    else
-    {
-        this->mJoinPolicy = new LastOfferJoinPolicy;
-    }
-    this->mState = other.mState;
-    this->timer = other.timer;
-    this->mOffers = other.mOffers;
+    mId = other.mId;
+    mName = other.getName();
+    mMandates = other.mMandates;
+    mJoinPolicy = other.mJoinPolicy;
+    mState = other.mState;
+    timer = other.timer;
+    mOffers = other.mOffers;
     other.mJoinPolicy = nullptr;
 }
 
@@ -54,13 +40,13 @@ Party &Party::operator=(const Party &other)
 {
     if (this != &other)
     {
-        *mJoinPolicy = *(other.mJoinPolicy);
-        this->mId = other.mId;
-        this->mName = other.getName();
-        this->mMandates = other.mMandates;
-        this->mState = other.mState;
-        this->timer = other.timer;
-        this->mOffers = other.mOffers;
+        mJoinPolicy = other.mJoinPolicy->clone();
+        mId = other.mId;
+        mName = other.getName();
+        mMandates = other.mMandates;
+        mState = other.mState;
+        timer = other.timer;
+        mOffers = other.mOffers;
     }
     return *this;
 }
@@ -70,12 +56,12 @@ Party &Party::operator=(Party &&other)
     if (this != &other)
     {
         mJoinPolicy = other.mJoinPolicy;
-        this->mId = move(other.mId);
-        this->mName = move(other.getName());
-        this->mMandates = move(other.mMandates);
-        this->mState = move(other.mState);
-        this->timer = move(other.timer);
-        this->mOffers = other.mOffers;
+        mId = move(other.mId);
+        mName = move(other.getName());
+        mMandates = move(other.mMandates);
+        mState = move(other.mState);
+        timer = move(other.timer);
+        mOffers = other.mOffers;
 
         other.mJoinPolicy = nullptr;
     }

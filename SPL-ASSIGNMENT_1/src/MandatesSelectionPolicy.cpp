@@ -50,3 +50,8 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
         cout << "didnt find a new favorite in MandatesSelectionPolicy select" << endl;
     }
 }
+
+MandatesSelectionPolicy* MandatesSelectionPolicy::clone() const
+{
+    return new MandatesSelectionPolicy;
+}
