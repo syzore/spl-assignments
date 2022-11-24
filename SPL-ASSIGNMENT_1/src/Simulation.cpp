@@ -127,6 +127,11 @@ const Coalition &Simulation::getCoalitionByPartyId(int id) const
     return mCoalitions.at(selectedIndex);
 }
 
+const Coalition &Simulation::getCoalitionById(int id) const
+{
+    return mCoalitions.at(id);
+}
+
 void Simulation::setCoalition(Coalition &c)
 {
     mCoalitions.at(c.getCoalitionId()) = c;
