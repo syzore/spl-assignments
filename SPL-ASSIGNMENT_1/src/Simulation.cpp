@@ -117,10 +117,7 @@ const Coalition &Simulation::getCoalitionByPartyId(int id) const
     {
         Coalition c = mCoalitions.at(i);
         vector<int> ids = c.getIdsVector();
-        for (int iid : ids)
-        {
-            cout << iid << endl;
-        }
+        
         if (std::find(ids.begin(), ids.end(), id) != ids.end())
         {
             selectedIndex = i;

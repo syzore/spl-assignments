@@ -67,20 +67,28 @@ Party &Party::operator=(const Party &other)
 
 Party &Party::operator=(Party &&other)
 {
-    *mJoinPolicy = *(other.mJoinPolicy);
-    this->mId = move(other.mId);
-    this->mName = move(other.getName());
-    this->mMandates = move(other.mMandates);
-    this->mState = move(other.mState);
-    this->timer = move(other.timer);
-    this->mOffers = other.mOffers;
+    if (this != &other)
+    {
+        mJoinPolicy = other.mJoinPolicy;
+        this->mId = move(other.mId);
+        this->mName = move(other.getName());
+        this->mMandates = move(other.mMandates);
+        this->mState = move(other.mState);
+        this->timer = move(other.timer);
+        this->mOffers = other.mOffers;
+
+        other.mJoinPolicy = nullptr;
+    }
     return *this;
 }
 
 Party::~Party()
 {
-    mJoinPolicy = nullptr;
-    delete mJoinPolicy;
+    if (mJoinPolicy)
+    {
+        mJoinPolicy = nullptr;
+        delete mJoinPolicy;
+    }
 }
 
 State Party::getState() const

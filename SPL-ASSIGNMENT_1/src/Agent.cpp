@@ -19,14 +19,8 @@ Agent::Agent(const Agent &other)
     this->mAgentId = other.mAgentId;
     this->mPartyId = other.mPartyId;
 
-    if (typeid(other.mSelectionPolicy) == typeid(MandatesSelectionPolicy))
-    {
-        mSelectionPolicy = new MandatesSelectionPolicy;
-    }
-    else
-    {
-        mSelectionPolicy = new EdgeWeightSelectionPolicy;
-    }
+    mSelectionPolicy = other.mSelectionPolicy->clone;
+
     this->mAlreadyOffered = other.mAlreadyOffered;
 }
 
@@ -55,8 +49,8 @@ Agent &Agent::operator=(const Agent &other)
         *mSelectionPolicy = *(other.mSelectionPolicy);
         this->mAgentId = other.mAgentId;
         this->mPartyId = other.mPartyId;
+        this->mAlreadyOffered = other.mAlreadyOffered;
     }
-    this->mAlreadyOffered = other.mAlreadyOffered;
     return *this;
 }
 
@@ -67,13 +61,20 @@ Agent &Agent::operator=(Agent &&other)
     this->mAgentId = move(other.mAgentId);
     this->mPartyId = move(other.mPartyId);
     this->mAlreadyOffered = other.mAlreadyOffered;
+
+    other.mSelectionPolicy = nullptr;
+    delete other.mSelectionPolicy;
+
     return *this;
 }
 
 Agent::~Agent()
 {
-    mSelectionPolicy = nullptr;
-    delete mSelectionPolicy;
+    if (mSelectionPolicy)
+    {
+        mSelectionPolicy = nullptr;
+        delete mSelectionPolicy;
+    }
 }
 
 int Agent::getId() const
