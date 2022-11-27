@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 
 // constructor
-Coalition::Coalition(int id) : mParties(), totalMandates(), id(id)
+Coalition::Coalition(int id) : id(id), totalMandates(), mParties()
 {
 }
 
@@ -16,12 +16,12 @@ Coalition::~Coalition()
 }
 
 // copy constructor
-Coalition::Coalition(const Coalition &other) : mParties(other.mParties), totalMandates(other.getTotalMandates()), id(other.id)
+Coalition::Coalition(const Coalition &other) : id(other.id), totalMandates(other.getTotalMandates()), mParties(other.mParties)
 {
 }
 
 // move constructor
-Coalition::Coalition(Coalition &&other) : mParties(), totalMandates()
+Coalition::Coalition(Coalition &&other) : id(), totalMandates(), mParties()
 {
     // cout << "move constructor was called inside Coalition" << endl;
     totalMandates = std::move(other.getTotalMandates());

@@ -25,7 +25,7 @@ public:
     const int getCoalitionId() const;
 
 private:
-    int totalMandates;
     int id;
+    int totalMandates;
     vector<Party> mParties;
 };

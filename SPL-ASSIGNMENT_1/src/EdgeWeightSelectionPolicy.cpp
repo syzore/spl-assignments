@@ -38,13 +38,6 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
         }
     }
 
-
-    for (Agent a: s.getAgents())
-    {
-        cout << "Agent ID is: " << a.getId() << endl;
-    }
-
-
     if (selectedPartyId != -1)
     {
         Party selected = g.getParty(selectedPartyId);

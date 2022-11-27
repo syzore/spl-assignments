@@ -11,7 +11,7 @@ Simulation::Simulation(Graph graph, vector<Agent> agents) : mGraph(graph), mAgen
 
 void Simulation::initializeCoalitions()
 {
-    for (int i = 0; i < mAgents.size(); i++)
+    for (long unsigned int i = 0; i < mAgents.size(); i++)
     {
         Agent agent = mAgents.at(i);
         Party originalParty = mGraph.getParty(agent.getPartyId());
@@ -72,13 +72,20 @@ const vector<Agent> &Simulation::getAgents() const
 
 Agent Simulation::getAgentByPartyId(int partyId)
 {
-    vector<Agent> agents = getAgents();
-    for (Agent agent : agents)
+    long unsigned int index = 0;
+    while (index < mAgents.size())
     {
+        Agent agent = mAgents.at(index);
+
         if (agent.getPartyId() == partyId)
-            return agent;
+            break;
+
+        index++;
     }
+
+    return mAgents.at(index);
 }
+
 void Simulation::setAgents(vector<Agent> &agents)
 {
     mAgents = agents;
@@ -113,7 +120,7 @@ void Simulation::setParty(Party &party)
 const Coalition &Simulation::getCoalitionByPartyId(int id) const
 {
     int selectedIndex = -1;
-    for (int i = 0; i < mCoalitions.size(); i++)
+    for (long unsigned int i = 0; i < mCoalitions.size(); i++)
     {
         Coalition c = mCoalitions.at(i);
         vector<int> ids = c.getIdsVector();

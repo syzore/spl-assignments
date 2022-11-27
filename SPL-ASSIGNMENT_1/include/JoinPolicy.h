@@ -18,8 +18,13 @@ public:
 class MandatesJoinPolicy : public JoinPolicy
 {
 public:
-    MandatesJoinPolicy();
-    ~MandatesJoinPolicy();
+    MandatesJoinPolicy();                                      // constructor
+    ~MandatesJoinPolicy();                                     // destructor
+    MandatesJoinPolicy(const MandatesJoinPolicy &);            // copy constructor
+    MandatesJoinPolicy(MandatesJoinPolicy &&);                 // move contructor
+    MandatesJoinPolicy &operator=(const MandatesJoinPolicy &); // copy assignment
+    MandatesJoinPolicy &operator=(MandatesJoinPolicy &&);      // move assignment
+
     void join(Party &p, Simulation &s);
     virtual MandatesJoinPolicy *clone() const override;
 };
@@ -27,8 +32,13 @@ public:
 class LastOfferJoinPolicy : public JoinPolicy
 {
 public:
-    LastOfferJoinPolicy();
-    ~LastOfferJoinPolicy();
+    LastOfferJoinPolicy();                                       // constructor
+    ~LastOfferJoinPolicy();                                      // destructor
+    LastOfferJoinPolicy(const LastOfferJoinPolicy &);            // copy constructor
+    LastOfferJoinPolicy(LastOfferJoinPolicy &&);                 // move contructor
+    LastOfferJoinPolicy &operator=(const LastOfferJoinPolicy &); // copy assignment
+    LastOfferJoinPolicy &operator=(LastOfferJoinPolicy &&);      // move assignment
+
     void join(Party &p, Simulation &s);
     virtual LastOfferJoinPolicy *clone() const override;
 };

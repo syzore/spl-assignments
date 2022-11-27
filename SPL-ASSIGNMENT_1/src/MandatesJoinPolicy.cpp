@@ -35,7 +35,7 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
     {
         Agent a = s.getAgents().at(agentId);
         s.cloneAgent(a, p.getId());
-    } 
+    }
     Coalition c = s.getCoalitionById(coalitionId);
     c.addParty(p, s);
     s.setCoalition(c);
