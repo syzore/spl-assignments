@@ -19,14 +19,10 @@ Agent::Agent(const Agent &other) : mAgentId(other.mAgentId), mPartyId(other.mPar
     mSelectionPolicy = other.mSelectionPolicy->clone();
 }
 
-Agent::Agent(Agent &&other)
+Agent::Agent(Agent &&other) : mAgentId(other.mAgentId), mPartyId(other.mPartyId), mSelectionPolicy(), mAlreadyOffered(other.mAlreadyOffered)
 {
-    // cout << "inside agent move constructor" << endl;
-    mAgentId = other.mAgentId;
-    mPartyId = other.mPartyId;
     mSelectionPolicy = other.mSelectionPolicy;
     other.mSelectionPolicy = nullptr;
-    mAlreadyOffered = other.mAlreadyOffered;
 }
 
 Agent &Agent::operator=(const Agent &other)
