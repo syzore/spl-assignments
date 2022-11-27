@@ -10,6 +10,10 @@ EdgeWeightSelectionPolicy::EdgeWeightSelectionPolicy() : SelectionPolicy()
 {
 }
 
+EdgeWeightSelectionPolicy::~EdgeWeightSelectionPolicy()
+{
+}
+
 void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
 {
     Graph g = s.getGraph();
@@ -55,7 +59,7 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
     }
 }
 
-EdgeWeightSelectionPolicy* EdgeWeightSelectionPolicy::clone() const
+EdgeWeightSelectionPolicy *EdgeWeightSelectionPolicy::clone() const
 {
     return new EdgeWeightSelectionPolicy;
 }

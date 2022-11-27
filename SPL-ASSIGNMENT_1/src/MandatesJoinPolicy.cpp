@@ -8,6 +8,8 @@ using std::endl;
 
 MandatesJoinPolicy::MandatesJoinPolicy() : JoinPolicy() {}
 
+MandatesJoinPolicy::~MandatesJoinPolicy() {}
+
 void MandatesJoinPolicy::join(Party &p, Simulation &s)
 {
     cout << "inside mandats join policy join" << endl;
@@ -29,7 +31,8 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
         }
     }
 
-    if (agentId != -1){
+    if (agentId != -1)
+    {
         Agent a = s.getAgents().at(agentId);
         s.cloneAgent(a, p.getId());
     } 
@@ -38,9 +41,7 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
     s.setCoalition(c);
 }
 
-MandatesJoinPolicy* MandatesJoinPolicy::clone() const
+MandatesJoinPolicy *MandatesJoinPolicy::clone() const
 {
- return new MandatesJoinPolicy;
+    return new MandatesJoinPolicy;
 }
-
-
