@@ -54,5 +54,6 @@ void EdgeWeightSelectionPolicy::select(Agent &agent, Simulation &s)
 
 EdgeWeightSelectionPolicy *EdgeWeightSelectionPolicy::clone() const
 {
-    return new EdgeWeightSelectionPolicy;
+    EdgeWeightSelectionPolicy *pointer = new EdgeWeightSelectionPolicy;
+    return pointer;
 }

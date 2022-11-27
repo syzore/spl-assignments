@@ -53,5 +53,6 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
 
 MandatesSelectionPolicy *MandatesSelectionPolicy::clone() const
 {
-    return new MandatesSelectionPolicy;
+    MandatesSelectionPolicy *pointer = new MandatesSelectionPolicy;
+    return pointer;
 }

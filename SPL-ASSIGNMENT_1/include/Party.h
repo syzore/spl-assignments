@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 #include <vector>
-using std::vector;
 using std::string;
+using std::vector;
 
 class Agent;
 class JoinPolicy;
@@ -30,20 +30,20 @@ public:
     int getMandates() const;
     void step(Simulation &s);
     const string &getName() const;
-    int timer;
     const int getId() const;
     void join(Simulation &);
     void suggest(Agent &);
     void printNumberOfOffers() const;
     void addOffer(Agent &);
-    vector<int> getMOffers() ;
+    vector<int> getMOffers();
     int getOffersSize() const;
 
 private:
     int mId;
-    string mName;
+    int timer;
     int mMandates;
-    JoinPolicy *mJoinPolicy;
-    vector<int> mOffers;
+    string mName;
     State mState;
+    vector<int> mOffers;
+    JoinPolicy *mJoinPolicy;
 };

@@ -43,5 +43,6 @@ void MandatesJoinPolicy::join(Party &p, Simulation &s)
 
 MandatesJoinPolicy *MandatesJoinPolicy::clone() const
 {
-    return new MandatesJoinPolicy;
+    MandatesJoinPolicy *pointer = new MandatesJoinPolicy;
+    return pointer;
 }

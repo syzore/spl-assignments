@@ -30,6 +30,7 @@ Agent &Agent::operator=(const Agent &other)
     // cout << "inside agent copy assignment" << endl;
     if (this != &other)
     {
+        delete mSelectionPolicy;
         mSelectionPolicy = other.mSelectionPolicy->clone();
         mAgentId = other.mAgentId;
         mPartyId = other.mPartyId;
@@ -56,8 +57,8 @@ Agent::~Agent()
 {
     if (mSelectionPolicy)
     {
-        mSelectionPolicy = nullptr;
         delete mSelectionPolicy;
+        mSelectionPolicy = nullptr;
     }
 }
 

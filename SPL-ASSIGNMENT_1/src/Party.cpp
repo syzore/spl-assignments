@@ -9,24 +9,18 @@ using std::endl;
 using std::move;
 using std::vector;
 
-Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), mName(name), mMandates(mandates), mJoinPolicy(jp), mState(Waiting), timer(3), mOffers()
+Party::Party(int id, string name, int mandates, JoinPolicy *jp) : mId(id), timer(3), mMandates(mandates), mName(name), mState(Waiting), mOffers(), mJoinPolicy(jp)
 {
 }
 
-Party::Party(const Party &other) : mId(other.mId), mName(other.getName()), mMandates(other.mMandates), mJoinPolicy(), mState(other.mState), timer(other.timer), mOffers(other.mOffers)
+Party::Party(const Party &other) : mId(other.mId), timer(other.timer), mMandates(other.mMandates), mName(other.mName), mState(other.mState), mOffers(other.mOffers), mJoinPolicy()
 {
     mJoinPolicy = other.mJoinPolicy->clone();
 }
 
-Party::Party(Party &&other) 
+Party::Party(Party &&other) : mId(other.mId), timer(other.timer), mMandates(other.mMandates), mName(other.mName), mState(other.mState), mOffers(other.mOffers), mJoinPolicy()
 {
-    mId = other.mId;
-    mName = other.getName();
-    mMandates = other.mMandates;
     mJoinPolicy = other.mJoinPolicy;
-    mState = other.mState;
-    timer = other.timer;
-    mOffers = other.mOffers;
     other.mJoinPolicy = nullptr;
 }
 
@@ -39,6 +33,7 @@ Party &Party::operator=(const Party &other)
 {
     if (this != &other)
     {
+        delete mJoinPolicy;
         mJoinPolicy = other.mJoinPolicy->clone();
         mId = other.mId;
         mName = other.getName();
@@ -69,10 +64,10 @@ Party &Party::operator=(Party &&other)
 
 Party::~Party()
 {
-    if (mJoinPolicy)
+    if (mJoinPolicy != nullptr)
     {
-        mJoinPolicy = nullptr;
         delete mJoinPolicy;
+        mJoinPolicy = nullptr;
     }
 }
 

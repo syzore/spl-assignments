@@ -427,7 +427,7 @@
             },
             {
                 "id": 2,
-                "partyId": 3
+                "partyId": 2
             }
         ],
         "coalitions": [
@@ -536,7 +536,7 @@
             },
             {
                 "id": 2,
-                "partyId": 3
+                "partyId": 2
             },
             {
                 "id": 3,
