@@ -18,7 +18,7 @@ Party::Party(const Party &other) : mId(other.mId), mName(other.getName()), mMand
     mJoinPolicy = other.mJoinPolicy->clone();
 }
 
-Party::Party(Party &&other)
+Party::Party(Party &&other) 
 {
     mId = other.mId;
     mName = other.getName();
@@ -29,6 +29,11 @@ Party::Party(Party &&other)
     mOffers = other.mOffers;
     other.mJoinPolicy = nullptr;
 }
+
+// Party::Party(Party &&other) : mId(other.mId), mName(other.getName()), mMandates(other.mMandates), mJoinPolicy(), mState(other.mState), timer(other.timer), mOffers(other.mOffers)
+// {
+//     other.mJoinPolicy = nullptr;
+// }
 
 Party &Party::operator=(const Party &other)
 {
