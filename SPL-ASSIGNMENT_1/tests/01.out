@@ -295,7 +295,7 @@
                 "id": 1,
                 "mandates": 30,
                 "name": "The Baratheons",
-                "state": "Waiting"
+                "state": "CollectingOffers"
             },
             {
                 "id": 2,
@@ -399,7 +399,7 @@
                 "id": 1,
                 "mandates": 30,
                 "name": "The Baratheons",
-                "state": "Waiting"
+                "state": "CollectingOffers"
             },
             {
                 "id": 2,
@@ -424,6 +424,10 @@
             {
                 "id": 1,
                 "partyId": 3
+            },
+            {
+                "id": 2,
+                "partyId": 3
             }
         ],
         "coalitions": [
@@ -434,9 +438,10 @@
                 ]
             },
             {
-                "mandates": 20,
+                "mandates": 40,
                 "parties": [
-                    3
+                    3,
+                    2
                 ]
             }
         ],
@@ -503,13 +508,13 @@
                 "id": 1,
                 "mandates": 30,
                 "name": "The Baratheons",
-                "state": "Waiting"
+                "state": "CollectingOffers"
             },
             {
                 "id": 2,
                 "mandates": 20,
                 "name": "The Targaryens",
-                "state": "CollectingOffers"
+                "state": "Joined"
             },
             {
                 "id": 3,
@@ -528,6 +533,14 @@
             {
                 "id": 1,
                 "partyId": 3
+            },
+            {
+                "id": 2,
+                "partyId": 3
+            },
+            {
+                "id": 3,
+                "partyId": 1
             }
         ],
         "coalitions": [
@@ -538,9 +551,11 @@
                 ]
             },
             {
-                "mandates": 20,
+                "mandates": 70,
                 "parties": [
-                    3
+                    3,
+                    2,
+                    1
                 ]
             }
         ],
@@ -607,429 +622,13 @@
                 "id": 1,
                 "mandates": 30,
                 "name": "The Baratheons",
-                "state": "Waiting"
+                "state": "Joined"
             },
             {
                 "id": 2,
                 "mandates": 20,
                 "name": "The Targaryens",
-                "state": "CollectingOffers"
-            },
-            {
-                "id": 3,
-                "mandates": 20,
-                "name": "The Starks",
                 "state": "Joined"
-            }
-        ]
-    },
-    {
-        "agents": [
-            {
-                "id": 0,
-                "partyId": 0
-            },
-            {
-                "id": 1,
-                "partyId": 3
-            }
-        ],
-        "coalitions": [
-            {
-                "mandates": 50,
-                "parties": [
-                    0
-                ]
-            },
-            {
-                "mandates": 20,
-                "parties": [
-                    3
-                ]
-            }
-        ],
-        "edges": [
-            {
-                "from": 0,
-                "to": 2,
-                "weight": 3
-            },
-            {
-                "from": 0,
-                "to": 3,
-                "weight": 1
-            },
-            {
-                "from": 1,
-                "to": 2,
-                "weight": 1
-            },
-            {
-                "from": 1,
-                "to": 3,
-                "weight": 1
-            },
-            {
-                "from": 2,
-                "to": 0,
-                "weight": 3
-            },
-            {
-                "from": 2,
-                "to": 1,
-                "weight": 1
-            },
-            {
-                "from": 2,
-                "to": 3,
-                "weight": 2
-            },
-            {
-                "from": 3,
-                "to": 0,
-                "weight": 1
-            },
-            {
-                "from": 3,
-                "to": 1,
-                "weight": 1
-            },
-            {
-                "from": 3,
-                "to": 2,
-                "weight": 2
-            }
-        ],
-        "parties": [
-            {
-                "id": 0,
-                "mandates": 50,
-                "name": "The Lannisters",
-                "state": "Joined"
-            },
-            {
-                "id": 1,
-                "mandates": 30,
-                "name": "The Baratheons",
-                "state": "Waiting"
-            },
-            {
-                "id": 2,
-                "mandates": 20,
-                "name": "The Targaryens",
-                "state": "CollectingOffers"
-            },
-            {
-                "id": 3,
-                "mandates": 20,
-                "name": "The Starks",
-                "state": "Joined"
-            }
-        ]
-    },
-    {
-        "agents": [
-            {
-                "id": 0,
-                "partyId": 0
-            },
-            {
-                "id": 1,
-                "partyId": 3
-            }
-        ],
-        "coalitions": [
-            {
-                "mandates": 50,
-                "parties": [
-                    0
-                ]
-            },
-            {
-                "mandates": 20,
-                "parties": [
-                    3
-                ]
-            }
-        ],
-        "edges": [
-            {
-                "from": 0,
-                "to": 2,
-                "weight": 3
-            },
-            {
-                "from": 0,
-                "to": 3,
-                "weight": 1
-            },
-            {
-                "from": 1,
-                "to": 2,
-                "weight": 1
-            },
-            {
-                "from": 1,
-                "to": 3,
-                "weight": 1
-            },
-            {
-                "from": 2,
-                "to": 0,
-                "weight": 3
-            },
-            {
-                "from": 2,
-                "to": 1,
-                "weight": 1
-            },
-            {
-                "from": 2,
-                "to": 3,
-                "weight": 2
-            },
-            {
-                "from": 3,
-                "to": 0,
-                "weight": 1
-            },
-            {
-                "from": 3,
-                "to": 1,
-                "weight": 1
-            },
-            {
-                "from": 3,
-                "to": 2,
-                "weight": 2
-            }
-        ],
-        "parties": [
-            {
-                "id": 0,
-                "mandates": 50,
-                "name": "The Lannisters",
-                "state": "Joined"
-            },
-            {
-                "id": 1,
-                "mandates": 30,
-                "name": "The Baratheons",
-                "state": "Waiting"
-            },
-            {
-                "id": 2,
-                "mandates": 20,
-                "name": "The Targaryens",
-                "state": "CollectingOffers"
-            },
-            {
-                "id": 3,
-                "mandates": 20,
-                "name": "The Starks",
-                "state": "Joined"
-            }
-        ]
-    },
-    {
-        "agents": [
-            {
-                "id": 0,
-                "partyId": 0
-            },
-            {
-                "id": 1,
-                "partyId": 3
-            }
-        ],
-        "coalitions": [
-            {
-                "mandates": 50,
-                "parties": [
-                    0
-                ]
-            },
-            {
-                "mandates": 20,
-                "parties": [
-                    3
-                ]
-            }
-        ],
-        "edges": [
-            {
-                "from": 0,
-                "to": 2,
-                "weight": 3
-            },
-            {
-                "from": 0,
-                "to": 3,
-                "weight": 1
-            },
-            {
-                "from": 1,
-                "to": 2,
-                "weight": 1
-            },
-            {
-                "from": 1,
-                "to": 3,
-                "weight": 1
-            },
-            {
-                "from": 2,
-                "to": 0,
-                "weight": 3
-            },
-            {
-                "from": 2,
-                "to": 1,
-                "weight": 1
-            },
-            {
-                "from": 2,
-                "to": 3,
-                "weight": 2
-            },
-            {
-                "from": 3,
-                "to": 0,
-                "weight": 1
-            },
-            {
-                "from": 3,
-                "to": 1,
-                "weight": 1
-            },
-            {
-                "from": 3,
-                "to": 2,
-                "weight": 2
-            }
-        ],
-        "parties": [
-            {
-                "id": 0,
-                "mandates": 50,
-                "name": "The Lannisters",
-                "state": "Joined"
-            },
-            {
-                "id": 1,
-                "mandates": 30,
-                "name": "The Baratheons",
-                "state": "Waiting"
-            },
-            {
-                "id": 2,
-                "mandates": 20,
-                "name": "The Targaryens",
-                "state": "CollectingOffers"
-            },
-            {
-                "id": 3,
-                "mandates": 20,
-                "name": "The Starks",
-                "state": "Joined"
-            }
-        ]
-    },
-    {
-        "agents": [
-            {
-                "id": 0,
-                "partyId": 0
-            },
-            {
-                "id": 1,
-                "partyId": 3
-            }
-        ],
-        "coalitions": [
-            {
-                "mandates": 50,
-                "parties": [
-                    0
-                ]
-            },
-            {
-                "mandates": 20,
-                "parties": [
-                    3
-                ]
-            }
-        ],
-        "edges": [
-            {
-                "from": 0,
-                "to": 2,
-                "weight": 3
-            },
-            {
-                "from": 0,
-                "to": 3,
-                "weight": 1
-            },
-            {
-                "from": 1,
-                "to": 2,
-                "weight": 1
-            },
-            {
-                "from": 1,
-                "to": 3,
-                "weight": 1
-            },
-            {
-                "from": 2,
-                "to": 0,
-                "weight": 3
-            },
-            {
-                "from": 2,
-                "to": 1,
-                "weight": 1
-            },
-            {
-                "from": 2,
-                "to": 3,
-                "weight": 2
-            },
-            {
-                "from": 3,
-                "to": 0,
-                "weight": 1
-            },
-            {
-                "from": 3,
-                "to": 1,
-                "weight": 1
-            },
-            {
-                "from": 3,
-                "to": 2,
-                "weight": 2
-            }
-        ],
-        "parties": [
-            {
-                "id": 0,
-                "mandates": 50,
-                "name": "The Lannisters",
-                "state": "Joined"
-            },
-            {
-                "id": 1,
-                "mandates": 30,
-                "name": "The Baratheons",
-                "state": "Waiting"
-            },
-            {
-                "id": 2,
-                "mandates": 20,
-                "name": "The Targaryens",
-                "state": "CollectingOffers"
             },
             {
                 "id": 3,

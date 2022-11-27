@@ -8,6 +8,8 @@ using std::vector;
 
 LastOfferJoinPolicy::LastOfferJoinPolicy() : JoinPolicy() {}
 
+LastOfferJoinPolicy::~LastOfferJoinPolicy() {}
+
 void LastOfferJoinPolicy::join(Party &p, Simulation &s)
 {
     cout << "inside last offer join" << endl;
@@ -24,8 +26,7 @@ void LastOfferJoinPolicy::join(Party &p, Simulation &s)
     s.cloneAgent(agent, lastOffered);
 }
 
-LastOfferJoinPolicy* LastOfferJoinPolicy::clone() const
+LastOfferJoinPolicy *LastOfferJoinPolicy::clone() const
 {
- return new LastOfferJoinPolicy;
+    return new LastOfferJoinPolicy;
 }
-

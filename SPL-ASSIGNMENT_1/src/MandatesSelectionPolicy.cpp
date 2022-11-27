@@ -6,9 +6,9 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-MandatesSelectionPolicy::MandatesSelectionPolicy() : SelectionPolicy()
-{
-}
+MandatesSelectionPolicy::MandatesSelectionPolicy() : SelectionPolicy() {}
+
+MandatesSelectionPolicy::~MandatesSelectionPolicy() {}
 
 void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
 {
@@ -51,7 +51,7 @@ void MandatesSelectionPolicy::select(Agent &agent, Simulation &s)
     }
 }
 
-MandatesSelectionPolicy* MandatesSelectionPolicy::clone() const
+MandatesSelectionPolicy *MandatesSelectionPolicy::clone() const
 {
     return new MandatesSelectionPolicy;
 }

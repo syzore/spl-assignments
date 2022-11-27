@@ -14,14 +14,9 @@ Agent::Agent(int agentId, int partyId, SelectionPolicy *selectionPolicy) : mAgen
 }
 
 // copy constructor
-Agent::Agent(const Agent &other)
+Agent::Agent(const Agent &other) : mAgentId(other.mAgentId), mPartyId(other.mPartyId), mSelectionPolicy(), mAlreadyOffered(other.mAlreadyOffered)
 {
-    mAgentId = other.mAgentId;
-    mPartyId = other.mPartyId;
-
     mSelectionPolicy = other.mSelectionPolicy->clone();
-
-    mAlreadyOffered = other.mAlreadyOffered;
 }
 
 Agent::Agent(Agent &&other)
