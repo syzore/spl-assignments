@@ -1,11 +1,11 @@
 package bguspl.set.ex;
 
-import bguspl.set.Env;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import bguspl.set.Env;
 
 /**
  * This class manages the dealer's threads and data
@@ -34,7 +34,8 @@ public class Dealer implements Runnable {
     private volatile boolean terminate;
 
     /**
-     * The time when the dealer countdown times out (at which point he must collect the cards and reshuffle the deck).
+     * The time when the dealer countdown times out (at which point he must collect
+     * the cards and reshuffle the deck).
      */
     private long countdownUntil;
 
@@ -62,7 +63,8 @@ public class Dealer implements Runnable {
     }
 
     /**
-     * The inner loop of the dealer thread that runs as long as the countdown did not time out.
+     * The inner loop of the dealer thread that runs as long as the countdown did
+     * not time out.
      */
     private void countdownLoop() {
         resetCountdown();
@@ -83,6 +85,7 @@ public class Dealer implements Runnable {
 
     /**
      * Check if the game should be terminated or the game end conditions are met.
+     * 
      * @return true iff the game should be finished.
      */
     private boolean shouldFinish() {
@@ -90,7 +93,8 @@ public class Dealer implements Runnable {
     }
 
     /**
-     * Checks if any cards should be removed from the table and returns them to the deck.
+     * Checks if any cards should be removed from the table and returns them to the
+     * deck.
      */
     private void removeCardsFromTable() {
         // TODO implement
@@ -104,7 +108,8 @@ public class Dealer implements Runnable {
     }
 
     /**
-     * Sleep for a fixed amount of time or until the thread is awakened for some purpose.
+     * Sleep for a fixed amount of time or until the thread is awakened for some
+     * purpose.
      */
     private void sleepUntilWokenOrTimeout() {
         // TODO implement
