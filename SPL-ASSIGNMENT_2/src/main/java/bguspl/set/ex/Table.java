@@ -1,11 +1,11 @@
 package bguspl.set.ex;
 
+import bguspl.set.Env;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import bguspl.set.Env;
 
 /**
  * This class contains the data that is visible to the player.
@@ -33,10 +33,8 @@ public class Table {
      * Constructor for testing.
      *
      * @param env        - the game environment objects.
-     * @param slotToCard - mapping between a slot and the card placed in it (null if
-     *                   none).
-     * @param cardToSlot - mapping between a card and the slot it is in (null if
-     *                   none).
+     * @param slotToCard - mapping between a slot and the card placed in it (null if none).
+     * @param cardToSlot - mapping between a card and the slot it is in (null if none).
      */
     public Table(Env env, Integer[] slotToCard, Integer[] cardToSlot) {
 
@@ -56,18 +54,15 @@ public class Table {
     }
 
     /**
-     * This method prints all possible legal sets of cards that are currently on the
-     * table.
+     * This method prints all possible legal sets of cards that are currently on the table.
      */
     public void hints() {
         List<Integer> deck = Arrays.stream(slotToCard).filter(Objects::nonNull).collect(Collectors.toList());
         env.util.findSets(deck, Integer.MAX_VALUE).forEach(set -> {
             StringBuilder sb = new StringBuilder().append("Hint: Set found: ");
-            List<Integer> slots = Arrays.stream(set).mapToObj(card -> cardToSlot[card]).sorted()
-                    .collect(Collectors.toList());
+            List<Integer> slots = Arrays.stream(set).mapToObj(card -> cardToSlot[card]).sorted().collect(Collectors.toList());
             int[][] features = env.util.cardsToFeatures(set);
-            System.out.println(
-                    sb.append("slots: ").append(slots).append(" features: ").append(Arrays.deepToString(features)));
+            System.out.println(sb.append("slots: ").append(slots).append(" features: ").append(Arrays.deepToString(features)));
         });
     }
 
@@ -86,7 +81,6 @@ public class Table {
 
     /**
      * Places a card on the table in a grid slot.
-     * 
      * @param card - the card id to place in the slot.
      * @param slot - the slot in which the card should be placed.
      *
@@ -95,8 +89,7 @@ public class Table {
     public void placeCard(int card, int slot) {
         try {
             Thread.sleep(env.config.tableDelayMillis);
-        } catch (InterruptedException ignored) {
-        }
+        } catch (InterruptedException ignored) {}
 
         cardToSlot[card] = slot;
         slotToCard[slot] = card;
@@ -106,21 +99,18 @@ public class Table {
 
     /**
      * Removes a card from a grid slot on the table.
-     * 
      * @param slot - the slot from which to remove the card.
      */
     public void removeCard(int slot) {
         try {
             Thread.sleep(env.config.tableDelayMillis);
-        } catch (InterruptedException ignored) {
-        }
+        } catch (InterruptedException ignored) {}
 
         // TODO implement
     }
 
     /**
      * Places a player token on a grid slot.
-     * 
      * @param player - the player the token belongs to.
      * @param slot   - the slot on which to place the token.
      */
@@ -130,10 +120,9 @@ public class Table {
 
     /**
      * Removes a token of a player from a grid slot.
-     * 
      * @param player - the player the token belongs to.
      * @param slot   - the slot from which to remove the token.
-     * @return - true iff a token was successfully removed.
+     * @return       - true iff a token was successfully removed.
      */
     public boolean removeToken(int player, int slot) {
         // TODO implement

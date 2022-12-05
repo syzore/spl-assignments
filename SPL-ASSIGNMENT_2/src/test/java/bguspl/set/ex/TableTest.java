@@ -95,44 +95,27 @@ class TableTest {
 
     static class MockUserInterface implements UserInterface {
         @Override
-        public void placeCard(int card, int slot) {
-        }
-
+        public void placeCard(int card, int slot) {}
         @Override
-        public void removeCard(int slot) {
-        }
-
+        public void removeCard(int slot) {}
         @Override
-        public void setCountdown(int seconds, boolean warn) {
-        }
-
+        public void setCountdown(long millies, boolean warn) {}
         @Override
-        public void setScore(int player, int score) {
-        }
-
+        public void setElapsed(long millies) {}
         @Override
-        public void setFreeze(int player, int seconds) {
-        }
-
+        public void setScore(int player, int score) {}
         @Override
-        public void placeToken(int player, int slot) {
-        }
-
+        public void setFreeze(int player, long millies) {}
         @Override
-        public void removeTokens() {
-        }
-
+        public void placeToken(int player, int slot) {}
         @Override
-        public void removeTokens(int slot) {
-        }
-
+        public void removeTokens() {}
         @Override
-        public void removeToken(int player, int slot) {
-        }
-
+        public void removeTokens(int slot) {}
         @Override
-        public void announceWinner(int[] players) {
-        }
+        public void removeToken(int player, int slot) {}
+        @Override
+        public void announceWinner(int[] players) {}
     };
 
     static class MockUtil implements Util {
