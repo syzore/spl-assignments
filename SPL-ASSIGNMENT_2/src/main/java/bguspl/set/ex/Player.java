@@ -1,6 +1,6 @@
 package bguspl.set.ex;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 
 import bguspl.set.Env;
@@ -17,6 +17,11 @@ public class Player implements Runnable {
      * The game environment object.
      */
     private final Env env;
+
+    /**
+     * The game dealer object.
+     */
+    private final Dealer dealer;
 
     /**
      * Game entities.
@@ -49,12 +54,17 @@ public class Player implements Runnable {
      */
     private volatile boolean terminate;
 
-    private Dealer dealer;
-
     /**
      * The current score of the player.
      */
     private int score;
+
+    /**
+     * A list that keeps the slots the player chose at the current try to make a
+     * set.
+     */
+
+    private LinkedList<Integer> currentTokens;
 
     private BlockingQueue<Integer> keyPressQueue;
 
@@ -70,13 +80,13 @@ public class Player implements Runnable {
      * @param human  - true iff the player is a human player (i.e. input is provided
      *               manually, via the keyboard).
      */
-    public Player(Env env, Dealer dealer, Table table, int id, boolean human) {
+    public Player(Env env, Dealer dealer, Table table, int id, boolean human, BlockingQueue<Integer> keyPressQueue) {
         this.env = env;
         this.dealer = dealer;
         this.table = table;
         this.id = id;
         this.human = human;
-        this.keyPressQueue = new ArrayBlockingQueue<>(3);
+        this.keyPressQueue = keyPressQueue;
     }
 
     /**
@@ -91,15 +101,30 @@ public class Player implements Runnable {
             createArtificialIntelligence();
 
         while (!terminate) {
-            synchronized (sharedLock) {
-                synchronized (this) {
-
-                    // if queue is not empty handle the key press
-
-                    // else wait
+            synchronized (this) {
+                if (keyPressQueue.isEmpty()) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                } else {
+                    int slot = keyPressQueue.poll();
+                    if (currentTokens.contains(slot)) { // check if player wants to place a token or to remove it
+                        table.removeToken(this.id, slot);
+                        int index = currentTokens.indexOf(slot);
+                        currentTokens.remove(index);
+                    } else {
+                        table.placeToken(this.id, slot);
+                        currentTokens.add(slot);
+                        if (currentTokens.size() == 3) {
+                            dealer.onSetFound(this, currentTokens.toArray(new Integer[3])); // calls the dealer to check a legal set
+                        }
+                    }
                 }
+
             }
-            // TODO implement main player loop
         }
         if (!human)
             try {
@@ -146,10 +171,6 @@ public class Player implements Runnable {
      * @param slot - the slot corresponding to the key pressed.
      */
     public void keyPressed(int slot) {
-        synchronized (this) {
-            // add to queeu
-            // this.notify
-        }
         // TODO implement
     }
 

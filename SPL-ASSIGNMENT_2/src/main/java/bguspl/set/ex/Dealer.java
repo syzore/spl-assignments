@@ -162,9 +162,21 @@ public class Dealer implements Runnable {
      * Check if any cards can be removed from the deck and placed on the table.
      */
     private void placeCardsOnTable(int[] slots) {
+        // TODO deck isempty, is there a set in the deck
+        if (deck.isEmpty() || env.util.findSets(deck, 1).isEmpty()) {
+            terminate();
+        }
 
         // TODO implement
+
+        for (int i = 0; i < slots.length; i++) {
+            int slot = slots[i];
+            int card = deck.remove(i);
+            table.placeCard(card, slot);
+        }
         // wake players
+        notifyAll();
+        ;
     }
 
     private void placeAllCardsOnTable() {
