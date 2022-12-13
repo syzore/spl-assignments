@@ -1,10 +1,14 @@
 package bguspl.set.ex;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import bguspl.set.Env;
+import javafx.util.Pair;
 
 /**
  * This class manages the dealer's threads and data
@@ -34,6 +38,12 @@ public class Dealer implements Runnable {
      */
     private volatile boolean terminate;
 
+    /**
+     * A queue of incoming sets from players
+     * the key of the Pair is the player id, and the value is the set
+     */
+    private BlockingQueue<Pair> setsQueue;
+
     // private static final int[] allCards;
 
     /**
@@ -46,6 +56,7 @@ public class Dealer implements Runnable {
         this.table = table;
         this.players = players;
         this.reshuffleTime = env.config.turnTimeoutMillis;
+        setsQueue = new ArrayBlockingQueue<>(players.length);
         deck = IntStream.range(0, env.config.deckSize).boxed().collect(Collectors.toList());
     }
 
@@ -79,24 +90,26 @@ public class Dealer implements Runnable {
     private void timerLoop() {
         while (!terminate && System.currentTimeMillis() < reshuffleTime) {
             sleepUntilWokenOrTimeout();
+            if (!setsQueue.isEmpty()) {
+                Pair<Integer, int[]> set = setsQueue.poll();
+                handleSet(set);
+            }
             updateTimerDisplay(false);
         }
     }
 
-    public void onSetFound(Player player, Integer[] set) {
+    public void onSetFound(Player player, int[] set) {
         if (set.length != 3) {
         } // throw bad set exception.
 
-        synchronized (player) {
-            boolean isSetCorrect = env.util.testSet(set);
-            if (isSetCorrect) {
-                player.point();
-                removeCardsFromTable(set);
-            } else {
-                player.penalty(3);
-                player.notify();
-            }
-        }
+        Pair<Integer, int[]> pair = new Pair<>(player.id, set);
+        setsQueue.add(pair);
+    }
+
+    private void handleSet(Pair<Integer, int[]> pair) {
+        Player player = players[pair.getKey()];
+        int[] set = pair.getValue();
+
     }
 
     /**
@@ -137,14 +150,24 @@ public class Dealer implements Runnable {
         // TODO implement
     }
 
+    private void shuffleDeck() {
+        Collections.shuffle(deck);
+    }
+
     /**
      * Checks if any cards should be removed from the table and returns them to the
      * deck.
      */
-    private void removeCardsFromTable(int[] slots, boolean throwCard) {
-        for (int slot: slots)
+    private void removeCardsFromTable(int[] slots) {
         for (int slot : slots) {
             env.ui.removeCard(slot);
+            if (throwCards) {
+                int index = deck.indexOf(slot);
+                deck.remove(index);
+            }
+            for (Player player : players) {
+                player.removeTokenIfPlaced(slot);
+            }
         }
     }
 
@@ -156,7 +179,8 @@ public class Dealer implements Runnable {
         for (int i = 0; i < env.config.tableSize; i++) {
             slots[i] = i;
         }
-        removeCardsFromTable(slots);
+        removeCardsFromTable(slots, false);
+
     }
 
     /**

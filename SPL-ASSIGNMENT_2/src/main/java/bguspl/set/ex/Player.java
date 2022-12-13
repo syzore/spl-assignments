@@ -1,6 +1,7 @@
 package bguspl.set.ex;
 
 import java.util.LinkedList;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import bguspl.set.Env;
@@ -80,13 +81,13 @@ public class Player implements Runnable {
      * @param human  - true iff the player is a human player (i.e. input is provided
      *               manually, via the keyboard).
      */
-    public Player(Env env, Dealer dealer, Table table, int id, boolean human, BlockingQueue<Integer> keyPressQueue) {
+    public Player(Env env, Dealer dealer, Table table, int id, boolean human) {
         this.env = env;
         this.dealer = dealer;
         this.table = table;
         this.id = id;
         this.human = human;
-        this.keyPressQueue = keyPressQueue;
+        this.keyPressQueue = new ArrayBlockingQueue<>(3);
     }
 
     /**
@@ -119,7 +120,10 @@ public class Player implements Runnable {
                         table.placeToken(this.id, slot);
                         currentTokens.add(slot);
                         if (currentTokens.size() == 3) {
-                            dealer.onSetFound(this, currentTokens.toArray(new Integer[3])); // calls the dealer to check a legal set
+                            dealer.onSetFound(this, currentTokens.stream().mapToInt(i -> i).toArray()); // calls the
+                                                                                                        // dealer to
+                                                                                                        // check a legal
+                                                                                                        // set
                         }
                     }
                 }
@@ -198,5 +202,12 @@ public class Player implements Runnable {
 
     public int getScore() {
         return score;
+    }
+
+    public void removeTokenIfPlaced(int slot) {
+        int index = currentTokens.indexOf(slot);
+        if (index != -1) {
+            currentTokens.remove(index);
+        }
     }
 }
