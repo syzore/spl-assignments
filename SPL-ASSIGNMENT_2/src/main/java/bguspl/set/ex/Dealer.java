@@ -83,7 +83,7 @@ public class Dealer implements Runnable {
         }
     }
 
-    public void onSetFound(Player player, int[] set) {
+    public void onSetFound(Player player, Integer[] set) {
         if (set.length != 3) {
         } // throw bad set exception.
 
