@@ -3,7 +3,6 @@ package bguspl.set.ex;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
 import bguspl.set.Env;
@@ -117,16 +116,6 @@ public class Table {
         }
 
         // TODO implement
-    }
-
-    public void handleTokenPressed(int player, int slot) {
-        // check if play token exists
-        // if yes removeToken
-        // if not place token
-        // if 3rd token handle ..
-        Vector<Integer> v = new Vector<>();
-        
-
     }
 
     /**

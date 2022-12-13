@@ -58,20 +58,12 @@ public class Dealer implements Runnable {
         // init players threads
         playerThreads = new Thread[players.length];
         for (Player player : players) {
-            PlayerListener listener = new PlayerListener() {
-                @Override
-                public void onTrio(int[] slots) {
-                    onTrio(slots);
-                }
-            };
-            player.register(listener);
-
             Thread playerThread = new Thread(player, "player" + player.id);
-            playerThread.wait();
+            playerThread.start();
         }
 
+        placeAllCardsOnTable();
         while (!shouldFinish()) {
-            placeCardsOnTable();
             timerLoop();
             updateTimerDisplay(false);
             removeAllCardsFromTable();
@@ -88,22 +80,30 @@ public class Dealer implements Runnable {
         while (!terminate && System.currentTimeMillis() < reshuffleTime) {
             sleepUntilWokenOrTimeout();
             updateTimerDisplay(false);
-            removeCardsFromTable();
-            placeCardsOnTable();
         }
     }
 
-    private void onTrio(int[] slots) {
-        makeAllPlayersWait();
+    public void onSetFound(Player player, int[] set) {
+        if (set.length != 3) {
+        } // throw bad set exception.
 
-        boolean isValid = checkTrio();
+        synchronized (player) {
+            boolean isSetCorrect = env.util.testSet(set);
+            if (isSetCorrect) {
+                player.point();
+                removeCardsFromTable(set);
+            } else {
+                player.penalty(3);
+                player.notify();
+            }
+        }
     }
 
     /**
      * Called when the game should be terminated due to an external event.
      */
     public void terminate() {
-        // TODO implement
+        terminate = true;
     }
 
     /**
@@ -116,41 +116,16 @@ public class Dealer implements Runnable {
     }
 
     /**
-     * Checks if any cards should be removed from the table and returns them to the
-     * deck.
-     */
-    private void removeCardsFromTable() {
-        try {
-            makeAllPlayersWait();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        // put wait on players
-        // TODO implement
-    }
-
-    /**
-     * Check if any cards can be removed from the deck and placed on the table.
-     */
-    private void placeCardsOnTable(int[] slots) {
-
-        // TODO implement
-        // wake players
-    }
-
-    private void makeAllPlayersWait() throws InterruptedException {
-        for (Thread playerThread : playerThreads) {
-            playerThread.wait();
-        }
-    }
-
-    /**
      * Sleep for a fixed amount of time or until the thread is awakened for some
      * purpose.
      */
     private void sleepUntilWokenOrTimeout() {
-        // TODO implement
+        try {
+            Thread.sleep(15);
+        } catch (InterruptedException e) {
+            // interrupted, worken up
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -163,10 +138,37 @@ public class Dealer implements Runnable {
     }
 
     /**
+     * Checks if any cards should be removed from the table and returns them to the
+     * deck.
+     */
+    private void removeCardsFromTable(int[] slots) {
+        for (int slot : slots) {
+            env.ui.removeCard(slot);
+        }
+    }
+
+    /**
      * Returns all the cards from the table to the deck.
      */
     private void removeAllCardsFromTable() {
+        int[] slots = new int[12];
+        for (int i = 0; i < 12; i++) {
+            slots[i] = i;
+        }
+        removeCardsFromTable(slots);
+    }
+
+    /**
+     * Check if any cards can be removed from the deck and placed on the table.
+     */
+    private void placeCardsOnTable(int[] slots) {
+
         // TODO implement
+        // wake players
+    }
+
+    private void placeAllCardsOnTable() {
+
     }
 
     /**
