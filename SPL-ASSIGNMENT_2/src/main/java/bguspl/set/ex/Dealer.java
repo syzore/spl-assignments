@@ -235,4 +235,5 @@ public class Dealer implements Runnable, TableListener {
     public void onSetAvailable(Pair pair) {
         setsQueue.add(pair);
     }
+
 }
