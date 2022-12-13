@@ -172,6 +172,7 @@ public class Player implements Runnable {
      */
     public void keyPressed(int slot) {
         // TODO implement
+        keyPressQueue.add(slot);
     }
 
     /**

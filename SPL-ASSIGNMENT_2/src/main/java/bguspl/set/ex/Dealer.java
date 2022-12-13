@@ -141,7 +141,8 @@ public class Dealer implements Runnable {
      * Checks if any cards should be removed from the table and returns them to the
      * deck.
      */
-    private void removeCardsFromTable(int[] slots) {
+    private void removeCardsFromTable(int[] slots, boolean throwCard) {
+        for (int slot: slots)
         for (int slot : slots) {
             env.ui.removeCard(slot);
         }
@@ -151,8 +152,8 @@ public class Dealer implements Runnable {
      * Returns all the cards from the table to the deck.
      */
     private void removeAllCardsFromTable() {
-        int[] slots = new int[12];
-        for (int i = 0; i < 12; i++) {
+        int[] slots = new int[env.config.tableSize];
+        for (int i = 0; i < env.config.tableSize; i++) {
             slots[i] = i;
         }
         removeCardsFromTable(slots);
@@ -180,7 +181,10 @@ public class Dealer implements Runnable {
     }
 
     private void placeAllCardsOnTable() {
-
+        for (int i = 0; i < env.config.tableSize; i++){
+            int card = deck.get(i);
+            table.placeCard(card, i);
+        }
     }
 
     /**
