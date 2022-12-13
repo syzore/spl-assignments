@@ -151,4 +151,15 @@ public class Table {
         env.ui.remove
         return false;
     }
+
+    public void handleToken(Player player, int slot) {
+        synchronized (player) {
+            // exists
+            {
+                removeToken(player.id, slot);
+                player.notify();
+            }
+            // else
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package bguspl.set.ex;
 
-import java.util.LinkedList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -64,9 +63,6 @@ public class Player implements Runnable {
      * A list that keeps the slots the player chose at the current try to make a
      * set.
      */
-
-    private LinkedList<Integer> currentTokens;
-
     private BlockingQueue<Integer> keyPressQueue;
 
     private boolean penalty;
@@ -102,32 +98,27 @@ public class Player implements Runnable {
             createArtificialIntelligence();
 
         while (!terminate) {
-            synchronized (this) {
-                if (keyPressQueue.isEmpty()) {
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                } else {
-                    int slot = keyPressQueue.poll();
-                    if (currentTokens.contains(slot)) { // check if player wants to place a token or to remove it
-                        table.removeToken(this.id, slot);
-                        int index = currentTokens.indexOf(slot);
-                        currentTokens.remove(index);
+            synchronized (dealer) {
+                synchronized (this) {
+                    if (keyPressQueue.isEmpty()) {
+                        try {
+                            wait();
+                        } catch (InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
                     } else {
-                        table.placeToken(this.id, slot);
-                        currentTokens.add(slot);
-                        if (currentTokens.size() == 3) {
-                            dealer.onSetFound(this, currentTokens.stream().mapToInt(i -> i).toArray()); // calls the
-                                                                                                        // dealer to
-                                                                                                        // check a legal
-                                                                                                        // set
+                        int slot = keyPressQueue.poll();
+                        table.handleToken(this, slot);
+                        try {
+                            this.wait();
+                        } catch (InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
                         }
                     }
-                }
 
+                }
             }
         }
         if (!human)
@@ -175,8 +166,11 @@ public class Player implements Runnable {
      * @param slot - the slot corresponding to the key pressed.
      */
     public void keyPressed(int slot) {
-        // TODO implement
-        keyPressQueue.add(slot);
+        synchronized (this) {
+            // TODO implement
+            keyPressQueue.add(slot);
+            this.notify();
+        }
     }
 
     /**
@@ -204,10 +198,4 @@ public class Player implements Runnable {
         return score;
     }
 
-    public void removeTokenIfPlaced(int slot) {
-        int index = currentTokens.indexOf(slot);
-        if (index != -1) {
-            currentTokens.remove(index);
-        }
-    }
 }
