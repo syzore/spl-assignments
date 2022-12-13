@@ -99,7 +99,7 @@ public class Dealer implements Runnable {
         while (!terminate && System.currentTimeMillis() < reshuffleTime) {
             sleepUntilWokenOrTimeout();
             if (!setsQueue.isEmpty()) {
-                Pair<Integer, int[]> set = setsQueue.poll();
+                Pair set = setsQueue.poll();
                 handleSet(set);
             }
             updateTimerDisplay(false);
@@ -110,14 +110,13 @@ public class Dealer implements Runnable {
         if (set.length != 3) {
         } // throw bad set exception.
 
-        Pair<Integer, int[]> pair = new Pair<>(player.id, set);
+        Pair pair = new Pair(player.id, set);
         setsQueue.add(pair);
     }
 
     private void handleSet(Pair pair) {
-        Player player = players[pair.getKey()];
-        int[] set = pair.getValue();
-
+        Player player = players[pair.getId()];
+        int[] set = pair.getSet();
     }
 
     /**
