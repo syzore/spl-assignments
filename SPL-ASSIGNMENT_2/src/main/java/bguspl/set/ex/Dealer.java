@@ -8,12 +8,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import bguspl.set.Env;
-import javafx.util.Pair;
 
 /**
  * This class manages the dealer's threads and data
  */
-public class Dealer implements Runnable {
+public class Dealer implements Runnable, TableListener {
 
     /**
      * The game environment object.
@@ -56,7 +55,6 @@ public class Dealer implements Runnable {
      */
     private long lastShuffleTime = Long.MIN_VALUE;
 
-
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
         this.table = table;
@@ -64,6 +62,7 @@ public class Dealer implements Runnable {
         this.reshuffleTime = env.config.turnTimeoutMillis;
         setsQueue = new ArrayBlockingQueue<>(players.length);
         deck = IntStream.range(0, env.config.deckSize).boxed().collect(Collectors.toList());
+        registerToTableChanges();
     }
 
     /**
@@ -88,8 +87,6 @@ public class Dealer implements Runnable {
         announceWinners();
         System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
     }
-
-  
 
     /**
      * The inner loop of the dealer thread that runs as long as the countdown did
@@ -146,6 +143,10 @@ public class Dealer implements Runnable {
             // interrupted, worken up
             e.printStackTrace();
         }
+    }
+
+    private void registerToTableChanges() {
+        table.register(this);
     }
 
     /**
@@ -228,5 +229,10 @@ public class Dealer implements Runnable {
      */
     private void announceWinners() {
         // TODO implement
+    }
+
+    @Override
+    public void onSetAvailable(Pair pair) {
+        setsQueue.add(pair);
     }
 }

@@ -130,12 +130,13 @@ public class Table {
      * @param player - the player the token belongs to.
      * @param slot   - the slot on which to place the token.
      */
-    public void placeToken(int player, int slot) {
-        env.ui.placeToken(player, slot);
+    public void placeToken(int playerId, int slot) {
+        env.ui.placeToken(playerId, slot);
 
         if (3 > 1) {
             int[] set = new int[3];
-            listener.onSetAvailable(set, );
+            Pair pair = new Pair(playerId, set);
+            listener.onSetAvailable(pair);
         }
     }
 
