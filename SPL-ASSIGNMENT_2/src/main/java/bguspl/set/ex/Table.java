@@ -29,6 +29,8 @@ public class Table {
      */
     protected final Integer[] cardToSlot; // slot per card (if any)
 
+    private TableListener listener;
+
     /**
      * Constructor for testing.
      *
@@ -84,6 +86,10 @@ public class Table {
         return cards;
     }
 
+    public void register(TableListener listener) {
+        this.listener = listener;
+    }
+
     /**
      * Places a card on the table in a grid slot.
      * 
@@ -125,7 +131,12 @@ public class Table {
      * @param slot   - the slot on which to place the token.
      */
     public void placeToken(int player, int slot) {
-        // TODO implement
+        env.ui.placeToken(player, slot);
+
+        if (3 > 1) {
+            int[] set = new int[3];
+            listener.onSetAvailable(set, );
+        }
     }
 
     /**
@@ -136,7 +147,7 @@ public class Table {
      * @return - true iff a token was successfully removed.
      */
     public boolean removeToken(int player, int slot) {
-        // TODO implement
+        env.ui.remove
         return false;
     }
 }

@@ -51,6 +51,12 @@ public class Dealer implements Runnable {
      */
     private long reshuffleTime = Long.MAX_VALUE;
 
+    /**
+     * time since
+     */
+    private long lastShuffleTime = Long.MIN_VALUE;
+
+
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
         this.table = table;
@@ -76,12 +82,14 @@ public class Dealer implements Runnable {
         placeAllCardsOnTable();
         while (!shouldFinish()) {
             timerLoop();
-            updateTimerDisplay(false);
+            updateTimerDisplay(true);
             removeAllCardsFromTable();
         }
         announceWinners();
         System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
     }
+
+  
 
     /**
      * The inner loop of the dealer thread that runs as long as the countdown did
@@ -106,7 +114,7 @@ public class Dealer implements Runnable {
         setsQueue.add(pair);
     }
 
-    private void handleSet(Pair<Integer, int[]> pair) {
+    private void handleSet(Pair pair) {
         Player player = players[pair.getKey()];
         int[] set = pair.getValue();
 
@@ -145,7 +153,11 @@ public class Dealer implements Runnable {
      * Reset and/or update the countdown and the countdown display.
      */
     private void updateTimerDisplay(boolean reset) {
-        long countdown = reshuffleTime - System.currentTimeMillis();
+        if (reset) {
+            reshuffleTime = env.config.turnTimeoutMillis;
+            lastShuffleTime = System.currentTimeMillis();
+        }
+        long countdown = lastShuffleTime - System.currentTimeMillis();
         env.ui.setCountdown(countdown, countdown < env.config.turnTimeoutWarningMillis);
         // TODO implement
     }
@@ -158,7 +170,7 @@ public class Dealer implements Runnable {
      * Checks if any cards should be removed from the table and returns them to the
      * deck.
      */
-    private void removeCardsFromTable(int[] slots) {
+    private void removeCardsFromTable(int[] slots, boolean throwCards) {
         for (int slot : slots) {
             env.ui.removeCard(slot);
             if (throwCards) {
@@ -205,10 +217,11 @@ public class Dealer implements Runnable {
     }
 
     private void placeAllCardsOnTable() {
-        for (int i = 0; i < env.config.tableSize; i++){
+        for (int i = 0; i < env.config.tableSize; i++) {
             int card = deck.get(i);
             table.placeCard(card, i);
         }
+        lastShuffleTime = System.currentTimeMillis();
     }
 
     /**
