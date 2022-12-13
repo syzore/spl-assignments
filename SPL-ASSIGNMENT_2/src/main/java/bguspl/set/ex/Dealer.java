@@ -178,7 +178,7 @@ public class Dealer implements Runnable, TableListener {
                 deck.remove(index);
             }
             for (Player player : players) {
-                player.removeTokenIfPlaced(slot);
+                table.removeToken(player.id, slot);
             }
         }
     }

@@ -111,7 +111,7 @@ public class Player implements Runnable {
                         int slot = keyPressQueue.poll();
                         table.handleToken(this, slot);
                         try {
-                            this.wait();
+                            wait();
                         } catch (InterruptedException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
 import bguspl.set.Env;
@@ -32,8 +31,8 @@ public class Table {
     protected final Integer[] cardToSlot; // slot per card (if any)
 
     private TableListener listener;
-    
-    private List<Integer>[] currentTokens; 
+
+    private List<Integer>[] currentTokens;
 
     /**
      * Constructor for testing.
@@ -135,13 +134,16 @@ public class Table {
      * @param player - the player the token belongs to.
      * @param slot   - the slot on which to place the token.
      */
-    public void placeToken(int playerId, int slot) {
-        env.ui.placeToken(playerId, slot);
-        if (!currentTokens[playerId].contains(slot))
-        if (3 > 1) {
-            int[] set = new int[3];
-            Pair pair = new Pair(playerId, set);
-            listener.onSetAvailable(pair);
+    public void placeToken(Player player, int slot) {
+        int playerId = player.id;
+        {
+            env.ui.placeToken(playerId, slot);
+            currentTokens[playerId].add(slot);
+            if (currentTokens[playerId].size() == 3) {
+                int[] set = new int[3];
+                Pair pair = new Pair(playerId, set);
+                listener.onSetAvailable(pair);
+            }
         }
     }
 
@@ -153,17 +155,18 @@ public class Table {
      * @return - true iff a token was successfully removed.
      */
     public boolean removeToken(int player, int slot) {
-        if ()
-        env.ui.remove
+        env.ui.removeToken(player, slot);
         return false;
     }
 
     public void handleToken(Player player, int slot) {
         synchronized (player) {
             // exists
-            {
+            if (currentTokens[player.id].contains(slot)) {
                 removeToken(player.id, slot);
                 player.notify();
+            } else {
+                placeToken(player, slot);
             }
             // else
         }
