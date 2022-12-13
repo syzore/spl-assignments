@@ -1,7 +1,6 @@
 package bguspl.set.ex;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 import bguspl.set.Env;
 
@@ -34,8 +33,7 @@ public class Player implements Runnable {
     private Thread playerThread;
 
     /**
-     * The thread of the AI (computer) player (an additional thread used to generate
-     * key presses).
+     * The thread of the AI (computer) player (an additional thread used to generate key presses).
      */
     private Thread aiThread;
 
@@ -54,14 +52,7 @@ public class Player implements Runnable {
      */
     private int score;
 
-    /**
-     * queue of incoming actions (key presses).
-     */
-    private Queue<Integer> keyPressesQueue;
-
-    private boolean penalty;
-
-    private PlayerListener listener;
+    private BlockingQueue<Integer> keyPressQueue;
 
     /**
      * The class constructor.
@@ -70,60 +61,35 @@ public class Player implements Runnable {
      * @param dealer - the dealer object.
      * @param table  - the table object.
      * @param id     - the id of the player.
-     * @param human  - true iff the player is a human player (i.e. input is provided
-     *               manually, via the keyboard).
+     * @param human  - true iff the player is a human player (i.e. input is provided manually, via the keyboard).
      */
-    public Player(Env env, Dealer dealer, Table table, int id, boolean human) {
+    public Player(Env env, Dealer dealer, Table table, int id, boolean human, BlockingQueue<Integer> keyPressQueue) {
         this.env = env;
         this.table = table;
         this.id = id;
         this.human = human;
-        keyPressesQueue = new LinkedList<Integer>();
+        this.keyPressQueue = keyPressQueue;
     }
 
     /**
-     * The main player thread of each player starts here (main loop for the player
-     * thread).
+     * The main player thread of each player starts here (main loop for the player thread).
      */
     @Override
     public void run() {
         playerThread = Thread.currentThread();
-        playerThread.stop();
         System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
-        if (!human)
-            createArtificialIntelligence();
+        if (!human) createArtificialIntelligence();
 
         while (!terminate) {
-            // wait if needed
-
-            if (!keyPressesQueue.isEmpty()) {
-                int slot = keyPressesQueue.remove();
-
-                // check if token exists
-                // if not
-                table.placeToken(id, slot);
-                // yes
-                table.removeToken(id, slot);
-
-                // if 3 declare set
-                listener.onTrio();
-
-            }
+            // TODO implement main player loop
         }
-
-        if (!human)
-            try {
-                aiThread.join();
-            } catch (InterruptedException ignored) {
-            }
+        if (!human) try { aiThread.join(); } catch (InterruptedException ignored) {}
         System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
     }
 
     /**
-     * Creates an additional thread for an AI (computer) player. The main loop of
-     * this thread repeatedly generates
-     * key presses. If the queue of key presses is full, the thread waits until it
-     * is not full.
+     * Creates an additional thread for an AI (computer) player. The main loop of this thread repeatedly generates
+     * key presses. If the queue of key presses is full, the thread waits until it is not full.
      */
     private void createArtificialIntelligence() {
         // note: this is a very very smart AI (!)
@@ -132,11 +98,8 @@ public class Player implements Runnable {
             while (!terminate) {
                 // TODO implement player key press simulator
                 try {
-                    synchronized (this) {
-                        wait();
-                    }
-                } catch (InterruptedException ignored) {
-                }
+                    synchronized (this) { wait(); }
+                } catch (InterruptedException ignored) {}
             }
             System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
         }, "computer-" + id);
@@ -156,9 +119,7 @@ public class Player implements Runnable {
      * @param slot - the slot corresponding to the key pressed.
      */
     public void keyPressed(int slot) {
-        if (keyPressesQueue.size() < 3) {
-            keyPressesQueue.add(slot);
-        }
+        // TODO implement
     }
 
     /**
@@ -177,15 +138,11 @@ public class Player implements Runnable {
     /**
      * Penalize a player and perform other related actions.
      */
-    public void penalty(int seconds) {
+    public void penalty() {
         // TODO implement
     }
 
     public int getScore() {
         return score;
-    }
-
-    public void register(PlayerListener listener) {
-        this.listener = listener;
     }
 }
