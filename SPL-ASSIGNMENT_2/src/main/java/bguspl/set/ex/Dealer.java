@@ -93,7 +93,7 @@ public class Dealer implements Runnable, TableListener {
      * not time out.
      */
     private void timerLoop() {
-        while (!terminate && System.currentTimeMillis() < reshuffleTime) {
+        while (!terminate && System.currentTimeMillis() - lastShuffleTime < reshuffleTime) {
             sleepUntilWokenOrTimeout();
             if (!setsQueue.isEmpty()) {
                 Pair set = setsQueue.poll();
@@ -157,7 +157,7 @@ public class Dealer implements Runnable, TableListener {
             reshuffleTime = env.config.turnTimeoutMillis;
             lastShuffleTime = System.currentTimeMillis();
         }
-        long countdown = lastShuffleTime - System.currentTimeMillis();
+        long countdown = lastShuffleTime + reshuffleTime - System.currentTimeMillis();
         env.ui.setCountdown(countdown, countdown < env.config.turnTimeoutWarningMillis);
         // TODO implement
     }

@@ -49,6 +49,9 @@ public class Table {
         this.slotToCard = slotToCard;
         this.cardToSlot = cardToSlot;
         currentTokens = new ArrayList[env.config.players];
+        for (int i = 0; i < currentTokens.length; i++) {
+            currentTokens[i] = new ArrayList<Integer>();
+        }
     }
 
     /**
@@ -111,7 +114,7 @@ public class Table {
         cardToSlot[card] = slot;
         slotToCard[slot] = card;
 
-        // TODO implement
+        env.ui.placeCard(card, slot);
     }
 
     /**

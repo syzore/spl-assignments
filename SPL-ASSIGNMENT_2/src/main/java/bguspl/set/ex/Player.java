@@ -98,7 +98,6 @@ public class Player implements Runnable {
             createArtificialIntelligence();
 
         while (!terminate) {
-            synchronized (dealer) {
                 synchronized (this) {
                     if (keyPressQueue.isEmpty()) {
                         try {
@@ -120,7 +119,6 @@ public class Player implements Runnable {
 
                 }
             }
-        }
         if (!human)
             try {
                 aiThread.join();
