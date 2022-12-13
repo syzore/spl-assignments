@@ -1,16 +1,21 @@
 package bguspl.set;
 
-import bguspl.set.ex.Dealer;
-import bguspl.set.ex.Player;
-import bguspl.set.ex.Table;
-
-import java.awt.*;
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.logging.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
+import bguspl.set.ex.Dealer;
+import bguspl.set.ex.Player;
+import bguspl.set.ex.Table;
 
 /**
  * This class contains the game's main function.
@@ -18,7 +23,8 @@ import java.util.logging.*;
 public class Main {
 
     /**
-     * The game's main function. Creates all data structures and initializes the threads.
+     * The game's main function. Creates all data structures and initializes the
+     * threads.
      *
      * @param args - unused.
      */
@@ -44,19 +50,22 @@ public class Main {
         Thread dealerThread = new Thread(dealer, "dealer");
         dealerThread.start();
 
-        try {dealerThread.join();} catch (InterruptedException ignored) {}
+        try {
+            dealerThread.join();
+        } catch (InterruptedException ignored) {
+        }
         env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " terminated.");
-        for(Handler h:env.logger.getHandlers())
+        for (Handler h : env.logger.getHandlers())
             h.close();
     }
 
     private static Logger initLogger(boolean disableTimestamp) {
 
         FileHandler fh;
-        //just to make our log file nicer :)
+        // just to make our log file nicer :)
         SimpleDateFormat format = new SimpleDateFormat("M-d_HH-mm-ss");
         try {
-            //noinspection ResultOfMethodCallIgnored
+            // noinspection ResultOfMethodCallIgnored
             new File("./logs/").mkdirs();
             fh = new FileHandler("./logs/" + format.format(Calendar.getInstance().getTime()) + ".log");
         } catch (IOException e) {
@@ -74,8 +83,7 @@ public class Main {
                 return String.format(disableTimestamp ? formatWithoutTimestamp : formatWithTimestamp,
                         new Date(lr.getMillis()),
                         lr.getLevel().getLocalizedName(),
-                        lr.getMessage()
-                );
+                        lr.getMessage());
             }
         });
         logger.addHandler(fh);
