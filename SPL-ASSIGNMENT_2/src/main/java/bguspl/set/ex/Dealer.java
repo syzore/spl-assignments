@@ -91,7 +91,7 @@ public class Dealer implements Runnable {
         while (!terminate && System.currentTimeMillis() < reshuffleTime) {
             sleepUntilWokenOrTimeout();
             if (!setsQueue.isEmpty()) {
-                Pair<Integer, int[]> set = setsQueue.poll();
+                Pair set = setsQueue.poll();
                 handleSet(set);
             }
             updateTimerDisplay(false);
@@ -102,13 +102,13 @@ public class Dealer implements Runnable {
         if (set.length != 3) {
         } // throw bad set exception.
 
-        Pair<Integer, int[]> pair = new Pair<>(player.id, set);
+        Pair pair = new Pair(player.id, set);
         setsQueue.add(pair);
     }
 
-    private void handleSet(Pair<Integer, int[]> pair) {
-        Player player = players[pair.getKey()];
-        int[] set = pair.getValue();
+    private void handleSet(Pair pair) {
+        Player player = players[pair.getId()];
+        int[] set = pair.getSet();
 
     }
 
@@ -158,7 +158,7 @@ public class Dealer implements Runnable {
      * Checks if any cards should be removed from the table and returns them to the
      * deck.
      */
-    private void removeCardsFromTable(int[] slots) {
+    private void removeCardsFromTable(int[] slots, boolean throwCards) {
         for (int slot : slots) {
             env.ui.removeCard(slot);
             if (throwCards) {
