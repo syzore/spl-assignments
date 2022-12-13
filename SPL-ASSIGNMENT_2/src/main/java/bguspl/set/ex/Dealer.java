@@ -1,10 +1,10 @@
 package bguspl.set.ex;
 
-import bguspl.set.Env;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import bguspl.set.Env;
 
 /**
  * This class manages the dealer's threads and data
@@ -22,6 +22,8 @@ public class Dealer implements Runnable {
     private final Table table;
     private final Player[] players;
 
+    private Thread[] playerThreads;
+
     /**
      * The list of card ids that are left in the dealer's deck.
      */
@@ -32,6 +34,8 @@ public class Dealer implements Runnable {
      */
     private volatile boolean terminate;
 
+    // private static final int[] allCards;
+
     /**
      * The time when the dealer needs to reshuffle the deck due to turn timeout.
      */
@@ -41,6 +45,7 @@ public class Dealer implements Runnable {
         this.env = env;
         this.table = table;
         this.players = players;
+        this.reshuffleTime = env.config.turnTimeoutMillis;
         deck = IntStream.range(0, env.config.deckSize).boxed().collect(Collectors.toList());
     }
 
@@ -50,6 +55,21 @@ public class Dealer implements Runnable {
     @Override
     public void run() {
         System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
+        // init players threads
+        playerThreads = new Thread[players.length];
+        for (Player player : players) {
+            PlayerListener listener = new PlayerListener() {
+                @Override
+                public void onTrio(int[] slots) {
+                    onTrio(slots);
+                }
+            };
+            player.register(listener);
+
+            Thread playerThread = new Thread(player, "player" + player.id);
+            playerThread.wait();
+        }
+
         while (!shouldFinish()) {
             placeCardsOnTable();
             timerLoop();
@@ -61,7 +81,8 @@ public class Dealer implements Runnable {
     }
 
     /**
-     * The inner loop of the dealer thread that runs as long as the countdown did not time out.
+     * The inner loop of the dealer thread that runs as long as the countdown did
+     * not time out.
      */
     private void timerLoop() {
         while (!terminate && System.currentTimeMillis() < reshuffleTime) {
@@ -70,6 +91,12 @@ public class Dealer implements Runnable {
             removeCardsFromTable();
             placeCardsOnTable();
         }
+    }
+
+    private void onTrio(int[] slots) {
+        makeAllPlayersWait();
+
+        boolean isValid = checkTrio();
     }
 
     /**
@@ -89,21 +116,38 @@ public class Dealer implements Runnable {
     }
 
     /**
-     * Checks if any cards should be removed from the table and returns them to the deck.
+     * Checks if any cards should be removed from the table and returns them to the
+     * deck.
      */
     private void removeCardsFromTable() {
+        try {
+            makeAllPlayersWait();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        // put wait on players
         // TODO implement
     }
 
     /**
      * Check if any cards can be removed from the deck and placed on the table.
      */
-    private void placeCardsOnTable() {
+    private void placeCardsOnTable(int[] slots) {
+
         // TODO implement
+        // wake players
+    }
+
+    private void makeAllPlayersWait() throws InterruptedException {
+        for (Thread playerThread : playerThreads) {
+            playerThread.wait();
+        }
     }
 
     /**
-     * Sleep for a fixed amount of time or until the thread is awakened for some purpose.
+     * Sleep for a fixed amount of time or until the thread is awakened for some
+     * purpose.
      */
     private void sleepUntilWokenOrTimeout() {
         // TODO implement
@@ -113,6 +157,8 @@ public class Dealer implements Runnable {
      * Reset and/or update the countdown and the countdown display.
      */
     private void updateTimerDisplay(boolean reset) {
+        long countdown = reshuffleTime - System.currentTimeMillis();
+        env.ui.setCountdown(countdown, countdown < env.config.turnTimeoutWarningMillis);
         // TODO implement
     }
 
