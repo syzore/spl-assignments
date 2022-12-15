@@ -1,11 +1,12 @@
 package bguspl.set.ex;
 
-import bguspl.set.Env;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import bguspl.set.Env;
 
 /**
  * This class contains the data that is visible to the player.
@@ -59,10 +60,9 @@ public class Table {
    */
   public Table(Env env) {
     this(
-      env,
-      new Integer[env.config.tableSize],
-      new Integer[env.config.deckSize]
-    );
+        env,
+        new Integer[env.config.tableSize],
+        new Integer[env.config.deckSize]);
   }
 
   /**
@@ -71,27 +71,26 @@ public class Table {
    */
   public void hints() {
     List<Integer> deck = Arrays
-      .stream(slotToCard)
-      .filter(Objects::nonNull)
-      .collect(Collectors.toList());
+        .stream(slotToCard)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
     env.util
-      .findSets(deck, Integer.MAX_VALUE)
-      .forEach(set -> {
-        StringBuilder sb = new StringBuilder().append("Hint: Set found: ");
-        List<Integer> slots = Arrays
-          .stream(set)
-          .mapToObj(card -> cardToSlot[card])
-          .sorted()
-          .collect(Collectors.toList());
-        int[][] features = env.util.cardsToFeatures(set);
-        System.out.println(
-          sb
-            .append("slots: ")
-            .append(slots)
-            .append(" features: ")
-            .append(Arrays.deepToString(features))
-        );
-      });
+        .findSets(deck, Integer.MAX_VALUE)
+        .forEach(set -> {
+          StringBuilder sb = new StringBuilder().append("Hint: Set found: ");
+          List<Integer> slots = Arrays
+              .stream(set)
+              .mapToObj(card -> cardToSlot[card])
+              .sorted()
+              .collect(Collectors.toList());
+          int[][] features = env.util.cardsToFeatures(set);
+          System.out.println(
+              sb
+                  .append("slots: ")
+                  .append(slots)
+                  .append(" features: ")
+                  .append(Arrays.deepToString(features)));
+        });
   }
 
   /**
@@ -101,7 +100,9 @@ public class Table {
    */
   public int countCards() {
     int cards = 0;
-    for (Integer card : slotToCard) if (card != null) ++cards;
+    for (Integer card : slotToCard)
+      if (card != null)
+        ++cards;
     return cards;
   }
 
@@ -120,7 +121,8 @@ public class Table {
   public void placeCard(int card, int slot) {
     try {
       Thread.sleep(env.config.tableDelayMillis);
-    } catch (InterruptedException ignored) {}
+    } catch (InterruptedException ignored) {
+    }
 
     cardToSlot[card] = slot;
     slotToCard[slot] = card;
@@ -136,7 +138,8 @@ public class Table {
   public void removeCard(int slot) {
     try {
       Thread.sleep(env.config.tableDelayMillis);
-    } catch (InterruptedException ignored) {}
+    } catch (InterruptedException ignored) {
+    }
 
     env.ui.removeCard(slot);
   }
@@ -163,7 +166,7 @@ public class Table {
         for (int i = 0; i < set.length; i++) {
           set[i] = currentTokens[playerId].get(i);
         }
-        Pair pair = new Pair(playerId, set);
+        SetWithPlayerId pair = new SetWithPlayerId(playerId, set);
         listener.onSetAvailable(pair);
       }
     }
@@ -178,8 +181,7 @@ public class Table {
    */
   public boolean removeToken(int player, int slot) {
     System.out.println(
-      "remove token " + slot + " from " + currentTokens[player]
-    );
+        "remove token " + slot + " from " + currentTokens[player]);
     int index = currentTokens[player].indexOf(slot);
     if (index != -1) {
       currentTokens[player].remove(index);

@@ -1,9 +1,10 @@
 package bguspl.set.ex;
 
-import bguspl.set.Env;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
+
+import bguspl.set.Env;
 
 /**
  * This class manages the players' threads and data
@@ -59,6 +60,9 @@ public class Player implements Runnable {
    */
   private int score;
 
+  /*
+   * Tells the player if it can accept inputs or not from the InputManager
+   */
   private boolean acceptInput;
 
   /**
@@ -67,8 +71,14 @@ public class Player implements Runnable {
    */
   private BlockingQueue<Integer> keyPressQueue;
 
+  /*
+   * A boolean telling the player thread whether or not he has a penalty or not
+   */
   private boolean penalty;
 
+  /*
+   * Sets the length of the player's penalty in milliseconds
+   */
   private long penaltyTime = 0;
 
   /**
@@ -99,10 +109,10 @@ public class Player implements Runnable {
   public void run() {
     playerThread = Thread.currentThread();
     System.out.printf(
-      "Info: Thread %s starting.%n",
-      Thread.currentThread().getName()
-    );
-    if (!human) createArtificialIntelligence();
+        "Info: Thread %s starting.%n",
+        Thread.currentThread().getName());
+    if (!human)
+      createArtificialIntelligence();
 
     while (!terminate) {
       synchronized (this) {
@@ -114,7 +124,6 @@ public class Player implements Runnable {
           try {
             wait();
           } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
           }
         } else {
@@ -123,19 +132,19 @@ public class Player implements Runnable {
           try {
             wait();
           } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
           }
         }
       }
     }
-    if (!human) try {
-      aiThread.join();
-    } catch (InterruptedException ignored) {}
+    if (!human)
+      try {
+        aiThread.join();
+      } catch (InterruptedException ignored) {
+      }
     System.out.printf(
-      "Info: Thread %s terminated.%n",
-      Thread.currentThread().getName()
-    );
+        "Info: Thread %s terminated.%n",
+        Thread.currentThread().getName());
   }
 
   /**
@@ -146,13 +155,11 @@ public class Player implements Runnable {
    */
   private void createArtificialIntelligence() {
     // note: this is a very very smart AI (!)
-    aiThread =
-      new Thread(
+    aiThread = new Thread(
         () -> {
           System.out.printf(
-            "Info: Thread %s starting.%n",
-            Thread.currentThread().getName()
-          );
+              "Info: Thread %s starting.%n",
+              Thread.currentThread().getName());
 
           while (!terminate) {
             int slot = ThreadLocalRandom.current().nextInt(0, 12);
@@ -178,12 +185,10 @@ public class Player implements Runnable {
             }
           }
           System.out.printf(
-            "Info: Thread %s terminated.%n",
-            Thread.currentThread().getName()
-          );
+              "Info: Thread %s terminated.%n",
+              Thread.currentThread().getName());
         },
-        "computer-" + id
-      );
+        "computer-" + id);
     aiThread.start();
   }
 
@@ -200,7 +205,8 @@ public class Player implements Runnable {
    * @param slot - the slot corresponding to the key pressed.
    */
   public void keyPressed(int slot) {
-    if (!acceptInput) return;
+    if (!acceptInput)
+      return;
 
     System.out.println("key pressed was " + slot);
     synchronized (this) {

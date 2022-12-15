@@ -1,5 +1,5 @@
 package bguspl.set.ex;
 
 public interface TableListener {
-    void onSetAvailable(Pair pair);
+    void onSetAvailable(SetWithPlayerId pair);
 }

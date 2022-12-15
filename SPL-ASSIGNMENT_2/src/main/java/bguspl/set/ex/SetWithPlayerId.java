@@ -1,19 +1,19 @@
 package bguspl.set.ex;
 
-public class Pair {
+public class SetWithPlayerId {
     private int playerId;
     private int[] set;
 
-    public Pair(int playerId, int[] set){
+    public SetWithPlayerId(int playerId, int[] set) {
         this.playerId = playerId;
         this.set = set;
     }
 
-    public int getId(){
+    public int getId() {
         return playerId;
     }
 
-    public int[] getSet(){
+    public int[] getSet() {
         return set;
     }
 }
