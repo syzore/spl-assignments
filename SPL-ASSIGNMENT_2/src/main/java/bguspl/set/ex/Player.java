@@ -59,6 +59,8 @@ public class Player implements Runnable {
      */
     private int score;
 
+    private boolean acceptInput;
+
     /**
      * A list that keeps the slots the player chose at the current try to make a
      * set.
@@ -66,6 +68,8 @@ public class Player implements Runnable {
     private BlockingQueue<Integer> keyPressQueue;
 
     private boolean penalty;
+
+    private long penaltyTime = 0;
 
     /**
      * The class constructor.
@@ -84,6 +88,8 @@ public class Player implements Runnable {
         this.id = id;
         this.human = human;
         this.keyPressQueue = new ArrayBlockingQueue<>(3);
+        acceptInput = true;
+
     }
 
     /**
@@ -98,27 +104,30 @@ public class Player implements Runnable {
             createArtificialIntelligence();
 
         while (!terminate) {
-                synchronized (this) {
-                    if (keyPressQueue.isEmpty()) {
-                        try {
-                            wait();
-                        } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                    } else {
-                        int slot = keyPressQueue.poll();
-                        table.handleToken(this, slot);
-                        try {
-                            wait();
-                        } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                    }
-
+            synchronized (this) {
+                if (penalty) {
+                    handlePenalty(penaltyTime);
                 }
+                if (keyPressQueue.isEmpty()) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                } else {
+                    int slot = keyPressQueue.poll();
+                    table.handleToken(this, slot);
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+
             }
+        }
         if (!human)
             try {
                 aiThread.join();
@@ -164,6 +173,8 @@ public class Player implements Runnable {
      * @param slot - the slot corresponding to the key pressed.
      */
     public void keyPressed(int slot) {
+        if (!acceptInput)
+            return;
         synchronized (this) {
             // TODO implement
             keyPressQueue.add(slot);
@@ -187,13 +198,38 @@ public class Player implements Runnable {
     /**
      * Penalize a player and perform other related actions.
      */
-    public void penalty(int seconds) {
-        // handle penalty
-        penalty = true;
+    private void handlePenalty(long millis) {
+        penalty = false;
+        setAcceptInput(false);
+        long startingTime = System.currentTimeMillis();
+        long remainingTime = millis + startingTime - System.currentTimeMillis();
+        while (remainingTime > 0) {
+            remainingTime = millis + startingTime - System.currentTimeMillis();
+            env.ui.setFreeze(id, remainingTime);
+            try {
+                Thread.sleep(15);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+            }
+        }
+        env.ui.setFreeze(id, 0);
+        setAcceptInput(true);
+    }
+
+    public void penalize(long millis) {
+        synchronized (this) {
+            penaltyTime = millis;
+            penalty = true;
+            this.notify();
+        }
     }
 
     public int getScore() {
         return score;
+    }
+
+    public void setAcceptInput(boolean b) {
+        acceptInput = b;
     }
 
 }

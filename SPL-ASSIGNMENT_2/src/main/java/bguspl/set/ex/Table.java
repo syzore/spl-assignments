@@ -128,7 +128,7 @@ public class Table {
         } catch (InterruptedException ignored) {
         }
 
-        // TODO implement
+        env.ui.removeCard(slot);
     }
 
     /**
@@ -143,7 +143,11 @@ public class Table {
             env.ui.placeToken(playerId, slot);
             currentTokens[playerId].add(slot);
             if (currentTokens[playerId].size() == 3) {
+                player.setAcceptInput(false);
                 int[] set = new int[3];
+                for (int i = 0; i < set.length; i++) {
+                    set[i] = currentTokens[playerId].get(i);
+                }
                 Pair pair = new Pair(playerId, set);
                 listener.onSetAvailable(pair);
             }
@@ -158,7 +162,11 @@ public class Table {
      * @return - true iff a token was successfully removed.
      */
     public boolean removeToken(int player, int slot) {
+        System.out.println("remove token " + slot + " from " + currentTokens[player]);
         env.ui.removeToken(player, slot);
+        int index = currentTokens[player].indexOf(slot);
+        if (index != -1)
+            currentTokens[player].remove(index);
         return false;
     }
 
@@ -172,6 +180,13 @@ public class Table {
                 placeToken(player, slot);
             }
             // else
+        }
+    }
+
+    public void removePlayerTokens(int id) {
+        for (int i = 0; i < currentTokens[id].size();) {
+            Integer token = currentTokens[id].get(i);
+            removeToken(id, token);
         }
     }
 }

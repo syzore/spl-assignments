@@ -78,8 +78,8 @@ public class Dealer implements Runnable, TableListener {
             playerThread.start();
         }
 
-        placeAllCardsOnTable();
         while (!shouldFinish()) {
+            placeAllCardsOnTable();
             timerLoop();
             updateTimerDisplay(true);
             removeAllCardsFromTable();
@@ -96,6 +96,7 @@ public class Dealer implements Runnable, TableListener {
         while (!terminate && System.currentTimeMillis() - lastShuffleTime < reshuffleTime) {
             sleepUntilWokenOrTimeout();
             if (!setsQueue.isEmpty()) {
+                System.out.println("dealer q isnt empty");
                 Pair set = setsQueue.poll();
                 handleSet(set);
             }
@@ -113,7 +114,26 @@ public class Dealer implements Runnable, TableListener {
 
     private void handleSet(Pair pair) {
         Player player = players[pair.getId()];
-        int[] set = pair.getSet();
+        synchronized (player) {
+            int[] set = pair.getSet();
+            int[] cards = new int[3];
+            for (int i = 0; i < cards.length; i++) {
+                cards[i] = table.slotToCard[set[i]];
+            }
+            boolean isLegalSet = env.util.testSet(cards);
+            if (isLegalSet) {
+                player.point();
+                player.penalize(env.config.pointFreezeMillis);
+                removeCardsFromTable(set, true);
+                placeCardsOnTable(set);
+            } else {
+                table.removePlayerTokens(player.id);
+                player.penalize(env.config.penaltyFreezeMillis);
+                player.setAcceptInput(true);
+                player.notify();
+            }
+        }
+
     }
 
     /**
@@ -171,10 +191,11 @@ public class Dealer implements Runnable, TableListener {
      * deck.
      */
     private void removeCardsFromTable(int[] slots, boolean throwCards) {
+        setAllPlayersFreezeState(true);
         for (int slot : slots) {
-            env.ui.removeCard(slot);
+            table.removeCard(slot);
             if (throwCards) {
-                int index = deck.indexOf(slot);
+                int index = deck.indexOf(table.slotToCard[slot]);
                 deck.remove(index);
             }
             for (Player player : players) {
@@ -208,20 +229,24 @@ public class Dealer implements Runnable, TableListener {
 
         for (int i = 0; i < slots.length; i++) {
             int slot = slots[i];
-            int card = deck.remove(i);
+            int card = deck.get(i);
             table.placeCard(card, slot);
         }
         // wake players
-        notifyAll();
-        ;
+        setAllPlayersFreezeState(false);
+
     }
 
     private void placeAllCardsOnTable() {
+        setAllPlayersFreezeState(true);
+        shuffleDeck();
         for (int i = 0; i < env.config.tableSize; i++) {
             int card = deck.get(i);
             table.placeCard(card, i);
         }
         lastShuffleTime = System.currentTimeMillis();
+
+        setAllPlayersFreezeState(false);
     }
 
     /**
@@ -233,7 +258,13 @@ public class Dealer implements Runnable, TableListener {
 
     @Override
     public void onSetAvailable(Pair pair) {
+        System.out.println("on available set");
         setsQueue.add(pair);
     }
 
+    private void setAllPlayersFreezeState(boolean freeze) {
+        for (Player player : players) {
+            player.setAcceptInput(!freeze);
+        }
+    }
 }
