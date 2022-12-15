@@ -1,6 +1,8 @@
 package bguspl.set.ex;
 
 import bguspl.set.Env;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -53,6 +55,12 @@ public class Dealer implements Runnable, TableListener {
    * time since
    */
   private long lastShuffleTime = Long.MIN_VALUE;
+
+  /*
+   * index of next card to pull from deck
+   *
+   */
+  private int deckIndex = 0;
 
   public Dealer(Env env, Table table, Player[] players) {
     this.env = env;
@@ -135,9 +143,10 @@ public class Dealer implements Runnable, TableListener {
         player.point();
         player.penalize(env.config.pointFreezeMillis);
         removeCardsFromTable(set, true);
+        updateTimerDisplay(true);
         placeCardsOnTable(set);
       } else {
-        table.removePlayerTokens(player.id);
+        // table.removePlayerTokens(player.id);
         player.penalize(env.config.penaltyFreezeMillis);
         player.setAcceptInput(true);
         player.notify();
@@ -150,8 +159,8 @@ public class Dealer implements Runnable, TableListener {
    */
   public void terminate() {
     setsQueue.clear();
-    for (Thread playerThread : playerThreads) {
-      playerThread.interrupt();
+    for (Player player : players) {
+      player.terminate();
     }
     terminate = true;
   }
@@ -214,6 +223,7 @@ public class Dealer implements Runnable, TableListener {
       if (throwCards) {
         int index = deck.indexOf(table.slotToCard[slot]);
         deck.remove(index);
+        deckIndex--;
       }
       for (Player player : players) {
         table.removeToken(player.id, slot);
@@ -230,6 +240,8 @@ public class Dealer implements Runnable, TableListener {
       slots[i] = i;
     }
     removeCardsFromTable(slots, false);
+
+    deckIndex = 0;
   }
 
   /**
@@ -242,12 +254,18 @@ public class Dealer implements Runnable, TableListener {
     }
 
     // TODO implement
+    System.out.println(
+      "pulling cards from deck " + deck.toString() + " from index " + deckIndex
+    );
 
-    for (int i = 0; i < slots.length; i++) {
+    for (int i = 0; i < slots.length && deckIndex < deck.size(); i++) {
       int slot = slots[i];
-      int card = deck.get(i);
+      int card = deck.get(deckIndex);
+      System.out.println();
+      deckIndex++;
       table.placeCard(card, slot);
     }
+
     // wake players
     setAllPlayersFreezeState(false);
   }
@@ -255,23 +273,49 @@ public class Dealer implements Runnable, TableListener {
   private void placeAllCardsOnTable() {
     setAllPlayersFreezeState(true);
 
-    if (env.util.findSets(deck, 1).size() <= 0) terminate();
+    if (env.util.findSets(deck, 1).size() <= 0) {
+      terminate();
+      return;
+    }
 
     shuffleDeck();
+
+    int[] allTableSlots = new int[env.config.tableSize];
     for (int i = 0; i < env.config.tableSize; i++) {
-      int card = deck.get(i);
-      table.placeCard(card, i);
+      allTableSlots[i] = i;
     }
+
     lastShuffleTime = System.currentTimeMillis();
 
-    setAllPlayersFreezeState(false);
+    placeCardsOnTable(allTableSlots);
   }
 
   /**
    * Check who is/are the winner/s and displays them.
    */
   private void announceWinners() {
-    // TODO implement
+    int highestScore = 0;
+
+    List<Integer> list = new ArrayList<>();
+
+    for (Player player : players) {
+      int score = player.getScore();
+      if (score > highestScore) {
+        highestScore = score;
+        list = new ArrayList<>();
+        list.add(player.id);
+      } else if (score == highestScore) {
+        list.add(player.id);
+      }
+    }
+
+    int[] winners = new int[list.size()];
+
+    for (int i = 0; i < winners.length; i++) {
+      winners[i] = list.get(i);
+    }
+
+    env.ui.announceWinner(winners);
   }
 
   @Override

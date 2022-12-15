@@ -1,9 +1,9 @@
 package bguspl.set.ex;
 
+import bguspl.set.Env;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-
-import bguspl.set.Env;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * This class manages the players' threads and data
@@ -13,223 +13,250 @@ import bguspl.set.Env;
  */
 public class Player implements Runnable {
 
-    /**
-     * The game environment object.
-     */
-    private final Env env;
+  /**
+   * The game environment object.
+   */
+  private final Env env;
 
-    /**
-     * The game dealer object.
-     */
-    private final Dealer dealer;
+  /**
+   * The game dealer object.
+   */
+  private final Dealer dealer;
 
-    /**
-     * Game entities.
-     */
-    private final Table table;
+  /**
+   * Game entities.
+   */
+  private final Table table;
 
-    /**
-     * The id of the player (starting from 0).
-     */
-    public final int id;
+  /**
+   * The id of the player (starting from 0).
+   */
+  public final int id;
 
-    /**
-     * The thread representing the current player.
-     */
-    private Thread playerThread;
+  /**
+   * The thread representing the current player.
+   */
+  private Thread playerThread;
 
-    /**
-     * The thread of the AI (computer) player (an additional thread used to generate
-     * key presses).
-     */
-    private Thread aiThread;
+  /**
+   * The thread of the AI (computer) player (an additional thread used to generate
+   * key presses).
+   */
+  private Thread aiThread;
 
-    /**
-     * True iff the player is human (not a computer player).
-     */
-    private final boolean human;
+  /**
+   * True iff the player is human (not a computer player).
+   */
+  private final boolean human;
 
-    /**
-     * True iff game should be terminated due to an external event.
-     */
-    private volatile boolean terminate;
+  /**
+   * True iff game should be terminated due to an external event.
+   */
+  private volatile boolean terminate;
 
-    /**
-     * The current score of the player.
-     */
-    private int score;
+  /**
+   * The current score of the player.
+   */
+  private int score;
 
-    private boolean acceptInput;
+  private boolean acceptInput;
 
-    /**
-     * A list that keeps the slots the player chose at the current try to make a
-     * set.
-     */
-    private BlockingQueue<Integer> keyPressQueue;
+  /**
+   * A list that keeps the slots the player chose at the current try to make a
+   * set.
+   */
+  private BlockingQueue<Integer> keyPressQueue;
 
-    private boolean penalty;
+  private boolean penalty;
 
-    private long penaltyTime = 0;
+  private long penaltyTime = 0;
 
-    /**
-     * The class constructor.
-     *
-     * @param env    - the environment object.
-     * @param dealer - the dealer object.
-     * @param table  - the table object.
-     * @param id     - the id of the player.
-     * @param human  - true iff the player is a human player (i.e. input is provided
-     *               manually, via the keyboard).
-     */
-    public Player(Env env, Dealer dealer, Table table, int id, boolean human) {
-        this.env = env;
-        this.dealer = dealer;
-        this.table = table;
-        this.id = id;
-        this.human = human;
-        this.keyPressQueue = new ArrayBlockingQueue<>(3);
-        acceptInput = true;
+  /**
+   * The class constructor.
+   *
+   * @param env    - the environment object.
+   * @param dealer - the dealer object.
+   * @param table  - the table object.
+   * @param id     - the id of the player.
+   * @param human  - true iff the player is a human player (i.e. input is provided
+   *               manually, via the keyboard).
+   */
+  public Player(Env env, Dealer dealer, Table table, int id, boolean human) {
+    this.env = env;
+    this.dealer = dealer;
+    this.table = table;
+    this.id = id;
+    this.human = human;
+    this.keyPressQueue = new ArrayBlockingQueue<>(3);
+    acceptInput = true;
+  }
 
-    }
+  /**
+   * The main player thread of each player starts here (main loop for the player
+   * thread).
+   */
+  @Override
+  public void run() {
+    playerThread = Thread.currentThread();
+    System.out.printf(
+      "Info: Thread %s starting.%n",
+      Thread.currentThread().getName()
+    );
+    if (!human) createArtificialIntelligence();
 
-    /**
-     * The main player thread of each player starts here (main loop for the player
-     * thread).
-     */
-    @Override
-    public void run() {
-        playerThread = Thread.currentThread();
-        System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
-        if (!human)
-            createArtificialIntelligence();
-
-        while (!terminate) {
-            synchronized (this) {
-                if (penalty) {
-                    handlePenalty(penaltyTime);
-                }
-                if (keyPressQueue.isEmpty()) {
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                } else {
-                    int slot = keyPressQueue.poll();
-                    table.handleToken(this, slot);
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-
-            }
+    while (!terminate) {
+      synchronized (this) {
+        if (penalty) {
+          handlePenalty(penaltyTime);
         }
-        if (!human)
-            try {
-                aiThread.join();
-            } catch (InterruptedException ignored) {
-            }
-        System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
-    }
 
-    /**
-     * Creates an additional thread for an AI (computer) player. The main loop of
-     * this thread repeatedly generates
-     * key presses. If the queue of key presses is full, the thread waits until it
-     * is not full.
-     */
-    private void createArtificialIntelligence() {
-        // note: this is a very very smart AI (!)
-        aiThread = new Thread(() -> {
-            System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
-            while (!terminate) {
-                // TODO implement player key press simulator
-                try {
-                    synchronized (this) {
-                        wait();
-                    }
-                } catch (InterruptedException ignored) {
-                }
-            }
-            System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
-        }, "computer-" + id);
-        aiThread.start();
-    }
-
-    /**
-     * Called when the game should be terminated due to an external event.
-     */
-    public void terminate() {
-        terminate = true;
-    }
-
-    /**
-     * This method is called when a key is pressed.
-     *
-     * @param slot - the slot corresponding to the key pressed.
-     */
-    public void keyPressed(int slot) {
-        if (!acceptInput)
-            return;
-        synchronized (this) {
-            // TODO implement
-            keyPressQueue.add(slot);
-            this.notify();
+        if (keyPressQueue.isEmpty()) {
+          try {
+            wait();
+          } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        } else {
+          int slot = keyPressQueue.poll();
+          table.handleToken(this, slot);
+          try {
+            wait();
+          } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
         }
+      }
     }
+    if (!human) try {
+      aiThread.join();
+    } catch (InterruptedException ignored) {}
+    System.out.printf(
+      "Info: Thread %s terminated.%n",
+      Thread.currentThread().getName()
+    );
+  }
 
-    /**
-     * Award a point to a player and perform other related actions.
-     *
-     * @post - the player's score is increased by 1.
-     * @post - the player's score is updated in the ui.
-     */
-    public void point() {
-        // TODO implement
+  /**
+   * Creates an additional thread for an AI (computer) player. The main loop of
+   * this thread repeatedly generates
+   * key presses. If the queue of key presses is full, the thread waits until it
+   * is not full.
+   */
+  private void createArtificialIntelligence() {
+    // note: this is a very very smart AI (!)
+    aiThread =
+      new Thread(
+        () -> {
+          System.out.printf(
+            "Info: Thread %s starting.%n",
+            Thread.currentThread().getName()
+          );
 
-        int ignored = table.countCards(); // this part is just for demonstration in the unit tests
-        env.ui.setScore(id, ++score);
-    }
-
-    /**
-     * Penalize a player and perform other related actions.
-     */
-    private void handlePenalty(long millis) {
-        penalty = false;
-        setAcceptInput(false);
-        long startingTime = System.currentTimeMillis();
-        long remainingTime = millis + startingTime - System.currentTimeMillis();
-        while (remainingTime > 0) {
-            remainingTime = millis + startingTime - System.currentTimeMillis();
-            env.ui.setFreeze(id, remainingTime);
-            try {
-                Thread.sleep(15);
-            } catch (InterruptedException e) {
+          while (!terminate) {
+            int slot = ThreadLocalRandom.current().nextInt(0, 12);
+            if (acceptInput) {
+              System.out.println("ai number " + id + " pressed " + slot);
+              synchronized (this) {
+                keyPressQueue.add(slot);
+                this.notify();
+              }
+              try {
+                Thread.sleep(500);
+              } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
+                e.printStackTrace();
+              }
+            } else {
+              try {
+                Thread.sleep(25);
+              } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+              }
             }
-        }
-        env.ui.setFreeze(id, 0);
-        setAcceptInput(true);
-    }
+          }
+          System.out.printf(
+            "Info: Thread %s terminated.%n",
+            Thread.currentThread().getName()
+          );
+        },
+        "computer-" + id
+      );
+    aiThread.start();
+  }
 
-    public void penalize(long millis) {
-        synchronized (this) {
-            penaltyTime = millis;
-            penalty = true;
-            this.notify();
-        }
-    }
+  /**
+   * Called when the game should be terminated due to an external event.
+   */
+  public void terminate() {
+    terminate = true;
+  }
 
-    public int getScore() {
-        return score;
-    }
+  /**
+   * This method is called when a key is pressed.
+   *
+   * @param slot - the slot corresponding to the key pressed.
+   */
+  public void keyPressed(int slot) {
+    if (!acceptInput) return;
 
-    public void setAcceptInput(boolean b) {
-        acceptInput = b;
+    System.out.println("key pressed was " + slot);
+    synchronized (this) {
+      // TODO implement
+      keyPressQueue.add(slot);
+      this.notify();
     }
+  }
 
+  /**
+   * Award a point to a player and perform other related actions.
+   *
+   * @post - the player's score is increased by 1.
+   * @post - the player's score is updated in the ui.
+   */
+  public void point() {
+    // TODO implement
+
+    int ignored = table.countCards(); // this part is just for demonstration in the unit tests
+    env.ui.setScore(id, ++score);
+  }
+
+  /**
+   * Penalize a player and perform other related actions.
+   */
+  private void handlePenalty(long millis) {
+    penalty = false;
+    setAcceptInput(false);
+    long startingTime = System.currentTimeMillis();
+    long remainingTime = millis + startingTime - System.currentTimeMillis();
+    while (remainingTime > 0) {
+      remainingTime = millis + startingTime - System.currentTimeMillis();
+      env.ui.setFreeze(id, remainingTime);
+      try {
+        Thread.sleep(15);
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+      }
+    }
+    env.ui.setFreeze(id, 0);
+    setAcceptInput(true);
+  }
+
+  public void penalize(long millis) {
+    synchronized (this) {
+      penaltyTime = millis;
+      penalty = true;
+      this.notify();
+    }
+  }
+
+  public int getScore() {
+    return score;
+  }
+
+  public void setAcceptInput(boolean b) {
+    acceptInput = b;
+  }
 }
