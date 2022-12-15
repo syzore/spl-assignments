@@ -210,7 +210,6 @@ public class Dealer implements Runnable, TableListener {
     private void removeCardsFromTable(int[] slots, boolean throwCards) {
         setAllPlayersFreezeState(true);
         for (int slot : slots) {
-            table.removeCard(slot);
             if (throwCards) {
                 int index = deck.indexOf(table.slotToCard[slot]);
                 deck.remove(index);
@@ -219,6 +218,8 @@ public class Dealer implements Runnable, TableListener {
             for (Player player : players) {
                 table.removeToken(player.id, slot);
             }
+            table.removeCard(slot);
+
         }
     }
 

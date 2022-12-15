@@ -164,13 +164,12 @@ public class Player implements Runnable {
           while (!terminate) {
             int slot = ThreadLocalRandom.current().nextInt(0, env.config.tableSize);
             if (acceptInput) {
-              System.out.println("ai number " + id + " pressed " + slot);
               synchronized (this) {
                 keyPressQueue.add(slot);
                 this.notify();
               }
               try {
-                Thread.sleep(500);
+                Thread.sleep(1);
               } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -235,14 +234,15 @@ public class Player implements Runnable {
     setAcceptInput(false);
     long startingTime = System.currentTimeMillis();
     long remainingTime = millis + startingTime - System.currentTimeMillis();
-    while (remainingTime > 0) {
-      remainingTime = millis + startingTime - System.currentTimeMillis();
-      env.ui.setFreeze(id, remainingTime);
+    env.ui.setFreeze(id, millis + 500);
+    while (remainingTime > 500) {
       try {
-        Thread.sleep(15);
+        Thread.sleep(30);
       } catch (InterruptedException e) {
         // TODO Auto-generated catch block
       }
+      remainingTime = millis + startingTime - System.currentTimeMillis();
+      env.ui.setFreeze(id, remainingTime + 500);
     }
     env.ui.setFreeze(id, 0);
     setAcceptInput(true);

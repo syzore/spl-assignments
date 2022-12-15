@@ -143,6 +143,10 @@ public class Table {
       Thread.sleep(env.config.tableDelayMillis);
     } catch (InterruptedException ignored) {
     }
+    int card = slotToCard[slot];
+
+    slotToCard[slot] = -1;
+    cardToSlot[card] = -1;
 
     env.ui.removeCard(slot);
   }
@@ -159,6 +163,10 @@ public class Table {
       if (currentTokens[playerId].size() == 3) {
         // it means he already has 3 token
         return;
+      }
+
+      if (cardToSlot[slot] == null || cardToSlot[slot] == -1) {
+        System.out.println("slot is empty");
       }
 
       env.ui.placeToken(playerId, slot);
