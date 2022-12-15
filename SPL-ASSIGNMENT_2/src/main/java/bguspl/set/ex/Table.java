@@ -106,6 +106,9 @@ public class Table {
     return cards;
   }
 
+  /*
+   * Anyone who calls this method can listen and be notified when a set is formed.
+   */
   public void register(TableListener listener) {
     this.listener = listener;
   }

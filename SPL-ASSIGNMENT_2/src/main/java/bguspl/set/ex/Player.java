@@ -162,7 +162,7 @@ public class Player implements Runnable {
               Thread.currentThread().getName());
 
           while (!terminate) {
-            int slot = ThreadLocalRandom.current().nextInt(0, 12);
+            int slot = ThreadLocalRandom.current().nextInt(0, env.config.tableSize);
             if (acceptInput) {
               System.out.println("ai number " + id + " pressed " + slot);
               synchronized (this) {
@@ -223,8 +223,6 @@ public class Player implements Runnable {
    * @post - the player's score is updated in the ui.
    */
   public void point() {
-    // TODO implement
-
     int ignored = table.countCards(); // this part is just for demonstration in the unit tests
     env.ui.setScore(id, ++score);
   }
