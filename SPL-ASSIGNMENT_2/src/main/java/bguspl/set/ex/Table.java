@@ -138,7 +138,7 @@ public class Table {
    *
    * @param slot - the slot from which to remove the card.
    */
-  public void removeCard(int slot) {
+  public synchronized void removeCard(int slot) {
     try {
       Thread.sleep(env.config.tableDelayMillis);
     } catch (InterruptedException ignored) {
@@ -159,27 +159,28 @@ public class Table {
    */
   public synchronized void placeToken(Player player, int slot) {
     int playerId = player.id;
-    {
-      if (currentTokens[playerId].size() == 3) {
-        // it means he already has 3 token
-        return;
-      }
 
-      if (cardToSlot[slot] == null || cardToSlot[slot] == -1) {
-        System.out.println("slot is empty");
-      }
+    if (currentTokens[playerId].size() == 3) {
+      // it means he already has 3 token
+      return;
+    }
 
-      env.ui.placeToken(playerId, slot);
-      currentTokens[playerId].add(slot);
-      if (currentTokens[playerId].size() == 3) {
-        player.setAcceptInput(false);
-        int[] set = new int[3];
-        for (int i = 0; i < set.length; i++) {
-          set[i] = currentTokens[playerId].get(i);
-        }
-        SetWithPlayerId pair = new SetWithPlayerId(playerId, set);
-        listener.onSetAvailable(pair);
+    if (cardToSlot[slot] == null || cardToSlot[slot] == -1) {
+      System.out.println("slot is empty");
+      return;
+    }
+
+    env.ui.placeToken(playerId, slot);
+    currentTokens[playerId].add(slot);
+    if (currentTokens[playerId].size() == 3) {
+      player.setAcceptInput(false);
+      int[] set = new int[3];
+      for (int i = 0; i < set.length; i++) {
+        set[i] = currentTokens[playerId].get(i);
       }
+      SetWithPlayerId pair = new SetWithPlayerId(playerId, set);
+      listener.onSetAvailable(pair);
+
     }
   }
 
