@@ -1,12 +1,11 @@
 package bguspl.set.ex;
 
+import bguspl.set.Env;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import bguspl.set.Env;
 
 /**
  * This class contains the data that is visible to the player.
@@ -60,9 +59,10 @@ public class Table {
    */
   public Table(Env env) {
     this(
-        env,
-        new Integer[env.config.tableSize],
-        new Integer[env.config.deckSize]);
+      env,
+      new Integer[env.config.tableSize],
+      new Integer[env.config.deckSize]
+    );
   }
 
   /**
@@ -71,26 +71,27 @@ public class Table {
    */
   public void hints() {
     List<Integer> deck = Arrays
-        .stream(slotToCard)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
+      .stream(slotToCard)
+      .filter(Objects::nonNull)
+      .collect(Collectors.toList());
     env.util
-        .findSets(deck, Integer.MAX_VALUE)
-        .forEach(set -> {
-          StringBuilder sb = new StringBuilder().append("Hint: Set found: ");
-          List<Integer> slots = Arrays
-              .stream(set)
-              .mapToObj(card -> cardToSlot[card])
-              .sorted()
-              .collect(Collectors.toList());
-          int[][] features = env.util.cardsToFeatures(set);
-          System.out.println(
-              sb
-                  .append("slots: ")
-                  .append(slots)
-                  .append(" features: ")
-                  .append(Arrays.deepToString(features)));
-        });
+      .findSets(deck, Integer.MAX_VALUE)
+      .forEach(set -> {
+        StringBuilder sb = new StringBuilder().append("Hint: Set found: ");
+        List<Integer> slots = Arrays
+          .stream(set)
+          .mapToObj(card -> cardToSlot[card])
+          .sorted()
+          .collect(Collectors.toList());
+        int[][] features = env.util.cardsToFeatures(set);
+        System.out.println(
+          sb
+            .append("slots: ")
+            .append(slots)
+            .append(" features: ")
+            .append(Arrays.deepToString(features))
+        );
+      });
   }
 
   /**
@@ -100,9 +101,7 @@ public class Table {
    */
   public int countCards() {
     int cards = 0;
-    for (Integer card : slotToCard)
-      if (card != null)
-        ++cards;
+    for (Integer card : slotToCard) if (card != null) ++cards;
     return cards;
   }
 
@@ -124,8 +123,7 @@ public class Table {
   public void placeCard(int card, int slot) {
     try {
       Thread.sleep(env.config.tableDelayMillis);
-    } catch (InterruptedException ignored) {
-    }
+    } catch (InterruptedException ignored) {}
 
     cardToSlot[card] = slot;
     slotToCard[slot] = card;
@@ -141,12 +139,9 @@ public class Table {
   public synchronized void removeCard(int slot) {
     try {
       Thread.sleep(env.config.tableDelayMillis);
-    } catch (InterruptedException ignored) {
-    }
-    int card = slotToCard[slot];
+    } catch (InterruptedException ignored) {}
 
     slotToCard[slot] = -1;
-    cardToSlot[card] = -1;
 
     env.ui.removeCard(slot);
   }
@@ -157,7 +152,7 @@ public class Table {
    * @param player - the player the token belongs to.
    * @param slot   - the slot on which to place the token.
    */
-  public synchronized void placeToken(Player player, int slot) {
+  public void placeToken(Player player, int slot) {
     int playerId = player.id;
 
     if (currentTokens[playerId].size() == 3) {
@@ -165,8 +160,7 @@ public class Table {
       return;
     }
 
-    if (cardToSlot[slot] == null || cardToSlot[slot] == -1) {
-      System.out.println("slot is empty");
+    if (slotToCard[slot] == null || slotToCard[slot] == -1) {
       return;
     }
 
@@ -180,7 +174,6 @@ public class Table {
       }
       SetWithPlayerId pair = new SetWithPlayerId(playerId, set);
       listener.onSetAvailable(pair);
-
     }
   }
 
@@ -192,8 +185,6 @@ public class Table {
    * @return - true iff a token was successfully removed.
    */
   public boolean removeToken(int player, int slot) {
-    System.out.println(
-        "remove token " + slot + " from " + currentTokens[player]);
     int index = currentTokens[player].indexOf(slot);
     if (index != -1) {
       currentTokens[player].remove(index);
