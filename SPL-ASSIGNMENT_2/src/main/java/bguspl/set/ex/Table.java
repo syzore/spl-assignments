@@ -172,8 +172,8 @@ public class Table {
       for (int i = 0; i < set.length; i++) {
         set[i] = currentTokens[playerId].get(i);
       }
-      SetWithPlayerId pair = new SetWithPlayerId(playerId, set);
-      listener.onSetAvailable(pair);
+      SetWithPlayerId setWithId = new SetWithPlayerId(playerId, set);
+      listener.onSetAvailable(setWithId);
     }
   }
 
