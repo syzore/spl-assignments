@@ -2,6 +2,7 @@ package bguspl.set.ex;
 
 import bguspl.set.Env;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -61,6 +62,13 @@ public class Dealer implements Runnable, TableListener {
    */
   private int deckIndex = 0;
 
+  /*
+   * Dictates how long the dealer thread should sleep each timerLoop iteration.
+   */
+  private long sleepTime = 1000;
+
+  private boolean timerWarning = false;
+
   public Dealer(Env env, Table table, Player[] players) {
     this.env = env;
     this.table = table;
@@ -84,12 +92,8 @@ public class Dealer implements Runnable, TableListener {
       "Info: Thread %s starting.%n",
       Thread.currentThread().getName()
     );
-    // init players threads
-    playerThreads = new Thread[players.length];
-    for (Player player : players) {
-      Thread playerThread = new Thread(player, "player" + player.id);
-      playerThread.start();
-    }
+
+    initPlayersThreads();
 
     while (!shouldFinish()) {
       placeAllCardsOnTable();
@@ -98,10 +102,21 @@ public class Dealer implements Runnable, TableListener {
       removeAllCardsFromTable();
     }
     announceWinners();
+
     System.out.printf(
       "Info: Thread %s terminated.%n",
       Thread.currentThread().getName()
     );
+  }
+
+  private void initPlayersThreads() {
+    playerThreads = new Thread[players.length];
+    for (int i = 0; i < playerThreads.length; i++) {
+      Player player = players[i];
+      Thread playerThread = new Thread(player, "player" + player.id);
+      playerThreads[i] = playerThread;
+      playerThread.start();
+    }
   }
 
   /**
@@ -113,11 +128,11 @@ public class Dealer implements Runnable, TableListener {
       !terminate && System.currentTimeMillis() - lastShuffleTime < reshuffleTime
     ) {
       sleepUntilWokenOrTimeout();
+      updateTimerDisplay(false);
       if (!setsQueue.isEmpty()) {
         SetWithPlayerId set = setsQueue.poll();
         handleSet(set);
       }
-      updateTimerDisplay(false);
     }
   }
 
@@ -156,9 +171,20 @@ public class Dealer implements Runnable, TableListener {
    */
   public void terminate() {
     setsQueue.clear();
-    for (Player player : players) {
+
+    System.out.println("player threads = " + Arrays.toString(playerThreads));
+
+    for (int i = players.length - 1; i >= 0; i--) {
+      Player player = players[i];
+      Thread playerThread = playerThreads[i];
       player.terminate();
+      try {
+        playerThread.join();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     }
+
     terminate = true;
   }
 
@@ -177,10 +203,9 @@ public class Dealer implements Runnable, TableListener {
    */
   private void sleepUntilWokenOrTimeout() {
     try {
-      Thread.sleep(15);
-    } catch (InterruptedException e) {
+      Thread.sleep(sleepTime);
+    } catch (InterruptedException ignored) {
       // interrupted, worken up
-      e.printStackTrace();
     }
   }
 
@@ -198,10 +223,12 @@ public class Dealer implements Runnable, TableListener {
     }
     long countdown =
       lastShuffleTime + reshuffleTime - System.currentTimeMillis();
-    env.ui.setCountdown(
-      countdown,
-      countdown < env.config.turnTimeoutWarningMillis
-    );
+
+    timerWarning = countdown < env.config.turnTimeoutWarningMillis;
+
+    sleepTime = timerWarning ? 20 : 1000;
+
+    env.ui.setCountdown(countdown, timerWarning);
   }
 
   private void shuffleDeck() {
