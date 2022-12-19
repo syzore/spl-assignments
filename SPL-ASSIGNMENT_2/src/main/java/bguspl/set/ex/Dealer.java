@@ -146,6 +146,9 @@ public class Dealer implements Runnable, TableListener {
     setsQueue.add(pair);
   }
 
+  /*
+   *
+   */
   private void handleSet(SetWithPlayerId pair) {
     Player player = players[pair.getId()];
     synchronized (player) {
@@ -162,9 +165,12 @@ public class Dealer implements Runnable, TableListener {
         updateTimerDisplay(true);
         placeCardsOnTable(set);
       } else {
+        System.out.println(1);
         player.penalize(env.config.penaltyFreezeMillis);
+        System.out.println(2);
         player.setAcceptInput(true);
-        player.notify();
+        System.out.println(3);
+        // player.notify();
       }
     }
   }
@@ -174,8 +180,6 @@ public class Dealer implements Runnable, TableListener {
    */
   public void terminate() {
     setsQueue.clear();
-
-    System.out.println("player threads = " + Arrays.toString(playerThreads));
 
     for (int i = players.length - 1; i >= 0; i--) {
       Player player = players[i];
@@ -223,14 +227,23 @@ public class Dealer implements Runnable, TableListener {
     long countdown;
 
     if (reset) {
-      reshuffleTime = env.config.turnTimeoutMillis;
       lastShuffleTime = System.currentTimeMillis();
       countdown = reshuffleTime;
     } else {
-      countdown = lastShuffleTime + reshuffleTime - System.currentTimeMillis();
+      countdown =
+        Math.max(
+          0,
+          lastShuffleTime + reshuffleTime - System.currentTimeMillis()
+        );
     }
 
     timerWarning = countdown < env.config.turnTimeoutWarningMillis;
+
+    if (!timerWarning) {
+      System.out.println("countdown before = " + countdown);
+      countdown = (long) (Math.ceil((countdown / 1000.0)) * 1000.0);
+      System.out.println("countdown after = " + countdown);
+    }
 
     sleepTime = timerWarning ? 20 : 1000;
 
@@ -292,7 +305,6 @@ public class Dealer implements Runnable, TableListener {
     for (int i = 0; i < slotsToShuffle.size() && deckIndex < deck.size(); i++) {
       int slot = slotsToShuffle.get(i);
       int card = deck.get(deckIndex);
-      System.out.println();
       deckIndex++;
       table.placeCard(card, slot);
     }
@@ -318,6 +330,23 @@ public class Dealer implements Runnable, TableListener {
     }
 
     placeCardsOnTable(allTableSlots);
+  }
+
+  @Override
+  public void onSetAvailable(SetWithPlayerId pair) {
+    try {
+      setsQueue.add(pair);
+    } catch (Exception e) {
+      // queue is full
+    }
+
+    dealerThread.interrupt();
+  }
+
+  private void setAllPlayersFreezeState(boolean freeze) {
+    for (Player player : players) {
+      player.setAcceptInput(!freeze);
+    }
   }
 
   /**
@@ -346,22 +375,5 @@ public class Dealer implements Runnable, TableListener {
     }
 
     env.ui.announceWinner(winners);
-  }
-
-  @Override
-  public void onSetAvailable(SetWithPlayerId pair) {
-    try {
-      setsQueue.add(pair);
-    } catch (Exception e) {
-      // queue is full
-    }
-
-    dealerThread.interrupt();
-  }
-
-  private void setAllPlayersFreezeState(boolean freeze) {
-    for (Player player : players) {
-      player.setAcceptInput(!freeze);
-    }
   }
 }

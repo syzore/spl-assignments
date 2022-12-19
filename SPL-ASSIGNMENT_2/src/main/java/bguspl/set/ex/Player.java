@@ -173,7 +173,7 @@ public class Player implements Runnable {
                 try {
                   keyPressQueue.add(slot);
                 } catch (Exception e) {
-                  // queue is full
+                  System.out.println("queue is full");
                 }
                 this.notify();
               }
@@ -184,13 +184,15 @@ public class Player implements Runnable {
                 e.printStackTrace();
               }
             } else {
-              synchronized (this) {
+              synchronized (aiThread) {
                 try {
-                  wait();
+                  aiThread.wait();
                 } catch (InterruptedException e) {
+                  // TODO Auto-generated catch block
                   e.printStackTrace();
                 }
               }
+              System.out.println("ai busy waiting");
             }
           }
           System.out.printf(
@@ -207,9 +209,7 @@ public class Player implements Runnable {
    * Called when the game should be terminated due to an external event.
    */
   public void terminate() {
-    System.out.println("player terminate before sync, player " + id);
     synchronized (this) {
-      System.out.println("player terminate inside sync, player " + id);
       terminate = true;
       this.notify();
     }
@@ -221,11 +221,9 @@ public class Player implements Runnable {
    * @param slot - the slot corresponding to the key pressed.
    */
   public void keyPressed(int slot) {
-    if (!acceptInput) return;
+    if (!acceptInput || !human) return;
 
-    System.out.println("player key press before sync, player " + id);
     synchronized (this) {
-      System.out.println("player key press inside sync, player " + id);
       keyPressQueue.add(slot);
       this.notify();
     }
@@ -269,16 +267,14 @@ public class Player implements Runnable {
       env.ui.setFreeze(id, remainingTime);
     }
     env.ui.setFreeze(id, 0);
+    System.out.println("penalty ended should notify ai thread");
     setAcceptInput(true);
   }
 
   public void penalize(long millis) {
-    System.out.println("player penalize before sync, player " + id);
+    penaltyTime = millis;
     synchronized (this) {
-      System.out.println("player penalize after sync, player " + id);
-      penaltyTime = millis;
       penalty = true;
-      this.notifyAll();
     }
   }
 
@@ -287,11 +283,18 @@ public class Player implements Runnable {
   }
 
   public void setAcceptInput(boolean b) {
-    System.out.println("player set accept input before sync, player " + id);
+    System.out.println("setting accept input " + b);
     synchronized (this) {
-      System.out.println("player set accept input inside sync, player " + id);
       acceptInput = b;
       this.notifyAll();
+    }
+
+    if (!human) {
+      if (b) {
+        synchronized (aiThread) {
+          aiThread.notify();
+        }
+      }
     }
   }
 }
