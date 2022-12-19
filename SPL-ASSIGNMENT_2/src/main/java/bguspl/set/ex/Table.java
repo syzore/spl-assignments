@@ -174,6 +174,8 @@ public class Table {
       }
       SetWithPlayerId setWithId = new SetWithPlayerId(playerId, set);
       listener.onSetAvailable(setWithId);
+    } else {
+      player.notify();
     }
   }
 
@@ -185,6 +187,7 @@ public class Table {
    * @return - true iff a token was successfully removed.
    */
   public boolean removeToken(int player, int slot) {
+    System.out.println("remove token player " + player);
     int index = currentTokens[player].indexOf(slot);
     if (index != -1) {
       currentTokens[player].remove(index);
@@ -196,12 +199,17 @@ public class Table {
   }
 
   public void handleToken(Player player, int slot) {
+    System.out.println("handle token player " + player.id);
     synchronized (player) {
+      System.out.println("handle token sync player " + player.id);
       // exists
       if (currentTokens[player.id].contains(slot)) {
+        System.out.println("handle token to remove player " + player.id);
         removeToken(player.id, slot);
         player.notify();
+        System.out.println("handle token notify player " + player.id);
       } else {
+        System.out.println("handle token to place player " + player.id);
         placeToken(player, slot);
       }
       // else

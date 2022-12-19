@@ -104,12 +104,34 @@ public class Dealer implements Runnable, TableListener {
       timerLoop();
       removeAllCardsFromTable();
     }
+
+    killAllPlayersGracefully();
+
     announceWinners();
 
     System.out.printf(
       "Info: Thread %s terminated.%n",
       Thread.currentThread().getName()
     );
+  }
+
+  private void killAllPlayersGracefully() {
+    // and in reverse order
+    for (int i = players.length - 1; i >= 0; i--) {
+      Player player = players[i];
+      Thread playerThread = playerThreads[i];
+      player.terminate();
+      try {
+        System.out.println("waiting for player " + i + " to join");
+        playerThread.join();
+        System.out.println("player " + i + " joined");
+      } catch (InterruptedException e) {
+        System.out.println(
+          "exception while waiting for player thread to join " + e
+        );
+        e.printStackTrace();
+      }
+    }
   }
 
   private void initPlayersThreads() {
@@ -165,14 +187,12 @@ public class Dealer implements Runnable, TableListener {
         updateTimerDisplay(true);
         placeCardsOnTable(set);
       } else {
-        System.out.println(1);
         player.penalize(env.config.penaltyFreezeMillis);
-        System.out.println(2);
         player.setAcceptInput(true);
-        System.out.println(3);
-        // player.notify();
       }
     }
+
+    System.out.println("finished handle set");
   }
 
   /**
@@ -181,18 +201,9 @@ public class Dealer implements Runnable, TableListener {
   public void terminate() {
     setsQueue.clear();
 
-    for (int i = players.length - 1; i >= 0; i--) {
-      Player player = players[i];
-      Thread playerThread = playerThreads[i];
-      player.terminate();
-      try {
-        playerThread.join();
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
-
     terminate = true;
+
+    dealerThread.interrupt();
   }
 
   /**
@@ -240,9 +251,7 @@ public class Dealer implements Runnable, TableListener {
     timerWarning = countdown < env.config.turnTimeoutWarningMillis;
 
     if (!timerWarning) {
-      System.out.println("countdown before = " + countdown);
       countdown = (long) (Math.ceil((countdown / 1000.0)) * 1000.0);
-      System.out.println("countdown after = " + countdown);
     }
 
     sleepTime = timerWarning ? 20 : 1000;
@@ -283,6 +292,7 @@ public class Dealer implements Runnable, TableListener {
       slots[i] = i;
       if (table.slotToCard[i] == -1) slots[i] = -1;
     }
+
     removeCardsFromTable(slots, false);
 
     deckIndex = 0;
@@ -309,6 +319,11 @@ public class Dealer implements Runnable, TableListener {
       table.placeCard(card, slot);
     }
 
+    if (deck.size() > 12) {
+      System.out.println("-------------------------");
+      table.hints();
+    }
+
     // wake the players
     setAllPlayersFreezeState(false);
   }
@@ -333,14 +348,15 @@ public class Dealer implements Runnable, TableListener {
   }
 
   @Override
-  public void onSetAvailable(SetWithPlayerId pair) {
+  public void onSetAvailable(SetWithPlayerId setWithId) {
     try {
-      setsQueue.add(pair);
+      setsQueue.add(setWithId);
+      dealerThread.interrupt();
     } catch (Exception e) {
       // queue is full
     }
 
-    dealerThread.interrupt();
+    if (terminate) players[setWithId.getId()].notify();
   }
 
   private void setAllPlayersFreezeState(boolean freeze) {
@@ -375,5 +391,9 @@ public class Dealer implements Runnable, TableListener {
     }
 
     env.ui.announceWinner(winners);
+
+    try {
+      Thread.sleep(env.config.endGamePauseMillies);
+    } catch (InterruptedException ignored) {}
   }
 }

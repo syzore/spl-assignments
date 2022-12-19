@@ -117,21 +117,35 @@ public class Player implements Runnable {
       synchronized (this) {
         if (penalty) {
           handlePenalty(penaltyTime);
-        }
-
-        if (keyPressQueue.isEmpty()) {
-          try {
-            wait();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
         } else {
-          int slot = keyPressQueue.poll();
-          table.handleToken(this, slot);
-          try {
-            wait();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
+          if (keyPressQueue.isEmpty()) {
+            try {
+              System.out.println("queue is empty, waiting (player " + id + ")");
+              wait();
+              System.out.println(
+                "queue is empty, finished waiting (player " + id + ")"
+              );
+            } catch (InterruptedException e) {
+              System.out.println("error while waiting for key press -> " + e);
+              e.printStackTrace();
+            }
+          } else {
+            int slot = keyPressQueue.poll();
+            table.handleToken(this, slot);
+            try {
+              System.out.println(
+                "table is handling token, waiting (player " + id + ")"
+              );
+              wait();
+              System.out.println(
+                "table is handling token, finished waiting (player " + id + ")"
+              );
+            } catch (InterruptedException e) {
+              System.out.println(
+                "error while waiting for table to handle token -> " + e
+              );
+              e.printStackTrace();
+            }
           }
         }
       }
@@ -140,7 +154,9 @@ public class Player implements Runnable {
     System.out.printf("outside %s while loop ", id);
 
     if (!human) try {
-      aiThread.join();
+      synchronized (aiThread) {
+        aiThread.join();
+      }
     } catch (InterruptedException ignored) {}
     System.out.printf(
       "Info: Thread %s terminated.%n",
@@ -209,9 +225,13 @@ public class Player implements Runnable {
    * Called when the game should be terminated due to an external event.
    */
   public void terminate() {
+    System.out.println("terminate player " + id);
+    keyPressQueue.clear();
     synchronized (this) {
+      System.out.println("sync terminate player " + id);
       terminate = true;
-      this.notify();
+      this.notifyAll();
+      playerThread.interrupt();
     }
   }
 
@@ -267,7 +287,6 @@ public class Player implements Runnable {
       env.ui.setFreeze(id, remainingTime);
     }
     env.ui.setFreeze(id, 0);
-    System.out.println("penalty ended should notify ai thread");
     setAcceptInput(true);
   }
 
@@ -275,6 +294,7 @@ public class Player implements Runnable {
     penaltyTime = millis;
     synchronized (this) {
       penalty = true;
+      this.notify();
     }
   }
 
@@ -283,11 +303,7 @@ public class Player implements Runnable {
   }
 
   public void setAcceptInput(boolean b) {
-    System.out.println("setting accept input " + b);
-    synchronized (this) {
-      acceptInput = b;
-      this.notifyAll();
-    }
+    acceptInput = b;
 
     if (!human) {
       if (b) {
