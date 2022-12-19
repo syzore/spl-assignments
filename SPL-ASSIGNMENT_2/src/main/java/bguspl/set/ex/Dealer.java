@@ -28,6 +28,8 @@ public class Dealer implements Runnable, TableListener {
 
   private Thread[] playerThreads;
 
+  private Thread dealerThread;
+
   /**
    * The list of card ids that are left in the dealer's deck.
    */
@@ -88,6 +90,7 @@ public class Dealer implements Runnable, TableListener {
    */
   @Override
   public void run() {
+    dealerThread = Thread.currentThread();
     System.out.printf(
       "Info: Thread %s starting.%n",
       Thread.currentThread().getName()
@@ -97,8 +100,8 @@ public class Dealer implements Runnable, TableListener {
 
     while (!shouldFinish()) {
       placeAllCardsOnTable();
-      timerLoop();
       updateTimerDisplay(true);
+      timerLoop();
       removeAllCardsFromTable();
     }
     announceWinners();
@@ -217,12 +220,15 @@ public class Dealer implements Runnable, TableListener {
    * Reset and/or update the countdown and the countdown display.
    */
   private void updateTimerDisplay(boolean reset) {
+    long countdown;
+
     if (reset) {
       reshuffleTime = env.config.turnTimeoutMillis;
       lastShuffleTime = System.currentTimeMillis();
+      countdown = reshuffleTime;
+    } else {
+      countdown = lastShuffleTime + reshuffleTime - System.currentTimeMillis();
     }
-    long countdown =
-      lastShuffleTime + reshuffleTime - System.currentTimeMillis();
 
     timerWarning = countdown < env.config.turnTimeoutWarningMillis;
 
@@ -291,7 +297,7 @@ public class Dealer implements Runnable, TableListener {
       table.placeCard(card, slot);
     }
 
-    // wake players
+    // wake the players
     setAllPlayersFreezeState(false);
   }
 
@@ -310,8 +316,6 @@ public class Dealer implements Runnable, TableListener {
     for (int i = 0; i < env.config.tableSize; i++) {
       allTableSlots[i] = i;
     }
-
-    lastShuffleTime = System.currentTimeMillis();
 
     placeCardsOnTable(allTableSlots);
   }
@@ -346,8 +350,13 @@ public class Dealer implements Runnable, TableListener {
 
   @Override
   public void onSetAvailable(SetWithPlayerId pair) {
-    System.out.println("on available set");
-    setsQueue.add(pair);
+    try {
+      setsQueue.add(pair);
+    } catch (Exception e) {
+      // queue is full
+    }
+
+    dealerThread.interrupt();
   }
 
   private void setAllPlayersFreezeState(boolean freeze) {
