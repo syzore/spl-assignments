@@ -96,7 +96,7 @@ public class Player implements Runnable {
     this.table = table;
     this.id = id;
     this.human = human;
-    this.keyPressQueue = new ArrayBlockingQueue<>(3);
+    this.keyPressQueue = new ArrayBlockingQueue<>(env.config.featureSize);
     acceptInput = true;
   }
 

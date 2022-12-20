@@ -162,7 +162,7 @@ public class Dealer implements Runnable, TableListener {
   }
 
   public void onSetFound(Player player, int[] set) {
-    if (set.length != 3) {} // throw bad set exception.
+    if (set.length != env.config.featureSize) {} // throw bad set exception.
 
     SetWithPlayerId pair = new SetWithPlayerId(player.id, set);
     setsQueue.add(pair);
@@ -175,7 +175,7 @@ public class Dealer implements Runnable, TableListener {
     Player player = players[pair.getId()];
     synchronized (player) {
       int[] set = pair.getSet();
-      int[] cards = new int[3];
+      int[] cards = new int[env.config.featureSize];
       for (int i = 0; i < cards.length; i++) {
         cards[i] = table.slotToCard[set[i]];
       }
@@ -270,7 +270,7 @@ public class Dealer implements Runnable, TableListener {
   private void removeCardsFromTable(int[] slots, boolean throwCards) {
     setAllPlayersFreezeState(true);
     for (int slot : slots) {
-      if (slot == -1) continue;
+      if (slot == Table.EMPTY_CARD_SLOT) continue;
       if (throwCards) {
         int index = deck.indexOf(table.slotToCard[slot]);
         deck.remove(index);
@@ -290,7 +290,8 @@ public class Dealer implements Runnable, TableListener {
     int[] slots = new int[env.config.tableSize];
     for (int i = 0; i < env.config.tableSize; i++) {
       slots[i] = i;
-      if (table.slotToCard[i] == -1) slots[i] = -1;
+      if (table.slotToCard[i] == Table.EMPTY_CARD_SLOT) slots[i] =
+        Table.EMPTY_CARD_SLOT;
     }
 
     removeCardsFromTable(slots, false);
@@ -319,6 +320,7 @@ public class Dealer implements Runnable, TableListener {
       table.placeCard(card, slot);
     }
 
+    // REMOVE THISSSS
     if (deck.size() > 12) {
       System.out.println("-------------------------");
       table.hints();
