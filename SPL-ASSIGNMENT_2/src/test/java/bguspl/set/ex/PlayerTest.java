@@ -1,6 +1,7 @@
 package bguspl.set.ex;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -9,7 +10,11 @@ import static org.mockito.Mockito.when;
 import bguspl.set.Config;
 import bguspl.set.Env;
 import bguspl.set.UserInterface;
+import bguspl.set.UserInterfaceImpl;
 import bguspl.set.Util;
+
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,8 +51,9 @@ class PlayerTest {
   @BeforeEach
   void setUp() {
     // purposely do not find the configuration files (use defaults here).
+    Config config = new Config(logger, (String) null);
     Env env = new Env(logger, new Config(logger, (String) null), ui, util);
-    player = new Player(env, dealer, table, 0, false);
+    player = new Player(env, dealer, table, 0, true);
     assertInvariants();
   }
 
@@ -73,4 +79,35 @@ class PlayerTest {
     // check that ui.setScore was called with the player's id and the correct score
     verify(ui).setScore(eq(player.id), eq(expectedScore));
   }
+
+  @Test
+  void setAcceptInput() {
+    // sets player's acceptInput field to true value
+    player.setAcceptInput(true);
+
+    // checks if the field was successfully changed
+    assertTrue(player.getAcceptInput());
+
+    // sets
+    player.setAcceptInput(false);
+    assertFalse(player.getAcceptInput());
+  }
+
+  @Test
+  void keyPressed() {
+
+    new Thread(player).start();
+    
+    player.keyPressed(0);
+   
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    verify(table).handleToken(eq(player), eq(0));
+  }
+
 }

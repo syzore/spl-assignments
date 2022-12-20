@@ -300,4 +300,12 @@ public class Player implements Runnable {
       }
     }
   }
+
+  /*
+   * only for testing
+   */
+
+  public boolean getAcceptInput(){
+    return acceptInput;
+  }
 }
