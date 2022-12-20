@@ -17,19 +17,16 @@ import java.util.logging.*;
 public class Main {
 
   private static Dealer dealer;
-  private static Thread thread;
+  private static Thread mainThread;
 
   private static boolean xButtonPressed = false;
   private static Logger logger;
 
-  public static void xButtonPressed() {
+  public static void xButtonPressed() throws InterruptedException {
     if (logger != null) logger.severe("exit button pressed");
     xButtonPressed = true;
     if (dealer != null) dealer.terminate();
-    thread.interrupt();
-    try {
-      thread.join();
-    } catch (InterruptedException ignored) {}
+    mainThread.join();
   }
 
   /**
@@ -38,7 +35,7 @@ public class Main {
    * @param args - unused.
    */
   public static void main(String[] args) {
-    thread = Thread.currentThread();
+    mainThread = Thread.currentThread();
 
     // create the game environment objects
     logger = initLogger();
@@ -77,12 +74,12 @@ public class Main {
       if (!xButtonPressed && config.endGamePauseMillies > 0) Thread.sleep(
         config.endGamePauseMillies
       );
-      env.ui.dispose();
     } catch (InterruptedException ignored) {} finally {
       logger.severe("thanks for playing... it was fun!");
       System.out.println("Thanks for playing... it was fun!");
       ThreadLogger.logStop(logger, Thread.currentThread().getName());
-      for (Handler h : logger.getHandlers()) h.close();
+      if (!xButtonPressed) env.ui.dispose();
+      for (Handler h : logger.getHandlers()) h.flush();
     }
   }
 

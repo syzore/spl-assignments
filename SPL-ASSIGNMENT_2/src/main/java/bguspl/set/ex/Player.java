@@ -120,11 +120,7 @@ public class Player implements Runnable {
         } else {
           if (keyPressQueue.isEmpty()) {
             try {
-              System.out.println("queue is empty, waiting (player " + id + ")");
               wait();
-              System.out.println(
-                "queue is empty, finished waiting (player " + id + ")"
-              );
             } catch (InterruptedException e) {
               System.out.println("error while waiting for key press -> " + e);
               e.printStackTrace();
@@ -133,13 +129,7 @@ public class Player implements Runnable {
             int slot = keyPressQueue.poll();
             table.handleToken(this, slot);
             try {
-              System.out.println(
-                "table is handling token, waiting (player " + id + ")"
-              );
               wait();
-              System.out.println(
-                "table is handling token, finished waiting (player " + id + ")"
-              );
             } catch (InterruptedException e) {
               System.out.println(
                 "error while waiting for table to handle token -> " + e
@@ -208,7 +198,6 @@ public class Player implements Runnable {
                   e.printStackTrace();
                 }
               }
-              System.out.println("ai busy waiting");
             }
           }
           System.out.printf(
@@ -225,10 +214,8 @@ public class Player implements Runnable {
    * Called when the game should be terminated due to an external event.
    */
   public void terminate() {
-    System.out.println("terminate player " + id);
     keyPressQueue.clear();
     synchronized (this) {
-      System.out.println("sync terminate player " + id);
       terminate = true;
       this.notifyAll();
       playerThread.interrupt();
