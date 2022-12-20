@@ -165,29 +165,31 @@ public class Table {
    * @param slot   - the slot on which to place the token.
    */
   public void placeToken(Player player, int slot) {
-    int playerId = player.id;
+    synchronized (player) {
+      int playerId = player.id;
 
-    if (currentTokens[playerId].size() == env.config.featureSize) {
-      // The player already has set size number of token.
-      return;
-    }
-
-    if (slotToCard[slot] == null || slotToCard[slot] == EMPTY_CARD_SLOT) {
-      // Empty slot (deck.size < table.size).
-      return;
-    }
-
-    env.ui.placeToken(playerId, slot);
-    currentTokens[playerId].add(slot);
-    if (currentTokens[playerId].size() == env.config.featureSize) {
-      player.setAcceptInput(false);
-      int[] set = new int[env.config.featureSize];
-      for (int i = 0; i < set.length; i++) {
-        set[i] = currentTokens[playerId].get(i);
+      if (currentTokens[playerId].size() == env.config.featureSize) {
+        // The player already has set size number of token.
+        return;
       }
-      listener.onSetAvailable(new SetWithPlayerId(playerId, set));
-    } else {
-      player.notify();
+
+      if (slotToCard[slot] == null || slotToCard[slot] == EMPTY_CARD_SLOT) {
+        // Empty slot (deck.size < table.size).
+        return;
+      }
+
+      env.ui.placeToken(playerId, slot);
+      currentTokens[playerId].add(slot);
+      if (currentTokens[playerId].size() == env.config.featureSize) {
+        player.setAcceptInput(false);
+        int[] set = new int[env.config.featureSize];
+        for (int i = 0; i < set.length; i++) {
+          set[i] = currentTokens[playerId].get(i);
+        }
+        listener.onSetAvailable(new SetWithPlayerId(playerId, set));
+      } else {
+        player.notify();
+      }
     }
   }
 
@@ -198,32 +200,34 @@ public class Table {
    * @param slot   - the slot from which to remove the token.
    * @return - true iff a token was successfully removed.
    */
-  public boolean removeToken(int player, int slot) {
-    int index = currentTokens[player].indexOf(slot);
-    if (index != EMPTY_CARD_SLOT) {
-      currentTokens[player].remove(index);
-      env.ui.removeToken(player, slot);
-      return true;
-    } else {
-      return false;
+  public boolean removeToken(Player player, int slot) {
+    synchronized (player) {
+      int index = currentTokens[player.id].indexOf(slot);
+      boolean result;
+      if (index != EMPTY_CARD_SLOT) {
+        currentTokens[player.id].remove(index);
+        env.ui.removeToken(player.id, slot);
+        result = true;
+      } else {
+        result = false;
+      }
+      player.notify();
+      return result;
     }
   }
 
   public void handleToken(Player player, int slot) {
-    synchronized (player) {
-      if (currentTokens[player.id].contains(slot)) {
-        removeToken(player.id, slot);
-        player.notify();
-      } else {
-        placeToken(player, slot);
-      }
+    if (currentTokens[player.id].contains(slot)) {
+      removeToken(player, slot);
+    } else {
+      placeToken(player, slot);
     }
   }
 
-  public void removePlayerTokens(int id) {
-    for (int i = 0; i < currentTokens[id].size();) {
-      Integer token = currentTokens[id].get(i);
-      removeToken(id, token);
+  public void removePlayerTokens(Player player) {
+    for (int i = 0; i < currentTokens[player.id].size();) {
+      Integer token = currentTokens[player.id].get(i);
+      removeToken(player, token);
     }
   }
 }

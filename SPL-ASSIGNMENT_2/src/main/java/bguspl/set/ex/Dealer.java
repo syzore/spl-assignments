@@ -46,21 +46,18 @@ public class Dealer implements Runnable, TableListener {
    */
   private BlockingQueue<SetWithPlayerId> setsQueue;
 
-  // private static final int[] allCards;
-
   /**
    * The time when the dealer needs to reshuffle the deck due to turn timeout.
    */
   private long reshuffleTime = Long.MAX_VALUE;
 
   /**
-   * time since
+   * Time of last reshuffle.
    */
   private long lastShuffleTime = Long.MIN_VALUE;
 
   /*
-   * index of next card to pull from deck
-   *
+   * The index of next card to pull from deck.
    */
   private int deckIndex = 0;
 
@@ -69,6 +66,9 @@ public class Dealer implements Runnable, TableListener {
    */
   private long sleepTime = 1000;
 
+  /**
+   * Dicates whether or not to show timer warning.
+   */
   private boolean timerWarning = false;
 
   public Dealer(Env env, Table table, Player[] players) {
@@ -203,7 +203,7 @@ public class Dealer implements Runnable, TableListener {
 
     terminate = true;
 
-    dealerThread.interrupt();
+    if (dealerThread != null) dealerThread.interrupt();
   }
 
   /**
@@ -233,6 +233,7 @@ public class Dealer implements Runnable, TableListener {
 
   /**
    * Reset and/or update the countdown and the countdown display.
+   * @param reset - if true resets the time to env.config.turnTimeoutMillis.
    */
   private void updateTimerDisplay(boolean reset) {
     long countdown;
@@ -259,6 +260,17 @@ public class Dealer implements Runnable, TableListener {
     env.ui.setCountdown(countdown, timerWarning);
   }
 
+  /**
+   *
+   * @param reset
+   */
+  public void updateTimerDisplayTest(boolean reset) {
+    updateTimerDisplay(reset);
+  }
+
+  /**
+   * Shuffles the deck.
+   */
   private void shuffleDeck() {
     Collections.shuffle(deck);
   }
@@ -266,6 +278,8 @@ public class Dealer implements Runnable, TableListener {
   /**
    * Checks if any cards should be removed from the table and returns them to the
    * deck.
+   * @param slots      - the slot numbers to remove.
+   * @param throwCards - whether or not the cards stay in the deck or thrown out for the rest of the game.
    */
   private void removeCardsFromTable(int[] slots, boolean throwCards) {
     setAllPlayersFreezeState(true);
@@ -277,10 +291,18 @@ public class Dealer implements Runnable, TableListener {
         deckIndex--;
       }
       for (Player player : players) {
-        table.removeToken(player.id, slot);
+        table.removeToken(player, slot);
       }
       table.removeCard(slot);
     }
+  }
+
+  /**
+   * Public version of removeCardsFromTable for tests.
+   * Only difference is that this function doesnt freeze the players.
+   */
+  public void removeCardsFromTableTest(int[] slots, boolean throwCards) {
+    removeCardsFromTable(slots, throwCards);
   }
 
   /**
@@ -330,6 +352,10 @@ public class Dealer implements Runnable, TableListener {
     setAllPlayersFreezeState(false);
   }
 
+  /**
+   * Place cards in on the empty slots on the table.
+   * Usually called when the table is empty.
+   */
   private void placeAllCardsOnTable() {
     setAllPlayersFreezeState(true);
 
@@ -347,6 +373,10 @@ public class Dealer implements Runnable, TableListener {
     }
 
     placeCardsOnTable(allTableSlots);
+  }
+
+  public void placeAllCardsOnTableTest() {
+    placeAllCardsOnTable();
   }
 
   @Override
