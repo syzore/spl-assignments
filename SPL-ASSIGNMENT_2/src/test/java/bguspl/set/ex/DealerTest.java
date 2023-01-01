@@ -4,20 +4,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import bguspl.set.Config;
-import bguspl.set.Env;
-import bguspl.set.UserInterface;
-import bguspl.set.Util;
-import bguspl.set.UtilImpl;
 import java.util.logging.Logger;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import bguspl.set.Config;
+import bguspl.set.Env;
+import bguspl.set.UserInterface;
+import bguspl.set.Util;
+import bguspl.set.UtilImpl;
 
 @ExtendWith(MockitoExtension.class)
 class DealerTest {
@@ -71,7 +72,7 @@ class DealerTest {
 
     int finalCount = table.countCards();
 
-    // check that the score was increased correctly
+    // check that the number of cards on the table equals to the table size.
     assertEquals(env.config.tableSize, finalCount);
   }
 
@@ -79,9 +80,9 @@ class DealerTest {
   void resetTimer() {
     dealer.updateTimerDisplayTest(true);
 
-    boolean warn =
-      env.config.turnTimeoutMillis > env.config.turnTimeoutWarningMillis;
+    boolean warn = env.config.turnTimeoutMillis > env.config.turnTimeoutWarningMillis;
 
+    // verify that the ui was updated to the wanted time and that the warning correlates.
     verify(ui).setCountdown(eq(env.config.turnTimeoutMillis), eq(warn));
   }
 }

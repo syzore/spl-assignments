@@ -1,14 +1,14 @@
 package bguspl.set.ex;
 
-import bguspl.set.Env;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import bguspl.set.Env;
 
 /**
  * This class manages the dealer's threads and data
@@ -77,8 +77,7 @@ public class Dealer implements Runnable, TableListener {
     this.players = players;
     this.reshuffleTime = env.config.turnTimeoutMillis;
     setsQueue = new ArrayBlockingQueue<>(players.length);
-    deck =
-      IntStream
+    deck = IntStream
         .range(0, env.config.deckSize)
         .boxed()
         .collect(Collectors.toList());
@@ -92,9 +91,8 @@ public class Dealer implements Runnable, TableListener {
   public void run() {
     dealerThread = Thread.currentThread();
     System.out.printf(
-      "Info: Thread %s starting.%n",
-      Thread.currentThread().getName()
-    );
+        "Info: Thread %s starting.%n",
+        Thread.currentThread().getName());
 
     initPlayersThreads();
 
@@ -110,9 +108,8 @@ public class Dealer implements Runnable, TableListener {
     announceWinners();
 
     System.out.printf(
-      "Info: Thread %s terminated.%n",
-      Thread.currentThread().getName()
-    );
+        "Info: Thread %s terminated.%n",
+        Thread.currentThread().getName());
   }
 
   private void killAllPlayersGracefully() {
@@ -122,13 +119,8 @@ public class Dealer implements Runnable, TableListener {
       Thread playerThread = playerThreads[i];
       player.terminate();
       try {
-        System.out.println("waiting for player " + i + " to join");
         playerThread.join();
-        System.out.println("player " + i + " joined");
       } catch (InterruptedException e) {
-        System.out.println(
-          "exception while waiting for player thread to join " + e
-        );
         e.printStackTrace();
       }
     }
@@ -149,9 +141,7 @@ public class Dealer implements Runnable, TableListener {
    * not time out.
    */
   private void timerLoop() {
-    while (
-      !terminate && System.currentTimeMillis() - lastShuffleTime < reshuffleTime
-    ) {
+    while (!terminate && System.currentTimeMillis() - lastShuffleTime < reshuffleTime) {
       sleepUntilWokenOrTimeout();
       updateTimerDisplay(false);
       if (!setsQueue.isEmpty()) {
@@ -162,7 +152,8 @@ public class Dealer implements Runnable, TableListener {
   }
 
   public void onSetFound(Player player, int[] set) {
-    if (set.length != env.config.featureSize) {} // throw bad set exception.
+    if (set.length != env.config.featureSize) {
+    } // throw bad set exception.
 
     SetWithPlayerId pair = new SetWithPlayerId(player.id, set);
     setsQueue.add(pair);
@@ -191,8 +182,6 @@ public class Dealer implements Runnable, TableListener {
         player.setAcceptInput(true);
       }
     }
-
-    System.out.println("finished handle set");
   }
 
   /**
@@ -203,7 +192,8 @@ public class Dealer implements Runnable, TableListener {
 
     terminate = true;
 
-    if (dealerThread != null) dealerThread.interrupt();
+    if (dealerThread != null)
+      dealerThread.interrupt();
   }
 
   /**
@@ -233,6 +223,7 @@ public class Dealer implements Runnable, TableListener {
 
   /**
    * Reset and/or update the countdown and the countdown display.
+   * 
    * @param reset - if true resets the time to env.config.turnTimeoutMillis.
    */
   private void updateTimerDisplay(boolean reset) {
@@ -242,11 +233,9 @@ public class Dealer implements Runnable, TableListener {
       lastShuffleTime = System.currentTimeMillis();
       countdown = reshuffleTime;
     } else {
-      countdown =
-        Math.max(
+      countdown = Math.max(
           0,
-          lastShuffleTime + reshuffleTime - System.currentTimeMillis()
-        );
+          lastShuffleTime + reshuffleTime - System.currentTimeMillis());
     }
 
     timerWarning = countdown < env.config.turnTimeoutWarningMillis;
@@ -278,13 +267,16 @@ public class Dealer implements Runnable, TableListener {
   /**
    * Checks if any cards should be removed from the table and returns them to the
    * deck.
+   * 
    * @param slots      - the slot numbers to remove.
-   * @param throwCards - whether or not the cards stay in the deck or thrown out for the rest of the game.
+   * @param throwCards - whether or not the cards stay in the deck or thrown out
+   *                   for the rest of the game.
    */
   private void removeCardsFromTable(int[] slots, boolean throwCards) {
     setAllPlayersFreezeState(true);
     for (int slot : slots) {
-      if (slot == Table.EMPTY_CARD_SLOT) continue;
+      if (slot == Table.EMPTY_CARD_SLOT)
+        continue;
       if (throwCards) {
         int index = deck.indexOf(table.slotToCard[slot]);
         deck.remove(index);
@@ -312,8 +304,8 @@ public class Dealer implements Runnable, TableListener {
     int[] slots = new int[env.config.tableSize];
     for (int i = 0; i < env.config.tableSize; i++) {
       slots[i] = i;
-      if (table.slotToCard[i] == Table.EMPTY_CARD_SLOT) slots[i] =
-        Table.EMPTY_CARD_SLOT;
+      if (table.slotToCard[i] == Table.EMPTY_CARD_SLOT)
+        slots[i] = Table.EMPTY_CARD_SLOT;
     }
 
     removeCardsFromTable(slots, false);
@@ -340,12 +332,6 @@ public class Dealer implements Runnable, TableListener {
       int card = deck.get(deckIndex);
       deckIndex++;
       table.placeCard(card, slot);
-    }
-
-    // REMOVE THISSSS
-    if (deck.size() > 12) {
-      System.out.println("-------------------------");
-      table.hints();
     }
 
     // wake the players
@@ -388,7 +374,8 @@ public class Dealer implements Runnable, TableListener {
       // queue is full
     }
 
-    if (terminate) players[setWithId.getId()].notify();
+    if (terminate)
+      players[setWithId.getId()].notify();
   }
 
   private void setAllPlayersFreezeState(boolean freeze) {
@@ -426,6 +413,7 @@ public class Dealer implements Runnable, TableListener {
 
     try {
       Thread.sleep(env.config.endGamePauseMillies);
-    } catch (InterruptedException ignored) {}
+    } catch (InterruptedException ignored) {
+    }
   }
 }

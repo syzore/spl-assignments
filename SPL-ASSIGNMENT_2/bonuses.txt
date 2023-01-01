@@ -12,13 +12,34 @@ with a short description of:
 
 1. Fully supporting all configuration fields and avoiding the use of magic numbers
 
-We are not entitled to this bonus.
+1. Every variable that used a value that is defined in the configuration we just the configuration file, i.e env.config.tableSize.
+2. - dealer.constructor
+   - dealer.updateTimerDisplay
+   - dealer.removeAllCardsFromTable
+   - dealer.placeAllCardsOnTable
+   - dealer.announceWinners
+   - dealer.onSetFound
+   - dealer.handleSet
+   - player - keyPressQueue's capacity
+   - player.createArtificialIntelligence
+   - table.currentTokens
+   - table constructor
+   - table.placeCard
+   - table.removeCard
+   - table.placeToken
+   - table.EMPTY_CARD_SLOT (avoiding magic numbers)
+3. No testing required..
+
 
 --------------------
 
 2. Terminating all threads (that you created) gracefully and in reverse order to the order they were created in.
 
-We are not entitled to this bonus.
+1. When initializing the player threads and starting them we did this in increasing order of their id,
+   and when terminating them we called player.terminate and playerThread.join in a decreasing order of their id.
+2. dealer.killAllPlayersGracefully
+3. By printing at each player, when the player left the while loop in the run function,
+   and printing before and after the playerThread.join command.
 
 --------------------
 
@@ -32,7 +53,28 @@ We are not entitled to this bonus.
 --------------------
 
 4. Making sure that the threads do not wake up unless some actual job needs to be done (e.g., a value needs to be
-changed on the display, key input needs to be handled, etc.) and the only threads created by you are:
-1 thread per player + 1 additional thread for non-human players.
+   changed on the display, key input needs to be handled, etc.) and the only threads created by you are:
+   1 thread per player + 1 additional thread for non-human players.
 
-We are not entitled to this bonus.
+1. Each player enters wait state when the keyPressQueue is empty and notified when player.keyPressed is called and a new slot entered to the queue.
+   Also, the players wait when the dealer checks their set or removes/places cards because the dealer changes player.acceptInput to false
+   Which prevents key presses entering the queue.
+   Same goes for the non-human players, they can pick slots to put tokens in when player.acceptInput allows it and when it does not they enter wait state until notified 
+   by a change in player.acceptInput.
+2. - player.run
+   - player.createArtificialIntelligence
+   - player.keyPressed
+   - player.handlePenalty
+   - player.penalize
+   - player.setAcceptInput
+   - dealer.handleSet
+   - dealer.removeCardsFromTable
+   - dealer.placeCardsOnTable
+   - dealer.placeAllCardsOnTable
+   - dealer.setAllPlayersFreezeState
+   - table.placeToken
+   - table.removeToken
+3. By printing inside the while loop of the player in the run function
+   And printing when the dealer removes the cards and places the cards and 
+   Seeing the the output that when the dealer start removing cards the player's printing stop
+   And resuming when dealer done placing the cards.

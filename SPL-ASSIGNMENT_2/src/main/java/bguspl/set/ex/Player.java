@@ -1,9 +1,10 @@
 package bguspl.set.ex;
 
-import bguspl.set.Env;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
+
+import bguspl.set.Env;
 
 /**
  * This class manages the players' threads and data
@@ -108,10 +109,10 @@ public class Player implements Runnable {
   public void run() {
     playerThread = Thread.currentThread();
     System.out.printf(
-      "Info: Thread %s starting.%n",
-      Thread.currentThread().getName()
-    );
-    if (!human) createArtificialIntelligence();
+        "Info: Thread %s starting.%n",
+        Thread.currentThread().getName());
+    if (!human)
+      createArtificialIntelligence();
 
     while (!terminate) {
       synchronized (this) {
@@ -122,19 +123,17 @@ public class Player implements Runnable {
             try {
               wait();
             } catch (InterruptedException e) {
-              System.out.println("error while waiting for key press -> " + e);
               e.printStackTrace();
             }
           } else {
             int slot = keyPressQueue.poll();
             table.handleToken(this, slot);
-            try {
-              wait();
-            } catch (InterruptedException e) {
-              System.out.println(
-                "error while waiting for table to handle token -> " + e
-              );
-              e.printStackTrace();
+            if (keyPressQueue.isEmpty()) {
+              try {
+                wait();
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
             }
           }
         }
@@ -143,15 +142,16 @@ public class Player implements Runnable {
 
     System.out.printf("outside %s while loop ", id);
 
-    if (!human) try {
-      synchronized (aiThread) {
-        aiThread.join();
+    if (!human)
+      try {
+        synchronized (aiThread) {
+          aiThread.join();
+        }
+      } catch (InterruptedException ignored) {
       }
-    } catch (InterruptedException ignored) {}
     System.out.printf(
-      "Info: Thread %s terminated.%n",
-      Thread.currentThread().getName()
-    );
+        "Info: Thread %s terminated.%n",
+        Thread.currentThread().getName());
   }
 
   /**
@@ -162,24 +162,22 @@ public class Player implements Runnable {
    */
   private void createArtificialIntelligence() {
     // note: this is a very very smart AI (!)
-    aiThread =
-      new Thread(
+    aiThread = new Thread(
         () -> {
           System.out.printf(
-            "Info: Thread %s starting.%n",
-            Thread.currentThread().getName()
-          );
+              "Info: Thread %s starting.%n",
+              Thread.currentThread().getName());
 
           while (!terminate) {
             int slot = ThreadLocalRandom
-              .current()
-              .nextInt(0, env.config.tableSize);
+                .current()
+                .nextInt(0, env.config.tableSize);
             if (acceptInput) {
               synchronized (this) {
                 try {
                   keyPressQueue.add(slot);
                 } catch (Exception e) {
-                  System.out.println("queue is full");
+                  // queue is full
                 }
                 this.notify();
               }
@@ -201,12 +199,10 @@ public class Player implements Runnable {
             }
           }
           System.out.printf(
-            "Info: Thread %s terminated.%n",
-            Thread.currentThread().getName()
-          );
+              "Info: Thread %s terminated.%n",
+              Thread.currentThread().getName());
         },
-        "computer-" + id
-      );
+        "computer-" + id);
     aiThread.start();
   }
 
@@ -228,7 +224,8 @@ public class Player implements Runnable {
    * @param slot - the slot corresponding to the key pressed.
    */
   public void keyPressed(int slot) {
-    if (!acceptInput || !human) return;
+    if (!acceptInput || !human)
+      return;
 
     synchronized (this) {
       keyPressQueue.add(slot);
@@ -259,17 +256,12 @@ public class Player implements Runnable {
     while (remainingTime > 0) {
       try {
         Thread.sleep(1000);
-      } catch (InterruptedException ignored) {}
+      } catch (InterruptedException ignored) {
+      }
 
-      remainingTime =
-        (long) (
-          (
-            Math.ceil(
-              (millis + startingTime - System.currentTimeMillis()) / 1000.0
-            )
-          ) *
-          1000.0
-        );
+      remainingTime = (long) ((Math.ceil(
+          (millis + startingTime - System.currentTimeMillis()) / 1000.0)) *
+          1000.0);
 
       env.ui.setFreeze(id, remainingTime);
     }
@@ -301,11 +293,10 @@ public class Player implements Runnable {
     }
   }
 
-  /*
+  /**
    * only for testing
    */
-
-  public boolean getAcceptInput(){
+  public boolean getAcceptInput() {
     return acceptInput;
   }
 }
