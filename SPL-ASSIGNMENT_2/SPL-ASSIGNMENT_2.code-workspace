@@ -1,9 +1,11 @@
 {
-	"folders": [
-		{
-			"name": "SPL-ASSIGNMENT_2",
-			"path": "."
-		}
-	],
-	"settings": {}
+  "folders": [
+    {
+      "name": "SPL-ASSIGNMENT_2",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "java.configuration.updateBuildConfiguration": "interactive"
+  }
 }
