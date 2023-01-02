@@ -1,2 +1,6 @@
 SPL-ASSIGNMENT_1/.vscode/settings.json
 SPL-ASSIGNMENT_1.zip
+SPL-ASSIGNMENT_3/client/bin/ConnectionHandler.o
+SPL-ASSIGNMENT_3/client/bin/EchoClient
+SPL-ASSIGNMENT_3/client/bin/echoClient.o
+SPL-ASSIGNMENT_3/server/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst

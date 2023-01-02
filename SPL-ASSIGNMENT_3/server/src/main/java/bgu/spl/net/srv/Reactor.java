@@ -1,7 +1,5 @@
 package bgu.spl.net.srv;
 
-import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedSelectorException;
@@ -11,6 +9,9 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
+
+import bgu.spl.net.api.MessageEncoderDecoder;
+import bgu.spl.net.api.MessagingProtocol;
 
 public class Reactor<T> implements Server<T> {
 
@@ -37,16 +38,16 @@ public class Reactor<T> implements Server<T> {
 
     @Override
     public void serve() {
-	selectorThread = Thread.currentThread();
+        selectorThread = Thread.currentThread();
         try (Selector selector = Selector.open();
                 ServerSocketChannel serverSock = ServerSocketChannel.open()) {
 
-            this.selector = selector; //just to be able to close
+            this.selector = selector; // just to be able to close
 
             serverSock.bind(new InetSocketAddress(port));
             serverSock.configureBlocking(false);
             serverSock.register(selector, SelectionKey.OP_ACCEPT);
-			System.out.println("Server started");
+            System.out.println("Server started");
 
             while (!Thread.currentThread().isInterrupted()) {
 
@@ -64,14 +65,14 @@ public class Reactor<T> implements Server<T> {
                     }
                 }
 
-                selector.selectedKeys().clear(); //clear the selected keys set so that we can know about new events
+                selector.selectedKeys().clear(); // clear the selected keys set so that we can know about new events
 
             }
 
         } catch (ClosedSelectorException ex) {
-            //do nothing - server was requested to be closed
+            // do nothing - server was requested to be closed
         } catch (IOException ex) {
-            //this is an error
+            // this is an error
             ex.printStackTrace();
         }
 
@@ -79,7 +80,7 @@ public class Reactor<T> implements Server<T> {
         pool.shutdown();
     }
 
-    /*package*/ void updateInterestedOps(SocketChannel chan, int ops) {
+    /* package */ void updateInterestedOps(SocketChannel chan, int ops) {
         final SelectionKey key = chan.keyFor(selector);
         if (Thread.currentThread() == selectorThread) {
             key.interestOps(ops);
@@ -90,7 +91,6 @@ public class Reactor<T> implements Server<T> {
             selector.wakeup();
         }
     }
-
 
     private void handleAccept(ServerSocketChannel serverChan, Selector selector) throws IOException {
         SocketChannel clientChan = serverChan.accept();
@@ -114,7 +114,7 @@ public class Reactor<T> implements Server<T> {
             }
         }
 
-	    if (key.isValid() && key.isWritable()) {
+        if (key.isValid() && key.isWritable()) {
             handler.continueWrite();
         }
     }

@@ -1,11 +1,12 @@
 package bgu.spl.net.srv;
 
-import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.function.Supplier;
+
+import bgu.spl.net.api.MessageEncoderDecoder;
+import bgu.spl.net.api.MessagingProtocol;
 
 public abstract class BaseServer<T> implements Server<T> {
 
@@ -22,16 +23,16 @@ public abstract class BaseServer<T> implements Server<T> {
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encdecFactory;
-		this.sock = null;
+        this.sock = null;
     }
 
     @Override
     public void serve() {
 
         try (ServerSocket serverSock = new ServerSocket(port)) {
-			System.out.println("Server started");
+            System.out.println("Server started");
 
-            this.sock = serverSock; //just to be able to close
+            this.sock = serverSock; // just to be able to close
 
             while (!Thread.currentThread().isInterrupted()) {
 
@@ -44,6 +45,7 @@ public abstract class BaseServer<T> implements Server<T> {
 
                 execute(handler);
             }
+
         } catch (IOException ex) {
         }
 
@@ -52,10 +54,10 @@ public abstract class BaseServer<T> implements Server<T> {
 
     @Override
     public void close() throws IOException {
-		if (sock != null)
-			sock.close();
+        if (sock != null)
+            sock.close();
     }
 
-    protected abstract void execute(BlockingConnectionHandler<T>  handler);
+    protected abstract void execute(BlockingConnectionHandler<T> handler);
 
 }
