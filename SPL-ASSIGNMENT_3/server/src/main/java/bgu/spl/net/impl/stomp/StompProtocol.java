@@ -5,24 +5,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import bgu.spl.net.api.StompMessagingProtocol;
+import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.srv.Connections;
 
-public class StompProtocol<T> implements StompMessagingProtocol<T> {
+public class StompProtocol<T> implements MessagingProtocol<T> {
 
     private boolean shouldTerminate = false;
     private Map<Integer, Connections<T>> connectionsMap;
     private List<User> usersList;
 
-    @Override
-    public void start(int connectionId, Connections<T> connections) {
-        // TODO Auto-generated method stub
+    // @Override
+    // public void start(int connectionId, Connections<T> connections) {
+    // // TODO Auto-generated method stub
 
-    }
+    // }
 
     @Override
-    public void process(T message) {
-        // TODO Auto-generated method stub
+    public T process(T message) {
+        System.out.println("protocol process message = " + message);
         String msg = message.toString();
         Scanner scanner = new Scanner(msg);
         String command = scanner.nextLine();
@@ -33,74 +33,75 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
                 break;
             }
             nextLine = scanner.nextLine();
+            System.out.println("next line = " + nextLine);
             int index = nextLine.indexOf(':');
             String key = nextLine.substring(0, index);
             String value = nextLine.substring(index + 1, nextLine.length());
             key_Value_Map.put(key, value);
-
         }
         String body = "";
         while (scanner.hasNextLine()) {
             body = body + scanner.nextLine();
         }
         scanner.close();
-        String result;
+        T result;
 
         switch (command) {
             case "CONNECT":
                 result = handleConnect(key_Value_Map);
                 System.out.println(result);
-                break;
+                return result;
             case "SEND":
                 result = handleSend(key_Value_Map, body);
                 System.out.println(result);
-                break;
+                return result;
             case "SUBSCRIBE":
                 result = handleSubscribe(key_Value_Map);
                 System.out.println(result);
-                break;
+                return result;
             case "UNSUBSCRIBE":
                 result = handleUnSubscribe(key_Value_Map, body);
                 System.out.println(result);
-                break;
+                return result;
             case "DISCONNECT":
                 result = handleDisconnect(key_Value_Map, body);
                 System.out.println(result);
-                break;
+                return result;
             default:
-                break;
+                return (T) "error";
         }
 
     }
 
-    private String handleDisconnect(Map<String, String> key_Value_Map, String body) {
-        return "handleDisconnect";
+    private T handleDisconnect(Map<String, String> key_Value_Map, String body) {
+        return (T) "handleDisconnect";
     }
 
-    private String handleUnSubscribe(Map<String, String> key_Value_Map, String body) {
-        return "handleUnSubscribe";
+    private T handleUnSubscribe(Map<String, String> key_Value_Map, String body) {
+        return (T) "handleUnSubscribe";
     }
 
-    private String handleSubscribe(Map<String, String> key_Value_Map) {
+    private T handleSubscribe(Map<String, String> key_Value_Map) {
         // String output = buildFrame(StompConstants.SUBSCRIBE, key_Value_Map, "");
-        return "handleSubscribe";
+        return (T) "handleSubscribe";
 
     }
 
-    private String handleSend(Map<String, String> key_Value_Map, String body) {
-        return "SEND";
+    private T handleSend(Map<String, String> key_Value_Map, String body) {
+        return (T) "SEND";
     }
 
-    private String handleConnect(Map<String, String> key_Value_Map) {
+    private T handleConnect(Map<String, String> key_Value_Map) {
+        System.out.println("handle connect");
         String acceptVersion = key_Value_Map.get("accept-version");
         String host = key_Value_Map.get("host");
         String login = key_Value_Map.get("login");
         String passcode = key_Value_Map.get("passcode");
         if (!acceptVersion.equals(StompConstants.ACCEPT_VERSION_VALUE)) {
-            return handleError("only version supported is 1.2", "add something");
+            return (T) handleError("only version supported is 1.2", "add something");
         }
         if (!host.equals(StompConstants.HOST_VALUE)) {
-            return handleError("not the host we support here", "add something");
+            return (T) handleError("not the host we support here", "add something");
         }
         User user = new User(login, passcode);
         String frame = "";
@@ -116,7 +117,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
         // if yes, check if password in map
         else if (user.getPasscode().equals(existingUser.getPasscode())) {
             if (user.getIsConnected()) {
-                return handleError("incorrect passcode", "add something");
+                return (T) handleError("incorrect passcode", "add something");
             } else {
                 user.connect();
                 Map<String, String> someMap = new HashMap<String, String>();
@@ -125,7 +126,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
                 // add to connections
             }
         }
-        return frame;
+        return (T) frame;
 
         // check what to do if passcode is incorrect
 

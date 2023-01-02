@@ -25,6 +25,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
     @Override
     public void run() {
+        System.out.println("entered handler run");
         try (Socket sock = this.sock) { // just for automatic closing
             int read;
 
@@ -35,6 +36,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
                 T nextMessage = encdec.decodeNextByte((byte) read);
                 if (nextMessage != null) {
                     T response = protocol.process(nextMessage);
+                    System.out.println("response = " + response);
                     if (response != null) {
                         out.write(encdec.encode(response));
                         out.flush();
@@ -43,6 +45,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
             }
 
         } catch (IOException ex) {
+            System.out.println("error when assigning socket " + ex);
             ex.printStackTrace();
         }
 

@@ -2,6 +2,8 @@
 #include <iostream>
 #include "../include/ConnectionHandler.h"
 #include "../include/Constants.h"
+// #include "../include/StringUtil.h"
+#include "../include/StompProtocol.h"
 
 int main(int argc, char *argv[])
 {
@@ -21,17 +23,17 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	std::thread t1(keyboard_handler_task, connectionHandler);
-	std::thread t2(socket_listener_task, connectionHandler);
+	std::thread t1(StompProtocol::keyboard_handler_task, std::ref(connectionHandler));
+	std::thread t2(StompProtocol::socket_listener_task, std::ref(connectionHandler));
 
 	t1.join();
 	t2.join();
 	return 0;
 }
 
-void socket_listener_task(ConnectionHandler connectionHandler)
+void StompProtocol::socket_listener_task(ConnectionHandler &connectionHandler)
 {
-	while (1)
+	while (0)
 	{
 		const short bufsize = 1024;
 		char buf[bufsize];
@@ -64,27 +66,30 @@ void socket_listener_task(ConnectionHandler connectionHandler)
 	}
 }
 
-void handle_message_from_subscription(std::string answer)
+void StompProtocol::handle_message_from_subscription(std::string answer)
 {
 	std::cout << "got new message from server: " << answer << std::endl;
 }
 
-void keyboard_handler_task(ConnectionHandler connectionHandler)
+void StompProtocol::keyboard_handler_task(ConnectionHandler &connectionHandler)
 {
 	while (1)
 	{
 		const short bufsize = 1024;
 		char buf[bufsize];
+		std::cout << "what is your commant?" << std::endl;
 		std::cin.getline(buf, bufsize);
 		std::string command(buf);
 
 		std::string encodedCommand = create_command_frame(command);
 
+		std::cout << "encoded comman = " << encodedCommand << std::endl;
+
 		std::istringstream f(encodedCommand);
 		std::string line;
 		while (std::getline(f, line))
 		{
-			if (!connectionHandler.sendLine(line))
+			if (!connectionHandler.sendLine(encodedCommand))
 			{
 				std::cout << "Disconnected. Exiting...\n"
 						  << std::endl;
@@ -101,6 +106,7 @@ void keyboard_handler_task(ConnectionHandler connectionHandler)
 		std::string answer;
 		// Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
 		// We could also use: connectionHandler.getline(answer) and then get the answer without the newline char at the end
+		std::cout << "waiting for server response" << std::endl;
 		if (!connectionHandler.getLine(answer))
 		{
 			std::cout << "Disconnected. Exiting...\n"
@@ -127,9 +133,9 @@ void keyboard_handler_task(ConnectionHandler connectionHandler)
 	}
 }
 
-std::string create_command_frame(std::string line)
+std::string StompProtocol::create_command_frame(std::string line)
 {
-	std::vector<std::string> lineParts = split(line, ' ');
+	std::vector<std::string> lineParts = StringUtil::split(line, ' ');
 	std::string command = lineParts[0];
 	if (command == command_login)
 	{
@@ -153,7 +159,7 @@ std::string create_command_frame(std::string line)
 	}
 }
 
-std::string handle_login_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_login_command(std::vector<std::string> lineParts)
 {
 	std::string address = lineParts[1];
 	std::string login = lineParts[2];
@@ -171,20 +177,20 @@ std::string handle_login_command(std::vector<std::string> lineParts)
 	return create_command_frame(CONNECT, args, "");
 }
 
-std::string handle_logout_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_logout_command(std::vector<std::string> lineParts)
 {
 }
-std::string handle_join_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_join_command(std::vector<std::string> lineParts)
 {
 }
-std::string handle_exit_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_exit_command(std::vector<std::string> lineParts)
 {
 }
-std::string handle_summary_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_summary_command(std::vector<std::string> lineParts)
 {
 }
 
-std::string create_command_frame(std::string command, std::vector<std::pair<std::string, std::string>> args, std::string body)
+std::string StompProtocol::create_command_frame(std::string command, std::vector<std::pair<std::string, std::string>> args, std::string body)
 {
 	std::string frame;
 	frame.append(command + "\n");
@@ -203,7 +209,7 @@ std::string create_command_frame(std::string command, std::vector<std::pair<std:
 	return frame;
 }
 
-void parse_then_handle_response(std::string answer)
+void StompProtocol::parse_then_handle_response(std::string answer)
 {
 	std::istringstream iteratable(answer);
 	std::string line;
@@ -237,32 +243,9 @@ void parse_then_handle_response(std::string answer)
 	handle_response(command, args, body);
 }
 
-void handle_response(std::string command, std::map<std::string, std::string> args, std::string body)
+void StompProtocol::handle_response(std::string command, std::map<std::string, std::string> args, std::string body)
 {
 	if (command == CONNECTED)
 	{
 	}
-}
-
-#include <string>
-#include <sstream>
-#include <vector>
-#include <iterator>
-
-template <typename Out>
-void split(const std::string &s, char delim, Out result)
-{
-	std::istringstream iss(s);
-	std::string item;
-	while (std::getline(iss, item, delim))
-	{
-		*result++ = item;
-	}
-}
-
-std::vector<std::string> split(const std::string &s, char delim)
-{
-	std::vector<std::string> elems;
-	split(s, delim, std::back_inserter(elems));
-	return elems;
 }
