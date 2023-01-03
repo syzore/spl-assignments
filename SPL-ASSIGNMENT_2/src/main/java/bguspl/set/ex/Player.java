@@ -128,27 +128,26 @@ public class Player implements Runnable {
           } else {
             int slot = keyPressQueue.poll();
             table.handleToken(this, slot);
-            if (keyPressQueue.isEmpty()) {
-              try {
-                wait();
-              } catch (InterruptedException e) {
-                e.printStackTrace();
-              }
+            // if (keyPressQueue.isEmpty()) {
+            try {
+              wait();
+            } catch (InterruptedException e) {
+              e.printStackTrace();
             }
+            // }
           }
         }
       }
     }
 
-    System.out.printf("outside %s while loop ", id);
-
-    if (!human)
+    if (!human) {
       try {
         synchronized (aiThread) {
           aiThread.join();
         }
       } catch (InterruptedException ignored) {
       }
+    }
     System.out.printf(
         "Info: Thread %s terminated.%n",
         Thread.currentThread().getName());
@@ -224,8 +223,9 @@ public class Player implements Runnable {
    * @param slot - the slot corresponding to the key pressed.
    */
   public void keyPressed(int slot) {
-    if (!acceptInput || !human)
+    if (!acceptInput || !human) {
       return;
+    }
 
     synchronized (this) {
       keyPressQueue.add(slot);

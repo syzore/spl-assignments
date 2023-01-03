@@ -144,7 +144,7 @@ public class Dealer implements Runnable, TableListener {
     while (!terminate && System.currentTimeMillis() - lastShuffleTime < reshuffleTime) {
       sleepUntilWokenOrTimeout();
       updateTimerDisplay(false);
-      if (!setsQueue.isEmpty()) {
+      while (!setsQueue.isEmpty()) {
         SetWithPlayerId set = setsQueue.poll();
         handleSet(set);
       }
@@ -174,9 +174,10 @@ public class Dealer implements Runnable, TableListener {
       if (isLegalSet) {
         player.point();
         player.penalize(env.config.pointFreezeMillis);
+        player.setAcceptInput(false);
         removeCardsFromTable(set, true);
-        updateTimerDisplay(true);
         placeCardsOnTable(set);
+        updateTimerDisplay(true);
       } else {
         player.penalize(env.config.penaltyFreezeMillis);
         player.setAcceptInput(true);
@@ -273,17 +274,16 @@ public class Dealer implements Runnable, TableListener {
    *                   for the rest of the game.
    */
   private void removeCardsFromTable(int[] slots, boolean throwCards) {
-    setAllPlayersFreezeState(true);
     for (int slot : slots) {
       if (slot == Table.EMPTY_CARD_SLOT)
         continue;
+      for (Player player : players) {
+        table.removeToken(player, slot);
+      }
       if (throwCards) {
         int index = deck.indexOf(table.slotToCard[slot]);
         deck.remove(index);
         deckIndex--;
-      }
-      for (Player player : players) {
-        table.removeToken(player, slot);
       }
       table.removeCard(slot);
     }
@@ -307,7 +307,7 @@ public class Dealer implements Runnable, TableListener {
       if (table.slotToCard[i] == Table.EMPTY_CARD_SLOT)
         slots[i] = Table.EMPTY_CARD_SLOT;
     }
-
+    setAllPlayersFreezeState(true);
     removeCardsFromTable(slots, false);
 
     deckIndex = 0;

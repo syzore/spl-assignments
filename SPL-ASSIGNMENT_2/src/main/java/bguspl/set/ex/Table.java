@@ -71,10 +71,9 @@ public class Table {
    */
   public Table(Env env) {
     this(
-      env,
-      new Integer[env.config.tableSize],
-      new Integer[env.config.deckSize]
-    );
+        env,
+        new Integer[env.config.tableSize],
+        new Integer[env.config.deckSize]);
   }
 
   /**
@@ -83,27 +82,26 @@ public class Table {
    */
   public void hints() {
     List<Integer> deck = Arrays
-      .stream(slotToCard)
-      .filter(Objects::nonNull)
-      .collect(Collectors.toList());
+        .stream(slotToCard)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
     env.util
-      .findSets(deck, Integer.MAX_VALUE)
-      .forEach(set -> {
-        StringBuilder sb = new StringBuilder().append("Hint: Set found: ");
-        List<Integer> slots = Arrays
-          .stream(set)
-          .mapToObj(card -> cardToSlot[card])
-          .sorted()
-          .collect(Collectors.toList());
-        int[][] features = env.util.cardsToFeatures(set);
-        System.out.println(
-          sb
-            .append("slots: ")
-            .append(slots)
-            .append(" features: ")
-            .append(Arrays.deepToString(features))
-        );
-      });
+        .findSets(deck, Integer.MAX_VALUE)
+        .forEach(set -> {
+          StringBuilder sb = new StringBuilder().append("Hint: Set found: ");
+          List<Integer> slots = Arrays
+              .stream(set)
+              .mapToObj(card -> cardToSlot[card])
+              .sorted()
+              .collect(Collectors.toList());
+          int[][] features = env.util.cardsToFeatures(set);
+          System.out.println(
+              sb
+                  .append("slots: ")
+                  .append(slots)
+                  .append(" features: ")
+                  .append(Arrays.deepToString(features)));
+        });
   }
 
   /**
@@ -113,7 +111,9 @@ public class Table {
    */
   public int countCards() {
     int cards = 0;
-    for (Integer card : slotToCard) if (card != null) ++cards;
+    for (Integer card : slotToCard)
+      if (card != null)
+        ++cards;
     return cards;
   }
 
@@ -135,7 +135,8 @@ public class Table {
   public void placeCard(int card, int slot) {
     try {
       Thread.sleep(env.config.tableDelayMillis);
-    } catch (InterruptedException ignored) {}
+    } catch (InterruptedException ignored) {
+    }
 
     cardToSlot[card] = slot;
     slotToCard[slot] = card;
@@ -148,10 +149,11 @@ public class Table {
    *
    * @param slot - the slot from which to remove the card.
    */
-  public synchronized void removeCard(int slot) {
+  public void removeCard(int slot) {
     try {
       Thread.sleep(env.config.tableDelayMillis);
-    } catch (InterruptedException ignored) {}
+    } catch (InterruptedException ignored) {
+    }
 
     slotToCard[slot] = EMPTY_CARD_SLOT;
 
@@ -165,29 +167,29 @@ public class Table {
    * @param slot   - the slot on which to place the token.
    */
   public void placeToken(Player player, int slot) {
-    synchronized (player) {
-      int playerId = player.id;
+    int playerId = player.id;
 
-      if (currentTokens[playerId].size() == env.config.featureSize) {
-        // The player already has set size number of token.
-        return;
+    if (currentTokens[playerId].size() == env.config.featureSize) {
+      // The player already has set size number of token.
+      return;
+    }
+
+    if (slotToCard[slot] == null || slotToCard[slot] == EMPTY_CARD_SLOT) {
+      // Empty slot (deck.size < table.size).
+      return;
+    }
+
+    env.ui.placeToken(playerId, slot);
+    currentTokens[playerId].add(slot);
+    if (currentTokens[playerId].size() == env.config.featureSize) {
+      player.setAcceptInput(false);
+      int[] set = new int[env.config.featureSize];
+      for (int i = 0; i < set.length; i++) {
+        set[i] = currentTokens[playerId].get(i);
       }
-
-      if (slotToCard[slot] == null || slotToCard[slot] == EMPTY_CARD_SLOT) {
-        // Empty slot (deck.size < table.size).
-        return;
-      }
-
-      env.ui.placeToken(playerId, slot);
-      currentTokens[playerId].add(slot);
-      if (currentTokens[playerId].size() == env.config.featureSize) {
-        player.setAcceptInput(false);
-        int[] set = new int[env.config.featureSize];
-        for (int i = 0; i < set.length; i++) {
-          set[i] = currentTokens[playerId].get(i);
-        }
-        listener.onSetAvailable(new SetWithPlayerId(playerId, set));
-      } else {
+      listener.onSetAvailable(new SetWithPlayerId(playerId, set));
+    } else {
+      synchronized (player) {
         player.notify();
       }
     }
@@ -201,19 +203,16 @@ public class Table {
    * @return - true iff a token was successfully removed.
    */
   public boolean removeToken(Player player, int slot) {
-    synchronized (player) {
-      int index = currentTokens[player.id].indexOf(slot);
-      boolean result;
-      if (index != EMPTY_CARD_SLOT) {
-        currentTokens[player.id].remove(index);
-        env.ui.removeToken(player.id, slot);
-        result = true;
-      } else {
-        result = false;
-      }
-      player.notify();
-      return result;
+    int index = currentTokens[player.id].indexOf(slot);
+    boolean result;
+    if (index != EMPTY_CARD_SLOT) {
+      currentTokens[player.id].remove(index);
+      env.ui.removeToken(player.id, slot);
+      result = true;
+    } else {
+      result = false;
     }
+    return result;
   }
 
   public void handleToken(Player player, int slot) {

@@ -82,7 +82,8 @@ class DealerTest {
 
     boolean warn = env.config.turnTimeoutMillis > env.config.turnTimeoutWarningMillis;
 
-    // verify that the ui was updated to the wanted time and that the warning correlates.
+    // verify that the ui was updated to the wanted time and that the warning
+    // correlates.
     verify(ui).setCountdown(eq(env.config.turnTimeoutMillis), eq(warn));
   }
 }
