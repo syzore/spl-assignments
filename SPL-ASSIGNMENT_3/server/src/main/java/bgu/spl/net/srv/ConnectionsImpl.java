@@ -30,13 +30,10 @@ public class ConnectionsImpl <T> implements Connections <T> {
     @Override
     public void send(String channel, T msg) {
         // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void disconnect(int connectionId) {
         // TODO Auto-generated method stub
-        
     }
-    
 }

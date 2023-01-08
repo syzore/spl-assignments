@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
 void StompProtocol::socket_listener_task(ConnectionHandler &connectionHandler)
 {
-	while (0)
+	while (1)
 	{
 		const short bufsize = 1024;
 		char buf[bufsize];

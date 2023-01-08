@@ -1,25 +1,25 @@
 package bgu.spl.net.impl.stomp;
 
-import bgu.spl.net.api.MessagingProtocol;
-import bgu.spl.net.srv.Connections;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Vector;
 
-public class StompProtocol<T> implements MessagingProtocol<T> {
+import bgu.spl.net.api.StompMessagingProtocol;
+import bgu.spl.net.srv.Connections;
+
+public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
   private boolean shouldTerminate = false;
-  private Map<Integer, Connections<T>> connectionsMap;
-  private List<User> usersList = new ArrayList<>();
+  private Vector<String> asdasd;
+  private Connections<T> connections;
+  private int connectionId;
 
-  // @Override
-  // public void start(int connectionId, Connections<T> connections) {
-  // // TODO Auto-generated method stub
-
-  // }
+  @Override
+  public void start(int connectionId, Connections<T> connections) {
+    this.connections = connections;
+    this.connectionId = connectionId;
+  }
 
   @Override
   public T process(T message) {
@@ -63,7 +63,7 @@ public class StompProtocol<T> implements MessagingProtocol<T> {
         System.out.println(result);
         return result;
       case "UNSUBSCRIBE":
-        result = handleUnSubscribe(key_Value_Map, body);
+        result = handleUnsubscribe(key_Value_Map, body);
         System.out.println(result);
         return result;
       case "DISCONNECT":
@@ -76,16 +76,24 @@ public class StompProtocol<T> implements MessagingProtocol<T> {
   }
 
   private T handleDisconnect(Map<String, String> key_Value_Map, String body) {
+    int connectionId = 1231;
+    connections.disconnect(connectionId);
     return (T) "handleDisconnect";
   }
 
-  private T handleUnSubscribe(Map<String, String> key_Value_Map, String body) {
+  private T handleUnsubscribe(Map<String, String> key_Value_Map, String body) {
     return (T) "handleUnSubscribe";
   }
 
   private T handleSubscribe(Map<String, String> key_Value_Map) {
-    // String output = buildFrame(StompConstants.SUBSCRIBE, key_Value_Map, "");
-    return (T) "handleSubscribe";
+    String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
+    if (destination == null) return handleError("no topic was mentioned when subscribing", destination)
+    boolean success = connections.subscribe(connectionId, destination);
+    if (success) {
+      return (T) "handleSubscribe";
+    } else {
+      return handleError("cant subscribe to " + , null);
+    }
   }
 
   private T handleSend(Map<String, String> key_Value_Map, String body) {
@@ -107,11 +115,11 @@ public class StompProtocol<T> implements MessagingProtocol<T> {
     User user = new User(login, passcode);
     String frame = "";
     // check if users exists
-    User existingUser = usersList
-      .stream()
-      .filter(u -> login.equals(u.getLogin()))
-      .findFirst()
-      .orElse(null);
+    User existingUser = DataBase.getDataBase().getUsersList()
+        .stream()
+        .filter(u -> login.equals(u.getLogin()))
+        .findFirst()
+        .orElse(null);
     if (existingUser == null) {
       usersList.add(user);
       user.connect();
@@ -147,10 +155,9 @@ public class StompProtocol<T> implements MessagingProtocol<T> {
   }
 
   public String buildFrame(
-    String command,
-    Map<String, String> arguments,
-    String body
-  ) {
+      String command,
+      Map<String, String> arguments,
+      String body) {
     String output = "";
     output += command;
     for (String key : arguments.keySet()) {
