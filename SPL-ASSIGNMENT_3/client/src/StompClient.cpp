@@ -1,9 +1,11 @@
 #include <stdlib.h>
 #include <iostream>
+#include <string>
 #include "../include/ConnectionHandler.h"
 #include "../include/Constants.h"
 // #include "../include/StringUtil.h"
 #include "../include/StompProtocol.h"
+using namespace std;
 
 int main(int argc, char *argv[])
 {
@@ -51,7 +53,7 @@ void StompProtocol::socket_listener_task(ConnectionHandler &connectionHandler)
 		// A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
 		// we filled up to the \n char - we must make sure now that a 0 char is also present. So we truncate last character.
 		answer.resize(len - 1);
-		std::cout << "Reply: " << answer << " " << len << " bytes " << std::endl
+		std::cout << "Passive Listener Reply: " << answer << " " << len << " bytes " << std::endl
 				  << std::endl;
 		if (answer == "bye")
 		{
@@ -85,17 +87,13 @@ void StompProtocol::keyboard_handler_task(ConnectionHandler &connectionHandler)
 
 		std::cout << "encoded comman = " << encodedCommand << std::endl;
 
-		std::istringstream f(encodedCommand);
-		std::string line;
-		while (std::getline(f, line))
-		{
-			if (!connectionHandler.sendLine(encodedCommand))
+		if (encodedCommand != "")
+			if (!connectionHandler.sendFrame(encodedCommand))
 			{
 				std::cout << "Disconnected. Exiting...\n"
 						  << std::endl;
 				break;
 			}
-		}
 
 		// connectionHandler.sendLine(line) appends '\n' to the message. Therefor we send len+1 bytes.
 
@@ -107,7 +105,7 @@ void StompProtocol::keyboard_handler_task(ConnectionHandler &connectionHandler)
 		// Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
 		// We could also use: connectionHandler.getline(answer) and then get the answer without the newline char at the end
 		std::cout << "waiting for server response" << std::endl;
-		if (!connectionHandler.getLine(answer))
+		if (!connectionHandler.getFrame(answer))
 		{
 			std::cout << "Disconnected. Exiting...\n"
 					  << std::endl;
@@ -118,8 +116,7 @@ void StompProtocol::keyboard_handler_task(ConnectionHandler &connectionHandler)
 		// A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
 		// we filled up to the \n char - we must make sure now that a 0 char is also present. So we truncate last character.
 		answer.resize(len - 1);
-		std::cout << "Reply: " << answer << " " << len << " bytes " << std::endl
-				  << std::endl;
+		std::cout << "Reply: " << answer << " , length = " << len << " bytes " << std::endl;
 		if (answer == "bye")
 		{
 			std::cout << "Exiting...\n"
@@ -135,8 +132,19 @@ void StompProtocol::keyboard_handler_task(ConnectionHandler &connectionHandler)
 
 std::string StompProtocol::create_command_frame(std::string line)
 {
-	std::vector<std::string> lineParts = StringUtil::split(line, ' ');
-	std::string command = lineParts[0];
+	std::vector<std::string> lineParts;
+	std::string command;
+	if (line.find(' ') < line.length())
+	{
+		lineParts = StringUtil::split(line, ' ');
+		std::cout << 'line parts size = ' << lineParts.size() << std::endl;
+		command = lineParts[0];
+	}
+	else
+	{
+		command = line;
+	}
+
 	if (command == command_login)
 	{
 		return handle_login_command(lineParts);
@@ -156,6 +164,11 @@ std::string StompProtocol::create_command_frame(std::string line)
 	else if (command == command_summary)
 	{
 		return handle_summary_command(lineParts);
+	}
+	else
+	{
+		std::cout << 'no command corresponding with ' << command << " was found..." << std::endl;
+		return "";
 	}
 }
 

@@ -34,9 +34,17 @@ public:
 	// Returns false in case connection closed before a newline can be read.
 	bool getLine(std::string &line);
 
-	// Send an ascii line from the server
+	// Read an ascii frame from the server
+	// Returns false in case connection closed before a newline can be read.
+	bool getFrame(std::string &line);
+
+	// Send an ascii line to the server
 	// Returns false in case connection closed before all the data is sent.
 	bool sendLine(std::string &line);
+
+	// Send an ascii frame to the server
+	// Returns false in case connection closed before all the data is sent.
+	bool sendFrame(std::string &frame);
 
 	// Get Ascii data from the server until the delimiter character
 	// Returns false in case connection closed before null can be read.

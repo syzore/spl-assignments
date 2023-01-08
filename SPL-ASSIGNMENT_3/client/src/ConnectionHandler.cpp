@@ -83,9 +83,19 @@ bool ConnectionHandler::getLine(std::string &line)
 	return getFrameAscii(line, '\n');
 }
 
+bool ConnectionHandler::getFrame(std::string &line)
+{
+	return getFrameAscii(line, '\0');
+}
+
 bool ConnectionHandler::sendLine(std::string &line)
 {
 	return sendFrameAscii(line, '\n');
+}
+
+bool ConnectionHandler::sendFrame(std::string &frame)
+{
+	return sendFrameAscii(frame, '\0');
 }
 
 bool ConnectionHandler::getFrameAscii(std::string &frame, char delimiter)
