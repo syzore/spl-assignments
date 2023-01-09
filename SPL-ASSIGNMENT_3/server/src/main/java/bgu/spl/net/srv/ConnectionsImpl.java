@@ -1,29 +1,30 @@
 package bgu.spl.net.srv;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public class ConnectionsImpl <T> implements Connections <T> {
-    
-    private Map<Integer, String> connectionsIdMap;
+import bgu.spl.net.impl.stomp.User;
 
-    public ConnectionsImpl() {
-        connectionsIdMap = new HashMap<Integer, String>();
-    }
+public class ConnectionsImpl<T> implements Connections<T> {
+
+    private Map<String, String> subscriptionMap;
+    private Map<String, User> connectionsIdMap;
+    private ConnectionHandler<T> connectionHandler;
+
     // returns true if subscription succeeded, otherwise returns false
-    public boolean subscribe(int id, String destination){
-        String abc = connectionsIdMap.get(id);
-        if (abc == null){
-            connectionsIdMap.put(id, destination);
+    public boolean subscribe(String username, int id, String destination) {
+        String key = username + "_" + id;
+        String abc = subscriptionMap.get(key);
+        if (abc == null) {
+            subscriptionMap.put(key, destination);
             return true;
-        } else{
+        } else {
             return false;
         }
     }
 
     @Override
     public boolean send(int connectionId, T msg) {
-        // TODO Auto-generated method stub
+        connectionHandler.send(msg);
         return false;
     }
 
@@ -35,5 +36,19 @@ public class ConnectionsImpl <T> implements Connections <T> {
     @Override
     public void disconnect(int connectionId) {
         // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void setHandler(ConnectionHandler<T> handler) {
+        connectionHandler = handler;
+    }
+
+    @Override
+    public void connect(User user, int connectionId) {
+        // check if connectionId exists in map
+            // if exists check if its the same user
+                //if same user return error already connected
+                //if not same user return error another user is already connected
+            // if doesnt exists add and return true
     }
 }

@@ -10,18 +10,18 @@ public class User {
     private boolean isConnected;
     private Connections<String> connections;
 
-    public User (String login, String passcode){
+    public User(String login, String passcode) {
         this.login = login;
         this.passcode = passcode;
         isConnected = false;
         connections = new ConnectionsImpl<String>();
     }
 
-    public void connect(){
+    public void connect() {
         isConnected = true;
     }
 
-    public void disconnect(){
+    public void disconnect() {
         isConnected = false;
     }
 
@@ -33,7 +33,7 @@ public class User {
         return passcode;
     }
 
-    public boolean getIsConnected(){
+    public boolean isConnected() {
         return isConnected;
     }
 

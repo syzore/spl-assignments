@@ -6,18 +6,18 @@ import java.net.Socket;
 import java.util.function.Supplier;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.StompMessagingProtocol;
+import bgu.spl.net.api.MessagingProtocol;
 
 public abstract class BaseServer<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<StompMessagingProtocol<T>> protocolFactory;
+    private final Supplier<MessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
 
     public BaseServer(
             int port,
-            Supplier<StompMessagingProtocol<T>> protocolFactory,
+            Supplier<MessagingProtocol<T>> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> encdecFactory) {
 
         this.port = port;
@@ -38,12 +38,12 @@ public abstract class BaseServer<T> implements Server<T> {
 
                 Socket clientSock = serverSock.accept();
 
-                BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
-                        clientSock,
-                        encdecFactory.get(),
-                        protocolFactory.get());
+                // BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
+                //         clientSock,
+                //         encdecFactory.get(),
+                //         protocolFactory.get());
 
-                execute(handler);
+                // execute(handler);
             }
 
         } catch (IOException ex) {
