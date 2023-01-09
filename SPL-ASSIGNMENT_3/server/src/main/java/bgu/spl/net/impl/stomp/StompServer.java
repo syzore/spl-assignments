@@ -3,13 +3,16 @@ package bgu.spl.net.impl.stomp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.WeakHashMap;
 import java.util.function.Supplier;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.api.StompMessagingProtocol;
-import bgu.spl.net.srv.BaseServer;
 import bgu.spl.net.srv.BlockingConnectionHandler;
+import bgu.spl.net.srv.Connections;
+import bgu.spl.net.srv.ConnectionsImpl;
 import bgu.spl.net.srv.Server;
 
 public class StompServer<T> implements Server<T> {
@@ -18,6 +21,9 @@ public class StompServer<T> implements Server<T> {
     private final Supplier<StompMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
+
+    private Map<Integer, Socket> socketMap = new WeakHashMap<>();
+    private int currentId = 0;
 
     public StompServer(
             int port,
@@ -32,6 +38,7 @@ public class StompServer<T> implements Server<T> {
 
     @Override
     public void serve() {
+        Connections<T> connections = new ConnectionsImpl<>();
 
         try (ServerSocket serverSock = new ServerSocket(port)) {
             System.out.println("Server started");
@@ -39,13 +46,17 @@ public class StompServer<T> implements Server<T> {
             this.sock = serverSock; // just to be able to close
 
             while (!Thread.currentThread().isInterrupted()) {
-
                 Socket clientSock = serverSock.accept();
+
+                int connectionId = getSocketConnectionId(clientSock);
 
                 BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
                         clientSock,
                         encdecFactory.get(),
-                        protocolFactory.get());
+                        protocolFactory.get(),
+                        connections);
+
+                connections.setHandler(handler);
 
                 execute(handler);
             }
@@ -56,23 +67,50 @@ public class StompServer<T> implements Server<T> {
         System.out.println("server closed!!!");
     }
 
+    private int getSocketConnectionId(Socket clientSock) {
+        if (!socketMap.containsValue(clientSock))
+            return currentId++;
+        for (Entry<Integer, Socket> set : socketMap.entrySet()) {
+            if (set.getValue() == clientSock) {
+                return set.getKey();
+            }
+        }
+
+        System.out.println("ERROR IN GETTING SOCKET CONNECTION ID!!!!!");
+
+        return -1;
+    }
+
     @Override
     public void close() throws IOException {
         if (sock != null)
             sock.close();
     }
 
-    protected void execute(BlockingConnectionHandler<T> handler){
+    protected void execute(BlockingConnectionHandler<T> handler) {
         new Thread(handler).start();
     }
 
+    public static <T> Server<T> threadPerClient(
+            int port,
+            Supplier<StompMessagingProtocol<T>> protocolFactory,
+            Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory) {
+
+        return new StompServer<T>(port, protocolFactory, encoderDecoderFactory) {
+            @Override
+            protected void execute(BlockingConnectionHandler<T> handler) {
+                new Thread(handler).start();
+            }
+        };
+
+    }
+
     public static void main(String[] args) {
-        Server.threadPerClientStomp(
+        threadPerClient(
                 7777, // port
                 () -> new StompProtocol<String>(), // protocol factory
                 FrameMessageEncoderDecoder::new // message encoder decoder factory
         ).serve();
     }
 
-    
 }

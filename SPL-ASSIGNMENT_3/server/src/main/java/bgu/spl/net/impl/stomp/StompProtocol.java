@@ -77,19 +77,20 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
   }
 
   private T handleDisconnect(Map<String, String> key_Value_Map, String body) {
-    int connectionId = 1231;
-    connections.disconnect(connectionId);
     return (T) "handleDisconnect";
   }
 
   private T handleUnsubscribe(Map<String, String> key_Value_Map, String body) {
+    int connectionId = 1231;
+    connections.disconnect(connectionId);
     return (T) "handleUnSubscribe";
   }
 
   private T handleSubscribe(Map<String, String> key_Value_Map) {
     String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
     if (destination == null) return (T) handleError("no topic was mentioned when subscribing", destination)
-    boolean success = connections.subscribe("", connectionId, destination);
+    
+    boolean success = connections.subscribe("" ,connectionId, destination);
     if (success) {
       return (T) "handleSubscribe";
     } else {
@@ -98,6 +99,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
   }
 
   private T handleSend(Map<String, String> key_Value_Map, String body) {
+    connections.send(body, null);
     return (T) "SEND";
   }
 
@@ -113,10 +115,15 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     if (!host.equals(StompConstants.HOST_VALUE)) {
       return (T) handleError("not the host we support here", "add something");
     }
+
     User user = new User(login, passcode);
+
+    connections.connect(user, connectionId);
+
     String frame = "";
+
     // check if users exists
-    User existingUser = DataBase.getDataBase().getUsersList()
+    User existingUser = connections.
         .stream()
         .filter(u -> login.equals(u.getLogin()))
         .findFirst()
@@ -130,13 +137,13 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     }
     // if yes, check if password in map
     else if (user.getPasscode().equals(existingUser.getPasscode())) {
-      if (user.getIsConnected()) {
+      if (user.isConnected()) {
         return (T) handleError("user is already connected", "");
       } else {
         user.connect();
-        Map<String, String> someMap = new HashMap<String, String>();
-        someMap.put(StompConstants.VERSION_KEY, StompConstants.VERSION_VALUE);
-        frame = buildFrame(StompConstants.CONNECTED, someMap, "");
+        Map<String, String> args = new HashMap<String, String>();
+        args.put(StompConstants.VERSION_KEY, StompConstants.VERSION_VALUE);
+        frame = buildFrame(StompConstants.CONNECTED, args, "");
         // add to connections
       }
     } else {
