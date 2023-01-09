@@ -3,16 +3,15 @@ package bgu.spl.net.impl.stomp;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Vector;
 
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.srv.Connection;
+import bgu.spl.net.srv.ConnectionResult;
 import bgu.spl.net.srv.Connections;
 
 public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
   private boolean shouldTerminate = false;
-  private Vector<String> asdasd;
   private Connections<T> connections;
   private int connectionId;
 
@@ -52,102 +51,121 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
     switch (command) {
       case "CONNECT":
-        result = handleConnect(key_Value_Map);
+        result = handleConnect(key_Value_Map, msg);
         System.out.println(result);
         return result;
       case "SEND":
-        result = handleSend(key_Value_Map, body);
+        result = handleSend(key_Value_Map, body, msg);
         System.out.println(result);
         return result;
       case "SUBSCRIBE":
-        result = handleSubscribe(key_Value_Map);
+        result = handleSubscribe(key_Value_Map, msg);
         System.out.println(result);
         return result;
       case "UNSUBSCRIBE":
-        result = handleUnsubscribe(key_Value_Map, body);
+        result = handleUnsubscribe(key_Value_Map, body, msg);
         System.out.println(result);
         return result;
       case "DISCONNECT":
-        result = handleDisconnect(key_Value_Map, body);
+        result = handleDisconnect(key_Value_Map, body, msg);
         System.out.println(result);
         return result;
       default:
-        return handleError("command not found", "");
+        return handleError("command not found.", msg, key_Value_Map.get(StompConstants.RECEIPT_ID_KEY),
+            "The frame should contain a command.");
     }
   }
 
-  private T handleDisconnect(Map<String, String> key_Value_Map, String body) {
+  private T handleDisconnect(Map<String, String> key_Value_Map, String body, String originalMassage) {
+    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
+    shouldTerminate = true;
     return (T) "handleDisconnect";
   }
 
-  private T handleUnsubscribe(Map<String, String> key_Value_Map, String body) {
-    int connectionId = 1231;
+  private T handleUnsubscribe(Map<String, String> key_Value_Map, String body, String originalMassage) {
+    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
     connections.disconnect(connectionId);
-    return (T) "handleUnSubscribe";
+    return (T) "handleUnsubscribe";
   }
 
-  private T handleSubscribe(Map<String, String> key_Value_Map) {
+  private T handleSubscribe(Map<String, String> key_Value_Map, String originalMassage) {
+    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
     String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
     if (destination == null)
-      return handleError("no topic was mentioned when subscribing", destination);
+      return handleError("No topic was mentioned when subscribing.", originalMassage, receiptId,
+          "When subscribing, you must include which topic you would like to subscribe to.");
 
     boolean success = connections.subscribe("", connectionId, destination);
     if (success) {
-      return (T) "handleSubscribe";
+      return (T) "handleSubscribe\0";
     } else {
-      return handleError("cant subscribe to " + destination, null);
+      return handleError("Was not able to subscribe to " + destination, originalMassage, receiptId, "");
     }
   }
 
-  private T handleSend(Map<String, String> key_Value_Map, String body) {
+  private T handleSend(Map<String, String> key_Value_Map, String body, String originalMassage) {
+    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
     connections.send(body, null);
     return (T) "SEND";
   }
 
-  private T handleConnect(Map<String, String> key_Value_Map) {
+  private T handleConnect(Map<String, String> key_Value_Map, String originalMassage) {
     System.out.println("handle connect");
+
     String acceptVersion = key_Value_Map.get("accept-version");
     String host = key_Value_Map.get("host");
     String login = key_Value_Map.get("login");
     String passcode = key_Value_Map.get("passcode");
+    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
+
     if (!acceptVersion.equals(StompConstants.ACCEPT_VERSION_VALUE)) {
-      return handleError("only version supported is 1.2", "add something");
+      return handleError("only version supported is 1.2", originalMassage, receiptId, "");
     }
     if (!host.equals(StompConstants.HOST_VALUE)) {
-      return handleError("not the host we support here", "add something");
+      return handleError("not the host we support here", originalMassage, receiptId, "...");
     }
 
     User user = new User(login, passcode);
 
-    connections.connect(user, connectionId);
-    Connection<T> connection = connections.getConnectionById(connectionId);
-    connection.setUser(user);
-
-    String frame = "";
-
-    // check if users exists
+    // handle registration and shit..
     boolean isRegistered = connections.isRegistered(user);
     if (!isRegistered) {
       connections.register(user);
-    } else if (connections.isConnected(user)) {
-      return handleError("user is already connected", "");
     } else if (!connections.checkPasscode(user)) {
-      return handleError("incorrect passcode", "add something");
+      return handleError("Incorrect passcode", originalMassage, receiptId, "The entered password was not corrent.");
     }
 
-    user.connect();
+    // if he got here it means the login / registration was successful..
+
+    // handle connection and shit..
+    ConnectionResult result = connections.connect(user, connectionId);
+    if (result == ConnectionResult.ALREADY_CONNECTED) {
+      return handleError("User is already connected", originalMassage, receiptId,
+          "This user is already connected through this client.");
+    } else if (result == ConnectionResult.ANOTHER_USER_CONNECTED) {
+      return handleError("Another user is already connected", originalMassage, receiptId,
+          "Another is already connected through this client.");
+    }
+
     Map<String, String> args = new HashMap<String, String>();
     args.put(StompConstants.VERSION_KEY, StompConstants.VERSION_VALUE);
 
     return buildFrame(StompConstants.CONNECTED, args, "");
-    // check what to do if passcode is incorrect
-
   }
 
-  private T handleError(String message, String body) {
+  private T handleError(String message, String originalMassage, String receiptId, String explanation) {
+    shouldTerminate = true;
     Map<String, String> errorMap = new HashMap<String, String>();
-    // errorMap.put(StompConstants.RECEIPT_ID_KEY, ""+receiptId);
     errorMap.put(StompConstants.MESSAGE_KEY, message);
+    if (receiptId != null && !receiptId.isEmpty()) {
+      errorMap.put(StompConstants.RECEIPT_ID_KEY, receiptId);
+    }
+    String body = "The message: \n----- \n";
+    body += originalMassage;
+    body += "----- \n";
+    if (!explanation.isEmpty()) {
+      body += explanation;
+    }
     return buildFrame("ERROR", errorMap, body);
   }
 
@@ -155,19 +173,18 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
       String command,
       Map<String, String> arguments,
       String body) {
-    String output = "";
-    output += command;
+    String frame = command;
     for (String key : arguments.keySet()) {
-      output += "\n";
-      output = output + key + ":" + arguments.get(key);
+      frame += "\n";
+      frame = frame + key + ":" + arguments.get(key);
     }
-    output = output + "\n\n" + body + '\u0000';
-    return (T) output;
+    frame = frame + "\n\n" + body + "\n";
+
+    return (T) frame;
   }
 
   @Override
   public boolean shouldTerminate() {
-    // TODO Auto-generated method stub
-    return false;
+    return shouldTerminate;
   }
 }

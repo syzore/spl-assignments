@@ -49,15 +49,14 @@ public class StompServer<T> implements Server<T> {
                 connection.setConnectionId(++currentConnectionId);
                 connections.addConnection(connection);
 
-
                 BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
                         clientSock,
                         encdecFactory.get(),
                         protocolFactory.get(),
-                        connections);
+                        connections,
+                        currentConnectionId);
 
                 connection.setHandler(handler);
-
 
                 execute(handler);
             }
@@ -70,6 +69,7 @@ public class StompServer<T> implements Server<T> {
 
     @Override
     public void close() throws IOException {
+        System.out.println("socket closing");
         if (sock != null)
             sock.close();
     }
@@ -89,7 +89,6 @@ public class StompServer<T> implements Server<T> {
                 new Thread(handler).start();
             }
         };
-
     }
 
     public static void main(String[] args) {
@@ -99,5 +98,4 @@ public class StompServer<T> implements Server<T> {
                 FrameMessageEncoderDecoder::new // message encoder decoder factory
         ).serve();
     }
-
 }

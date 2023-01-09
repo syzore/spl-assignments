@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 		std::cerr << "Cannot connect to " << host << ":" << port << std::endl;
 		return 1;
 	}
+	
 
 	StompClient client();
 	// StompProtocol proto = ...
@@ -60,8 +61,7 @@ void StompClient::socket_listener_task(ConnectionHandler &connectionHandler)
 		// A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
 		// we filled up to the \n char - we must make sure now that a 0 char is also present. So we truncate last character.
 		answer.resize(len - 1);
-		std::cout << "Passive Listener Reply: " << answer << " " << len << " bytes " << std::endl
-				  << std::endl;
+		std::cout << "Passive Listener Reply: " << answer << " " << len << " bytes " << std::endl;
 		if (answer == "bye")
 		{
 			std::cout << "Exiting...\n"
@@ -89,7 +89,8 @@ void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 		
 		//std::string encodedCommand = create_command_frame(command);
 
-		std::cout << "encoded comman = " << encodedCommand << std::endl;
+		std::cout << "encoded frame = \n"
+				  << encodedCommand << std::endl;
 
 		if (encodedCommand != "")
 			if (!connectionHandler.sendFrame(encodedCommand))
@@ -120,7 +121,8 @@ void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 		// A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
 		// we filled up to the \n char - we must make sure now that a 0 char is also present. So we truncate last character.
 		answer.resize(len - 1);
-		std::cout << "Reply: " << answer << " , length = " << len << " bytes " << std::endl;
+		std::cout << "Reply: \n"
+				  << answer << std::endl;
 		if (answer == "bye")
 		{
 			std::cout << "Exiting...\n"
@@ -167,7 +169,7 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 	}
 	else
 	{
-		std::cout << 'no command corresponding with ' << command << " was found..." << std::endl;
+		std::cout << "no command corresponding with " << command << " was found..." << std::endl;
 		return "";
 	}
 }
