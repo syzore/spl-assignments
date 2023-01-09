@@ -16,4 +16,5 @@ public interface Connections<T> {
     Connection<T> getConnectionById(int connectionId);
 
     void addConnection(Connection<T> connection);
+    void register(User user);
 }
