@@ -7,7 +7,7 @@ import bgu.spl.net.impl.stomp.User;
 public class ConnectionsImpl<T> implements Connections<T> {
 
     private Map<String, String> subscriptionMap;
-    private Map<String, Connection<T>> connectionsIdMap;
+    private Map<Integer, Connection<T>> connectionsIdMap;
 
     // returns true if subscription succeeded, otherwise returns false
     public boolean subscribe(String username, int id, String destination) {
@@ -45,5 +45,17 @@ public class ConnectionsImpl<T> implements Connections<T> {
         // if same user return error already connected
         // if not same user return error another user is already connected
         // if doesnt exists add and return true
+    }
+
+    @Override
+    public Connection<T> getConnectionById(int connectionId) {
+        Connection<T> connection = connectionsIdMap.get(connectionsIdMap);
+        return connection;
+    }
+
+    @Override
+    public void addConnection(Connection<T> connection) {
+        connectionsIdMap.put(connection.getConnectionId(), connection);
+        
     }
 }
