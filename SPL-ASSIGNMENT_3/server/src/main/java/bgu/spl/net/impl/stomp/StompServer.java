@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
-import bgu.spl.net.impl.echo.FrameMessageEncoderDecoder;
+import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.srv.BaseServer;
 import bgu.spl.net.srv.BlockingConnectionHandler;
 import bgu.spl.net.srv.Server;
@@ -15,13 +15,13 @@ import bgu.spl.net.srv.Server;
 public class StompServer<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<MessagingProtocol<T>> protocolFactory;
+    private final Supplier<StompMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
 
     public StompServer(
             int port,
-            Supplier<MessagingProtocol<T>> protocolFactory,
+            Supplier<StompMessagingProtocol<T>> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> encdecFactory) {
 
         this.port = port;
@@ -67,7 +67,7 @@ public class StompServer<T> implements Server<T> {
     }
 
     public static void main(String[] args) {
-        Server.threadPerClient(
+        Server.threadPerClientStomp(
                 7777, // port
                 () -> new StompProtocol<String>(), // protocol factory
                 FrameMessageEncoderDecoder::new // message encoder decoder factory
