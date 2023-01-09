@@ -17,32 +17,38 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
     private BufferedOutputStream out;
     private volatile boolean connected = true;
     private Connections<T> connections;
+    private int connectionId;
 
     public BlockingConnectionHandler(Socket sock, MessageEncoderDecoder<T> reader, StompMessagingProtocol<T> protocol,
-            Connections<T> connections) {
+            Connections<T> connections, int connectionId) {
         this.sock = sock;
         this.encdec = reader;
         this.protocol = protocol;
         this.connections = connections;
+        this.connectionId = connectionId;
     }
 
     @Override
     public void run() {
         System.out.println("entered handler run");
         try (Socket sock = this.sock) { // just for automatic closing
-            int read;
+            int read = -1;
 
             synchronized (this) {
                 in = new BufferedInputStream(sock.getInputStream());
                 out = new BufferedOutputStream(sock.getOutputStream());
 
-                protocol.start(0, connections);
+                protocol.start(connectionId, connections);
 
                 while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
                     T nextMessage = encdec.decodeNextByte((byte) read);
                     if (nextMessage != null) {
                         T response = protocol.process(nextMessage);
-                        System.out.println("response = " + response);
+                        System.out.println("response = \n" + response);
+                        String s = response.toString().contains("\u0000") ? "yes" : " no";
+                        String s2 = response.toString().contains("\0") ? "yes" : " no";
+                        System.out.println("does the response containts null? " + s);
+                        System.out.println("does the response containts null zero? " + s2);
                         if (response != null) {
                             out.write(encdec.encode(response));
                             out.flush();
@@ -50,6 +56,10 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
                     }
                 }
             }
+
+            System.out.println("should terminate = " + protocol.shouldTerminate());
+            System.out.println("connected = " + connected);
+            System.out.println("read = " + read);
 
         } catch (IOException ex) {
             System.out.println("error when assigning socket " + ex);
@@ -73,7 +83,9 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
                 while (!protocol.shouldTerminate() && connected) {
                     if (msg != null) {
                         T response = protocol.process(msg);
-                        System.out.println("response = " + response);
+                        System.out.println("response = \n" + response);
+                        String s = response.toString().contains("\u0000") ? "yes" : " no";
+                        System.out.println("does the response containts null? " + s);
                         if (response != null) {
                             out.write(encdec.encode(response));
                             out.flush();

@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
 		std::cerr << "Cannot connect to " << host << ":" << port << std::endl;
 		return 1;
 	}
+	
 
 	std::thread t1(StompProtocol::keyboard_handler_task, std::ref(connectionHandler));
 	std::thread t2(StompProtocol::socket_listener_task, std::ref(connectionHandler));
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
 
 void StompProtocol::socket_listener_task(ConnectionHandler &connectionHandler)
 {
-	while (1)
+	while (0)
 	{
 		const short bufsize = 1024;
 		char buf[bufsize];
@@ -53,8 +54,7 @@ void StompProtocol::socket_listener_task(ConnectionHandler &connectionHandler)
 		// A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
 		// we filled up to the \n char - we must make sure now that a 0 char is also present. So we truncate last character.
 		answer.resize(len - 1);
-		std::cout << "Passive Listener Reply: " << answer << " " << len << " bytes " << std::endl
-				  << std::endl;
+		std::cout << "Passive Listener Reply: " << answer << " " << len << " bytes " << std::endl;
 		if (answer == "bye")
 		{
 			std::cout << "Exiting...\n"
@@ -79,13 +79,16 @@ void StompProtocol::keyboard_handler_task(ConnectionHandler &connectionHandler)
 	{
 		const short bufsize = 1024;
 		char buf[bufsize];
-		std::cout << "what is your commant?" << std::endl;
+		std::cout << "what is your command?" << std::endl;
 		std::cin.getline(buf, bufsize);
 		std::string command(buf);
 
 		std::string encodedCommand = create_command_frame(command);
+		if (encodedCommand.empty())
+			continue;
 
-		std::cout << "encoded comman = " << encodedCommand << std::endl;
+		std::cout << "encoded frame = \n"
+				  << encodedCommand << std::endl;
 
 		if (encodedCommand != "")
 			if (!connectionHandler.sendFrame(encodedCommand))
@@ -116,7 +119,8 @@ void StompProtocol::keyboard_handler_task(ConnectionHandler &connectionHandler)
 		// A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
 		// we filled up to the \n char - we must make sure now that a 0 char is also present. So we truncate last character.
 		answer.resize(len - 1);
-		std::cout << "Reply: " << answer << " , length = " << len << " bytes " << std::endl;
+		std::cout << "Reply: \n"
+				  << answer << std::endl;
 		if (answer == "bye")
 		{
 			std::cout << "Exiting...\n"
@@ -137,7 +141,7 @@ std::string StompProtocol::create_command_frame(std::string line)
 	if (line.find(' ') < line.length())
 	{
 		lineParts = StringUtil::split(line, ' ');
-		std::cout << 'line parts size = ' << lineParts.size() << std::endl;
+		std::cout << "line parts size = " << lineParts.size() << std::endl;
 		command = lineParts[0];
 	}
 	else
@@ -167,7 +171,7 @@ std::string StompProtocol::create_command_frame(std::string line)
 	}
 	else
 	{
-		std::cout << 'no command corresponding with ' << command << " was found..." << std::endl;
+		std::cout << "no command corresponding with " << command << " was found..." << std::endl;
 		return "";
 	}
 }
@@ -237,7 +241,6 @@ void StompProtocol::parse_then_handle_response(std::string answer)
 	{
 		if (line.empty())
 			break;
-		std::cout << line << std::endl;
 		int index = line.find(':');
 		std::string key = line.substr(0, index);
 		std::string value = line.substr(index + 1, line.length());
@@ -246,12 +249,16 @@ void StompProtocol::parse_then_handle_response(std::string answer)
 
 	// BODY
 	std::string body;
+	std::cout << "starting to read body line by line, the body: " << body << "\n"
+			  << std::endl;
 	while (std::getline(iteratable, line))
 	{
 		if (line == "\0")
 			break;
 		body += line;
 	}
+	std::cout << "finished reading the body line by line\n"
+			  << std::endl;
 
 	handle_response(command, args, body);
 }

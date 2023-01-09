@@ -38,15 +38,16 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     @Override
     public boolean send(int connectionId, T msg) {
-        Connection<T> connection = connectionsIdMap.get(connectionId);
-        if (connection == null)
+        Connection<T> connection = getConnectionById(connectionId);
+        if (connection != null)
             connection.getHandler().send(msg);
         return false;
     }
 
     @Override
     public void send(String channel, T msg) {
-        // TODO Auto-generated method stub
+        // get vector of all connectionIds that are subscribed to this channel..
+        // for each connectionId send(connectionId, msg)
     }
 
     @Override
@@ -55,24 +56,35 @@ public class ConnectionsImpl<T> implements Connections<T> {
     }
 
     @Override
-    public void connect(User user, int connectionId) {
-        // check if connectionId exists in map
-        // if exists check if its the same user
-        // if same user return error already connected
-        // if not same user return error another user is already connected
-        // if doesnt exists add and return true
+    public ConnectionResult connect(User user, int connectionId) {
+        Connection<T> connection = getConnectionById(connectionId);
+        if (connection.getUser() != null) {
+            if (connection.getUser() == user) {
+                return ConnectionResult.ALREADY_CONNECTED;
+            } else {
+                return ConnectionResult.ANOTHER_USER_CONNECTED;
+            }
+        } else {
+            connection.setUser(user);
+            user.connect();
+
+            System.out.println("testing user connection ---");
+            Connection<T> connectionTest = getConnectionById(connectionId);
+            System.out.println("is user not null, as expected? " + connectionTest.getUser() != null);
+        }
+
+        return ConnectionResult.CONNECTED;
     }
 
     @Override
     public Connection<T> getConnectionById(int connectionId) {
-        Connection<T> connection = connectionsIdMap.get(connectionsIdMap);
-        return connection;
+        return connectionsIdMap.get(new Integer(connectionId));
     }
 
     @Override
     public void addConnection(Connection<T> connection) {
-        connectionsIdMap.put(connection.getConnectionId(), connection);
-
+        System.out.println("adding connection " + connection + " with id " + connection.getConnectionId());
+        connectionsIdMap.put(new Integer(connection.getConnectionId()), connection);
     }
 
     @Override
@@ -93,23 +105,6 @@ public class ConnectionsImpl<T> implements Connections<T> {
     public boolean isConnected(int connectionId, User user) {
         Connection<T> connection = connectionsIdMap.get(connectionId);
         return user.getLogin().equals(connection.getUser().getLogin());
-    }
-
-    @Override
-    public boolean checkPasscode(User user) {
-        return user.getPasscode().equals(usersDatabase.get(user.getLogin()));
-    }
-
-    @Override
-    public boolean isRegistered(User user) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean isConnected(User user) {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     @Override

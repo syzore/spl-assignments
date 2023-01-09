@@ -34,4 +34,10 @@ public class User {
         return isConnected;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof User))
+            return false;
+        return ((User) other).login == this.login && ((User) other).passcode == this.passcode;
+    }
 }

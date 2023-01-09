@@ -11,7 +11,7 @@ public interface Connections<T> {
 
     void disconnect(int connectionId);
 
-    void connect(User user, int connectionId);
+    ConnectionResult connect(User user, int connectionId);
 
     Connection<T> getConnectionById(int connectionId);
 
