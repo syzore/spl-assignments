@@ -6,11 +6,11 @@ import java.util.Scanner;
 import java.util.Vector;
 
 import bgu.spl.net.api.StompMessagingProtocol;
+import bgu.spl.net.srv.Connection;
 import bgu.spl.net.srv.Connections;
 
 public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
-  
   private boolean shouldTerminate = false;
   private Vector<String> asdasd;
   private Connections<T> connections;
@@ -119,6 +119,8 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     User user = new User(login, passcode);
 
     connections.connect(user, connectionId);
+    Connection<T> connection = connections.getConnectionById(connectionId);
+    connection.setUser(user);
 
     String frame = "";
 

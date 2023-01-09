@@ -3,14 +3,12 @@ package bgu.spl.net.impl.stomp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.WeakHashMap;
 import java.util.function.Supplier;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.srv.BlockingConnectionHandler;
+import bgu.spl.net.srv.Connection;
 import bgu.spl.net.srv.Connections;
 import bgu.spl.net.srv.ConnectionsImpl;
 import bgu.spl.net.srv.Server;
@@ -22,8 +20,7 @@ public class StompServer<T> implements Server<T> {
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
 
-    private Map<Integer, Socket> socketMap = new WeakHashMap<>();
-    private int currentId = 0;
+    private int currentConnectionId = 0;
 
     public StompServer(
             int port,
@@ -48,7 +45,10 @@ public class StompServer<T> implements Server<T> {
             while (!Thread.currentThread().isInterrupted()) {
                 Socket clientSock = serverSock.accept();
 
-                int connectionId = getSocketConnectionId(clientSock);
+                Connection<T> connection = new Connection();
+                connection.setConnectionId(++currentConnectionId);
+                connections.addConnection(connection);
+
 
                 BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
                         clientSock,
@@ -56,7 +56,8 @@ public class StompServer<T> implements Server<T> {
                         protocolFactory.get(),
                         connections);
 
-                connections.setHandler(handler);
+                connection.setHandler(handler);
+
 
                 execute(handler);
             }
@@ -65,20 +66,6 @@ public class StompServer<T> implements Server<T> {
         }
 
         System.out.println("server closed!!!");
-    }
-
-    private int getSocketConnectionId(Socket clientSock) {
-        if (!socketMap.containsValue(clientSock))
-            return currentId++;
-        for (Entry<Integer, Socket> set : socketMap.entrySet()) {
-            if (set.getValue() == clientSock) {
-                return set.getKey();
-            }
-        }
-
-        System.out.println("ERROR IN GETTING SOCKET CONNECTION ID!!!!!");
-
-        return -1;
     }
 
     @Override
