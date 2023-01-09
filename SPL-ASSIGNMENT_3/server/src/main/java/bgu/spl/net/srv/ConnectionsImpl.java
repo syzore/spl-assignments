@@ -79,4 +79,21 @@ public class ConnectionsImpl<T> implements Connections<T> {
     public void register(User user) {
         // TODO Auto-generated method stub
     }
+
+    @Override
+    public boolean isRegistered(User user) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isConnected(User user) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean checkPasscode(User user) {
+        return user.getPasscode().equals(usersDatabase.get(user.getLogin()));
+    }
 }
