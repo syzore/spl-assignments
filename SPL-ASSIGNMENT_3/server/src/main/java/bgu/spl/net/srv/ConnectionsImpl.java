@@ -10,13 +10,13 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     private Vector<String> topics;
     private Map<String, String> subscriptionMap;
-    private Map<String, Connection<T>> connectionsIdMap;
+    private Map<Integer, Connection<T>> connectionsIdMap;
     private Map<String, String> usersDatabase;
 
     public ConnectionsImpl() {
         this.topics = new Vector<>();
         this.subscriptionMap = new WeakHashMap<String, String>();
-        this.connectionsIdMap = new WeakHashMap<String, Connection<T>>();
+        this.connectionsIdMap = new WeakHashMap<Integer, Connection<T>>();
         this.usersDatabase = new WeakHashMap<String, String>();
     }
 
@@ -73,7 +73,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
         connectionsIdMap.put(connection.getConnectionId(), connection);
         
     }
-}
+
 
     @Override
     public void register(User user) {
