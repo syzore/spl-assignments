@@ -3,7 +3,6 @@ package bgu.spl.net.impl.stomp;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Vector;
 
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.srv.Connection;
@@ -12,7 +11,6 @@ import bgu.spl.net.srv.Connections;
 public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
   private boolean shouldTerminate = false;
-  private Vector<String> asdasd;
   private Connections<T> connections;
   private int connectionId;
 
@@ -77,6 +75,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
   }
 
   private T handleDisconnect(Map<String, String> key_Value_Map, String body) {
+    shouldTerminate = true;
     return (T) "handleDisconnect";
   }
 
@@ -123,13 +122,11 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     Connection<T> connection = connections.getConnectionById(connectionId);
     connection.setUser(user);
 
-    String frame = "";
-
     // check if users exists
     boolean isRegistered = connections.isRegistered(user);
     if (!isRegistered) {
       connections.register(user);
-    } else if (connections.isConnected(user)) {
+    } else if (connections.isConnected(connectionId, user)) {
       return handleError("user is already connected", "");
     } else if (!connections.checkPasscode(user)) {
       return handleError("incorrect passcode", "add something");
@@ -145,6 +142,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
   }
 
   private T handleError(String message, String body) {
+    shouldTerminate = true;
     Map<String, String> errorMap = new HashMap<String, String>();
     // errorMap.put(StompConstants.RECEIPT_ID_KEY, ""+receiptId);
     errorMap.put(StompConstants.MESSAGE_KEY, message);
@@ -167,7 +165,6 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
   @Override
   public boolean shouldTerminate() {
-    // TODO Auto-generated method stub
-    return false;
+    return shouldTerminate;
   }
 }

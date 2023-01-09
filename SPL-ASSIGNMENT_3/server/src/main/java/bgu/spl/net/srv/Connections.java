@@ -16,11 +16,12 @@ public interface Connections<T> {
     Connection<T> getConnectionById(int connectionId);
 
     void addConnection(Connection<T> connection);
+
     void register(User user);
 
     boolean isRegistered(User user);
 
-    boolean isConnected(User user);
+    boolean isConnected(int connectionId, User user);
 
     boolean checkPasscode(User user);
 }

@@ -1,6 +1,7 @@
 package bgu.spl.net.srv;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
@@ -10,13 +11,15 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     private Vector<String> topics;
     private Map<String, String> subscriptionMap;
-    private Map<String, Connection<T>> connectionsIdMap;
+    private Map<Integer, Connection<T>> connectionsIdMap;
+
+    // <Login, Passcode>
     private Map<String, String> usersDatabase;
 
     public ConnectionsImpl() {
         this.topics = new Vector<>();
         this.subscriptionMap = new WeakHashMap<String, String>();
-        this.connectionsIdMap = new WeakHashMap<String, Connection<T>>();
+        this.connectionsIdMap = new WeakHashMap<Integer, Connection<T>>();
         this.usersDatabase = new WeakHashMap<String, String>();
     }
 
@@ -71,12 +74,31 @@ public class ConnectionsImpl<T> implements Connections<T> {
     @Override
     public void addConnection(Connection<T> connection) {
         connectionsIdMap.put(connection.getConnectionId(), connection);
-        
+
     }
-}
 
     @Override
     public void register(User user) {
-        // TODO Auto-generated method stub
+        usersDatabase.put(user.getLogin(), user.getPasscode());
+    }
+
+    @Override
+    public boolean isRegistered(User user) {
+        for (Entry<String, String> entry : usersDatabase.entrySet()) {
+            if (entry.getKey().equals(user.getLogin()))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isConnected(int connectionId, User user) {
+        Connection<T> connection = connectionsIdMap.get(connectionId);
+        return user.getLogin().equals(connection.getUser().getLogin());
+    }
+
+    @Override
+    public boolean checkPasscode(User user) {
+        return user.getPasscode().equals(usersDatabase.get(user.getLogin()));
     }
 }
