@@ -72,7 +72,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
         System.out.println(result);
         return result;
       default:
-        return (T) handleError("command not found", "");
+        return handleError("command not found", "");
     }
   }
 
@@ -88,13 +88,14 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
   private T handleSubscribe(Map<String, String> key_Value_Map) {
     String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
-    if (destination == null) return (T) handleError("no topic was mentioned when subscribing", destination);
-    
-    boolean success = connections.subscribe("" ,connectionId, destination);
+    if (destination == null)
+      return handleError("no topic was mentioned when subscribing", destination);
+
+    boolean success = connections.subscribe("", connectionId, destination);
     if (success) {
       return (T) "handleSubscribe";
     } else {
-      return (T) handleError("cant subscribe to " + , null);
+      return handleError("cant subscribe to " + destination, null);
     }
   }
 
@@ -110,10 +111,10 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     String login = key_Value_Map.get("login");
     String passcode = key_Value_Map.get("passcode");
     if (!acceptVersion.equals(StompConstants.ACCEPT_VERSION_VALUE)) {
-      return (T) handleError("only version supported is 1.2", "add something");
+      return handleError("only version supported is 1.2", "add something");
     }
     if (!host.equals(StompConstants.HOST_VALUE)) {
-      return (T) handleError("not the host we support here", "add something");
+      return handleError("not the host we support here", "add something");
     }
 
     User user = new User(login, passcode);
@@ -125,48 +126,32 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     String frame = "";
 
     // check if users exists
-    User existingUser = connections.
-        .stream()
-        .filter(u -> login.equals(u.getLogin()))
-        .findFirst()
-        .orElse(null);
-    if (existingUser == null) {
-      usersList.add(user);
-      user.connect();
-      Map<String, String> someMap = new HashMap<String, String>();
-      someMap.put(StompConstants.VERSION_KEY, StompConstants.VERSION_VALUE);
-      frame = buildFrame(StompConstants.CONNECTED, someMap, "");
-    }
-    // if yes, check if password in map
-    else if (user.getPasscode().equals(existingUser.getPasscode())) {
-      if (user.isConnected()) {
-        return (T) handleError("user is already connected", "");
-      } else {
-        Map<String, String> args = new HashMap<String, String>();
-        args.put(StompConstants.VERSION_KEY, StompConstants.VERSION_VALUE);
-        frame = buildFrame(StompConstants.CONNECTED, args, "");
-        // add to connections
-      }
-    } else {
-      return (T) handleError("incorrect passcode", "add something");
+    boolean isRegistered = connections.isRegistered(user);
+    if (!isRegistered) {
+      connections.register(user);
+    } else if (connections.isConnected(user)) {
+      return handleError("user is already connected", "");
+    } else if (!connections.checkPasscode(user)) {
+      return handleError("incorrect passcode", "add something");
     }
 
     user.connect();
+    Map<String, String> args = new HashMap<String, String>();
+    args.put(StompConstants.VERSION_KEY, StompConstants.VERSION_VALUE);
 
-    return (T) frame;
+    return buildFrame(StompConstants.CONNECTED, args, "");
     // check what to do if passcode is incorrect
 
   }
 
-  private String handleError(String message, String body) {
+  private T handleError(String message, String body) {
     Map<String, String> errorMap = new HashMap<String, String>();
     // errorMap.put(StompConstants.RECEIPT_ID_KEY, ""+receiptId);
     errorMap.put(StompConstants.MESSAGE_KEY, message);
-    String frame = buildFrame("ERROR", errorMap, body);
-    return frame;
+    return buildFrame("ERROR", errorMap, body);
   }
 
-  public String buildFrame(
+  public T buildFrame(
       String command,
       Map<String, String> arguments,
       String body) {
@@ -177,7 +162,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
       output = output + key + ":" + arguments.get(key);
     }
     output = output + "\n\n" + body + '\u0000';
-    return output;
+    return (T) output;
   }
 
   @Override

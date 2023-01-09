@@ -17,4 +17,10 @@ public interface Connections<T> {
 
     void addConnection(Connection<T> connection);
     void register(User user);
+
+    boolean isRegistered(User user);
+
+    boolean isConnected(User user);
+
+    boolean checkPasscode(User user);
 }
