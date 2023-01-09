@@ -125,7 +125,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     String frame = "";
 
     // check if users exists
-    User existingUser = connections.
+    User existingUser = connections
         .stream()
         .filter(u -> login.equals(u.getLogin()))
         .findFirst()
