@@ -10,6 +10,7 @@ import bgu.spl.net.srv.Connections;
 
 public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
+  
   private boolean shouldTerminate = false;
   private Vector<String> asdasd;
   private Connections<T> connections;
@@ -87,12 +88,12 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
   private T handleSubscribe(Map<String, String> key_Value_Map) {
     String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
-    if (destination == null) return handleError("no topic was mentioned when subscribing", destination)
-    boolean success = connections.subscribe(connectionId, destination);
+    if (destination == null) return (T) handleError("no topic was mentioned when subscribing", destination)
+    boolean success = connections.subscribe("", connectionId, destination);
     if (success) {
       return (T) "handleSubscribe";
     } else {
-      return handleError("cant subscribe to " + , null);
+      return (T) handleError("cant subscribe to " + , null);
     }
   }
 
