@@ -12,8 +12,6 @@ public class ConnectionsImpl<T> implements Connections<T> {
     private Vector<String> topics;
     private Map<String, String> subscriptionMap;
     private Map<Integer, Connection<T>> connectionsIdMap;
-
-    // <Login, Passcode>
     private Map<String, String> usersDatabase;
 
     public ConnectionsImpl() {
@@ -95,6 +93,23 @@ public class ConnectionsImpl<T> implements Connections<T> {
     public boolean isConnected(int connectionId, User user) {
         Connection<T> connection = connectionsIdMap.get(connectionId);
         return user.getLogin().equals(connection.getUser().getLogin());
+    }
+
+    @Override
+    public boolean checkPasscode(User user) {
+        return user.getPasscode().equals(usersDatabase.get(user.getLogin()));
+    }
+
+    @Override
+    public boolean isRegistered(User user) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isConnected(User user) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override
