@@ -125,14 +125,9 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     String frame = "";
 
     // check if users exists
-    User existingUser = connections.
-        .stream()
-        .filter(u -> login.equals(u.getLogin()))
-        .findFirst()
-        .orElse(null);
-    if (existingUser == null) {
-      usersList.add(user);
-      user.connect();
+    boolean isRegistered = connections.isRegistered(user);
+    if (!isRegistered) {
+      connections.register(user);
       Map<String, String> someMap = new HashMap<String, String>();
       someMap.put(StompConstants.VERSION_KEY, StompConstants.VERSION_VALUE);
       frame = buildFrame(StompConstants.CONNECTED, someMap, "");
@@ -142,7 +137,6 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
       if (user.isConnected()) {
         return (T) handleError("user is already connected", "");
       } else {
-        user.connect();
         Map<String, String> args = new HashMap<String, String>();
         args.put(StompConstants.VERSION_KEY, StompConstants.VERSION_VALUE);
         frame = buildFrame(StompConstants.CONNECTED, args, "");
@@ -151,6 +145,9 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     } else {
       return (T) handleError("incorrect passcode", "add something");
     }
+
+    user.connect();
+
     return (T) frame;
     // check what to do if passcode is incorrect
 

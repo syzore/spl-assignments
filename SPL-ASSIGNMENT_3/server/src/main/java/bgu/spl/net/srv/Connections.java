@@ -12,4 +12,6 @@ public interface Connections<T> {
     void disconnect(int connectionId);
 
     void connect(User user, int connectionId);
+
+    void register(User user);
 }

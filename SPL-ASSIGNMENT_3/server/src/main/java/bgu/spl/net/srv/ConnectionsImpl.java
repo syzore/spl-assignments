@@ -1,18 +1,32 @@
 package bgu.spl.net.srv;
 
 import java.util.Map;
+import java.util.Vector;
+import java.util.WeakHashMap;
 
 import bgu.spl.net.impl.stomp.User;
 
 public class ConnectionsImpl<T> implements Connections<T> {
 
+    private Vector<String> topics;
     private Map<String, String> subscriptionMap;
     private Map<String, Connection<T>> connectionsIdMap;
+    private Map<String, String> usersDatabase;
+
+    public ConnectionsImpl() {
+        this.topics = new Vector<>();
+        this.subscriptionMap = new WeakHashMap<String, String>();
+        this.connectionsIdMap = new WeakHashMap<String, Connection<T>>();
+        this.usersDatabase = new WeakHashMap<String, String>();
+    }
 
     // returns true if subscription succeeded, otherwise returns false
     public boolean subscribe(String username, int id, String destination) {
         String key = username + "_" + id;
         String abc = subscriptionMap.get(key);
+        if (!topics.contains(destination))
+            topics.add(destination);
+
         if (abc == null) {
             subscriptionMap.put(key, destination);
             return true;
@@ -24,7 +38,8 @@ public class ConnectionsImpl<T> implements Connections<T> {
     @Override
     public boolean send(int connectionId, T msg) {
         Connection<T> connection = connectionsIdMap.get(connectionId);
-        if (connection == null) connection.getHandler().send(msg);
+        if (connection == null)
+            connection.getHandler().send(msg);
         return false;
     }
 
@@ -45,5 +60,10 @@ public class ConnectionsImpl<T> implements Connections<T> {
         // if same user return error already connected
         // if not same user return error another user is already connected
         // if doesnt exists add and return true
+    }
+
+    @Override
+    public void register(User user) {
+        // TODO Auto-generated method stub
     }
 }
