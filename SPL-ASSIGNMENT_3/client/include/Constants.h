@@ -21,4 +21,7 @@ const std::string login_key = "login";
 const std::string host_key = "host";
 const std::string passcode_key = "passcode";
 const std::string accept_version_key = "accept-version";
+const std::string destination_key = "destination";
+const std::string receipt_key = "receipt";
+const std::string id_key = "id";
 #endif

@@ -4,11 +4,13 @@
 #include "../include/ConnectionHandler.h"
 #include "../include/Constants.h"
 // #include "../include/StringUtil.h"
+#include "../include/StompClient.h"
 #include "../include/StompProtocol.h"
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+
 	if (argc < 3)
 	{
 		std::cerr << "Usage: " << argv[0] << " host port" << std::endl
@@ -25,17 +27,22 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	std::thread t1(StompProtocol::keyboard_handler_task, std::ref(connectionHandler));
-	std::thread t2(StompProtocol::socket_listener_task, std::ref(connectionHandler));
+	StompClient client();
+	// StompProtocol proto = ...
+	std::thread t1(StompClient::keyboard_handler_task, std::ref(connectionHandler));
+	std::thread t2(StompClient::socket_listener_task, std::ref(connectionHandler));
 
 	t1.join();
 	t2.join();
 	return 0;
 }
 
-void StompProtocol::socket_listener_task(ConnectionHandler &connectionHandler)
+StompClient::StompClient() : currentUser(nullptr), id(0){}
+
+
+void StompClient::socket_listener_task(ConnectionHandler &connectionHandler)
 {
-	while (1)
+	while (0)
 	{
 		const short bufsize = 1024;
 		char buf[bufsize];
@@ -68,22 +75,19 @@ void StompProtocol::socket_listener_task(ConnectionHandler &connectionHandler)
 	}
 }
 
-void StompProtocol::handle_message_from_subscription(std::string answer)
-{
-	std::cout << "got new message from server: " << answer << std::endl;
-}
 
-void StompProtocol::keyboard_handler_task(ConnectionHandler &connectionHandler)
+void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 {
 	while (1)
 	{
 		const short bufsize = 1024;
 		char buf[bufsize];
-		std::cout << "what is your commant?" << std::endl;
+		std::cout << "what is your command?" << std::endl;
 		std::cin.getline(buf, bufsize);
-		std::string command(buf);
-
-		std::string encodedCommand = create_command_frame(command);
+		std::string commandLine(buf);
+		std::vector<std::string> lineParts = StringUtil::split(commandLine, ' ');
+		
+		//std::string encodedCommand = create_command_frame(command);
 
 		std::cout << "encoded comman = " << encodedCommand << std::endl;
 
@@ -130,40 +134,36 @@ void StompProtocol::keyboard_handler_task(ConnectionHandler &connectionHandler)
 	}
 }
 
-std::string StompProtocol::create_command_frame(std::string line)
+const int StompClient::getNextId()
 {
-	std::vector<std::string> lineParts;
-	std::string command;
-	if (line.find(' ') < line.length())
-	{
-		lineParts = StringUtil::split(line, ' ');
-		std::cout << 'line parts size = ' << lineParts.size() << std::endl;
-		command = lineParts[0];
-	}
-	else
-	{
-		command = line;
-	}
+	int output = id; 
+	id++;
+	return output;
+}
+
+std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
+{
+	std::string command = lineParts[0];
 
 	if (command == command_login)
 	{
-		return handle_login_command(lineParts);
+		return StompProtocol::handle_login_command(lineParts);
 	}
 	else if (command == command_logout)
 	{
-		return handle_logout_command(lineParts);
+		return StompProtocol::handle_logout_command(lineParts);
 	}
 	else if (command == command_join)
 	{
-		return handle_join_command(lineParts);
+		return StompProtocol::handle_join_command(lineParts);
 	}
 	else if (command == command_exit)
 	{
-		return handle_exit_command(lineParts);
+		return StompProtocol::handle_exit_command(lineParts);
 	}
 	else if (command == command_summary)
 	{
-		return handle_summary_command(lineParts);
+		return StompProtocol::handle_summary_command(lineParts);
 	}
 	else
 	{
@@ -172,93 +172,7 @@ std::string StompProtocol::create_command_frame(std::string line)
 	}
 }
 
-std::string StompProtocol::handle_login_command(std::vector<std::string> lineParts)
+User StompClient::getCurrentUser()
 {
-	std::string address = lineParts[1];
-	std::string login = lineParts[2];
-	std::string passcode = lineParts[3];
-	std::string host = "stomp.cs.bgu.ac.il";
-	std::string accept_version = "1.2";
-
-	std::vector<std::pair<std::string, std::string>> args;
-
-	args.push_back(std::pair<std::string, std::string>(host_key, host));
-	args.push_back(std::pair<std::string, std::string>(passcode_key, passcode));
-	args.push_back(std::pair<std::string, std::string>(accept_version_key, accept_version));
-	args.push_back(std::pair<std::string, std::string>(login_key, login));
-
-	return create_command_frame(CONNECT, args, "");
-}
-
-std::string StompProtocol::handle_logout_command(std::vector<std::string> lineParts)
-{
-}
-std::string StompProtocol::handle_join_command(std::vector<std::string> lineParts)
-{
-}
-std::string StompProtocol::handle_exit_command(std::vector<std::string> lineParts)
-{
-}
-std::string StompProtocol::handle_summary_command(std::vector<std::string> lineParts)
-{
-}
-
-std::string StompProtocol::create_command_frame(std::string command, std::vector<std::pair<std::string, std::string>> args, std::string body)
-{
-	std::string frame;
-	frame.append(command + "\n");
-	for (std::pair<std::string, std::string> pair : args)
-	{
-		frame.append(pair.first + ":" + pair.second + "\n");
-	}
-
-	if (body != "")
-	{
-		frame.append("\n");
-		frame.append(body + "\n");
-	}
-	frame.append("\0");
-
-	return frame;
-}
-
-void StompProtocol::parse_then_handle_response(std::string answer)
-{
-	std::istringstream iteratable(answer);
-	std::string line;
-	std::getline(iteratable, line);
-
-	// COMMAND
-	std::string command = std::string(line);
-
-	// ARGUMENTS
-	std::map<std::string, std::string> args;
-	while (std::getline(iteratable, line))
-	{
-		if (line.empty())
-			break;
-		std::cout << line << std::endl;
-		int index = line.find(':');
-		std::string key = line.substr(0, index);
-		std::string value = line.substr(index + 1, line.length());
-		args.insert({std::make_pair(key, value)});
-	}
-
-	// BODY
-	std::string body;
-	while (std::getline(iteratable, line))
-	{
-		if (line == "\0")
-			break;
-		body += line;
-	}
-
-	handle_response(command, args, body);
-}
-
-void StompProtocol::handle_response(std::string command, std::map<std::string, std::string> args, std::string body)
-{
-	if (command == CONNECTED)
-	{
-	}
+	return currentUser;
 }
