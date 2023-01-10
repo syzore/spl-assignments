@@ -1,7 +1,5 @@
 package bgu.spl.net.impl.stomp;
 
-import bgu.spl.net.srv.Connections;
-
 public class User {
 
     private String login;
