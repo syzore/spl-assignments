@@ -3,14 +3,14 @@
 
 User::User(std::string name)
 {
-    name = name;;
-    subscriptionsMap = std::map<string, int>();
+    this->name = name;;
+    subscriptionsMap = new std::map<string, int>();
 }
 
 const string User::getName(){
     return name;
 }
 
-std::map<string, int> User::getSubscriptionsMap(){
+std::map<string, int>* User::getSubscriptionsMap(){
     return subscriptionsMap;
 }

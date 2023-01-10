@@ -5,11 +5,11 @@ using namespace std;
 
 class User {
     private:
-        std::map<string, int> subscriptionsMap;
+        std::map<string, int>* subscriptionsMap;
         string name;
 
     public:
         User(string name);
         const string getName();
-        std::map<string, int> getSubscriptionsMap();
+        std::map<string, int>* getSubscriptionsMap();
 };

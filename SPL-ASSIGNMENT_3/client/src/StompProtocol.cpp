@@ -17,47 +17,6 @@ void StompProtocol::handle_message_from_subscription(std::string answer)
 	std::cout << "got new message from server: " << answer << std::endl;
 }
 
-std::string StompProtocol::create_command_frame(std::string line)
-{
-	std::vector<std::string> lineParts;
-	std::string command;
-	if (line.find(' ') < line.length())
-	{
-		lineParts = StringUtil::split(line, ' ');
-		std::cout << 'line parts size = ' << lineParts.size() << std::endl;
-		command = lineParts[0];
-	}
-	else
-	{
-		command = line;
-	}
-
-	if (command == command_login)
-	{
-		return handle_login_command(lineParts);
-	}
-	else if (command == command_logout)
-	{
-		return handle_logout_command(lineParts);
-	}
-	else if (command == command_join)
-	{
-		return handle_join_command(lineParts);
-	}
-	else if (command == command_exit)
-	{
-		return handle_exit_command(lineParts);
-	}
-	else if (command == command_summary)
-	{
-		return handle_summary_command(lineParts);
-	}
-	else
-	{
-		std::cout << 'no command corresponding with ' << command << " was found..." << std::endl;
-		return "";
-	}
-}
 
 std::string StompProtocol::handle_login_command(std::vector<std::string> lineParts)
 {
@@ -82,15 +41,19 @@ std::string StompProtocol::handle_logout_command(std::vector<std::string> linePa
 {
 }
 
-std::string StompProtocol::handle_join_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_join_command(std::vector<std::string> lineParts, User *currentUser, int subscriptionId, int receiptId)
 {
-	std::string game = lineParts[1];
-	//int id = 
-
+	if (currentUser != nullptr){
+		cout << "user is already connected" << endl;
+		return "";
+	}
+	
 	std::vector<std::pair<std::string, std::string>> args;
 
-	args.push_back(std::pair<std::string, std::string>(destination_key, game));
-	
+	args.push_back(std::pair<std::string, std::string>(destination_key, lineParts[1]));
+	args.push_back(std::pair<std::string, std::string>(subscription_id_key, std::to_string(subscriptionId)));
+	args.push_back(std::pair<std::string, std::string>(receipt_key, std::to_string(receiptId)));
+	return create_command_frame(SUBSCRIBE, args, "");
 }
 
 std::string StompProtocol::handle_exit_command(std::vector<std::string> lineParts)
