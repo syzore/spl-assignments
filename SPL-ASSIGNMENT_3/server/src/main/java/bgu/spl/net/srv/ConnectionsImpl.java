@@ -36,6 +36,19 @@ public class ConnectionsImpl<T> implements Connections<T> {
         }
     }
 
+    public void unsubscribe(String username, int id, String destination) {
+        String key = username + "_" + id;
+        String abc = subscriptionMap.get(key);
+        if (abc == null)
+            System.out.println("user does not subscribe this game");
+        else{
+            //topics.remove(destination);
+            subscriptionMap.remove(key, destination);
+            if (!subscriptionMap.containsValue(destination))
+                topics.remove(destination);
+        }
+    }
+
     @Override
     public boolean send(int connectionId, T msg) {
         Connection<T> connection = getConnectionById(connectionId);
@@ -52,7 +65,8 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     @Override
     public void disconnect(int connectionId) {
-        // TODO Auto-generated method stub
+        if (connectionsIdMap.containsKey(connectionId))
+            connectionsIdMap.remove(connectionId);
     }
 
     @Override

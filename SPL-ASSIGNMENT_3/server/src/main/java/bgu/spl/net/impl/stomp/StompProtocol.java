@@ -75,40 +75,47 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     }
   }
 
-  private T handleDisconnect(Map<String, String> key_Value_Map, String body, String originalMassage) {
-    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
-    shouldTerminate = true;
-    return (T) "handleDisconnect";
-  }
-
-  private T handleUnsubscribe(Map<String, String> key_Value_Map, String body, String originalMassage) {
+  private T handleDisconnect(Map<String, String> key_Value_Map, String body, String originalMessage) {
     String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
     connections.disconnect(connectionId);
-    return (T) "handleUnsubscribe";
+    Map<String, String> args = new HashMap<String, String>();
+    args.put(StompConstants.RECEIPT_ID_KEY, receiptId);
+    shouldTerminate = true;
+    return buildFrame(StompConstants.RECEIPT, args, StompConstants.EMPTY_BODY);
   }
 
-  private T handleSubscribe(Map<String, String> key_Value_Map, String originalMassage) {
+  private T handleUnsubscribe(Map<String, String> key_Value_Map, String body, String originalMessage) {
+    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
+    String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
+    User user = connections.getConnectionById(connectionId).getUser();
+    connections.subscribe(user.getLogin(), connectionId, destination);
+    Map<String, String> args = new HashMap<String, String>();
+    args.put(StompConstants.RECEIPT_ID_KEY, receiptId);
+    return buildFrame(StompConstants.RECEIPT, args, StompConstants.EMPTY_BODY);
+  }
+
+  private T handleSubscribe(Map<String, String> key_Value_Map, String originalMessage) {
     String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
     String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
     if (destination == null)
-      return handleError("No topic was mentioned when subscribing.", originalMassage, receiptId,
+      return handleError("No topic was mentioned when subscribing.", originalMessage, receiptId,
           "When subscribing, you must include which topic you would like to subscribe to.");
-
-    boolean success = connections.subscribe("", connectionId, destination);
+    User user = connections.getConnectionById(connectionId).getUser();
+    boolean success = connections.subscribe(user.getLogin(), connectionId, destination);
     if (success) {
       return (T) "handleSubscribe\0";
     } else {
-      return handleError("Was not able to subscribe to " + destination, originalMassage, receiptId, "");
+      return handleError("Was not able to subscribe to " + destination, originalMessage, receiptId, "");
     }
   }
 
-  private T handleSend(Map<String, String> key_Value_Map, String body, String originalMassage) {
+  private T handleSend(Map<String, String> key_Value_Map, String body, String originalMessage) {
     String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
     connections.send(body, null);
     return (T) "SEND";
   }
 
-  private T handleConnect(Map<String, String> key_Value_Map, String originalMassage) {
+  private T handleConnect(Map<String, String> key_Value_Map, String originalMessage) {
     System.out.println("handle connect");
 
     String acceptVersion = key_Value_Map.get("accept-version");
@@ -118,10 +125,10 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
 
     if (!acceptVersion.equals(StompConstants.ACCEPT_VERSION_VALUE)) {
-      return handleError("only version supported is 1.2", originalMassage, receiptId, "");
+      return handleError("only version supported is 1.2", originalMessage, receiptId, "");
     }
     if (!host.equals(StompConstants.HOST_VALUE)) {
-      return handleError("not the host we support here", originalMassage, receiptId, "...");
+      return handleError("not the host we support here", originalMessage, receiptId, "...");
     }
 
     User user = new User(login, passcode);
@@ -131,7 +138,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     if (!isRegistered) {
       connections.register(user);
     } else if (!connections.checkPasscode(user)) {
-      return handleError("Incorrect passcode", originalMassage, receiptId, "The entered password was not corrent.");
+      return handleError("Incorrect passcode", originalMessage, receiptId, "The entered password was not corrent.");
     }
 
     // if he got here it means the login / registration was successful..
@@ -139,10 +146,10 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     // handle connection and shit..
     ConnectionResult result = connections.connect(user, connectionId);
     if (result == ConnectionResult.ALREADY_CONNECTED) {
-      return handleError("User is already connected", originalMassage, receiptId,
+      return handleError("User is already connected", originalMessage, receiptId,
           "This user is already connected through this client.");
     } else if (result == ConnectionResult.ANOTHER_USER_CONNECTED) {
-      return handleError("Another user is already connected", originalMassage, receiptId,
+      return handleError("Another user is already connected", originalMessage, receiptId,
           "Another is already connected through this client.");
     }
 
@@ -152,7 +159,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     return buildFrame(StompConstants.CONNECTED, args, "");
   }
 
-  private T handleError(String message, String originalMassage, String receiptId, String explanation) {
+  private T handleError(String message, String originalMessage, String receiptId, String explanation) {
     shouldTerminate = true;
     Map<String, String> errorMap = new HashMap<String, String>();
     errorMap.put(StompConstants.MESSAGE_KEY, message);
@@ -160,7 +167,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
       errorMap.put(StompConstants.RECEIPT_ID_KEY, receiptId);
     }
     String body = "The message: \n----- \n";
-    body += originalMassage;
+    body += originalMessage;
     body += "----- \n";
     if (!explanation.isEmpty()) {
       body += explanation;

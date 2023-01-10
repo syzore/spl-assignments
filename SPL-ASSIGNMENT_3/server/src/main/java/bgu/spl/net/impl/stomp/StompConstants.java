@@ -36,5 +36,6 @@ public class StompConstants {
     public static final String DESTINED_KEY = "destined";
 
     public static final String ID_KEY = "id";
+    public static final String EMPTY_BODY = "";
 
 }
