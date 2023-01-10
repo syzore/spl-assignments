@@ -1,7 +1,7 @@
 #pragma once
 #include "../include/User.h"
 
-User::User(std::string name) : name(name), subscriptionsMap()
+User::User(std::string name) : name(name), subscriptionsMap(), mIsConnected(false)
 {
 }
 
@@ -22,4 +22,14 @@ const string User::getName()
 std::map<string, int> *User::getSubscriptionsMap()
 {
     return subscriptionsMap;
+}
+
+void User::connect()
+{
+    mIsConnected = true;
+}
+
+bool User::isConnected()
+{
+    return mIsConnected;
 }

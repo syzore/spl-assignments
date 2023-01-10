@@ -37,14 +37,21 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-StompClient::StompClient() : currentUser(nullptr), subscriptionId(0), receiptId(0) {}
+StompClient::StompClient() : currentUser(nullptr), subscriptionId(0), receiptId(0), waitingForResponse(false) {}
+
+StompClient::~StompClient()
+{
+	if (currentUser)
+	{
+		delete currentUser;
+		currentUser = nullptr;
+	}
+}
 
 void StompClient::socket_listener_task(ConnectionHandler &connectionHandler)
 {
-	while (0)
+	while (1)
 	{
-		const short bufsize = 1024;
-		char buf[bufsize];
 		std::string answer;
 		// Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
 		// We could also use: connectionHandler.getline(answer) and then get the answer without the newline char at the end
@@ -68,7 +75,7 @@ void StompClient::socket_listener_task(ConnectionHandler &connectionHandler)
 		}
 		else
 		{
-			StompProtocol::handle_message_from_subscription(answer);
+			parse_then_handle_response(answer);
 		}
 	}
 }
@@ -100,40 +107,6 @@ void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 			std::cout << "Disconnected. Exiting...\n"
 					  << std::endl;
 			break;
-		}
-
-		// connectionHandler.sendLine(line) appends '\n' to the message. Therefor we send len+1 bytes.
-
-		// We can use one of three options to read data from the server:
-		// 1. Read a fixed number of characters
-		// 2. Read a line (up to the newline character using the getline() buffered reader
-		// 3. Read up to the null character
-		std::string answer;
-		// Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
-		// We could also use: connectionHandler.getline(answer) and then get the answer without the newline char at the end
-		std::cout << "waiting for server response" << std::endl;
-		if (!connectionHandler.getFrame(answer))
-		{
-			std::cout << "Disconnected. Exiting...\n"
-					  << std::endl;
-			break;
-		}
-
-		int len = answer.length();
-		// A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
-		// we filled up to the \n char - we must make sure now that a 0 char is also present. So we truncate last character.
-		answer.resize(len - 1);
-		std::cout << "Reply: \n"
-				  << answer << std::endl;
-		if (answer == "bye")
-		{
-			std::cout << "Exiting...\n"
-					  << std::endl;
-			break;
-		}
-		else
-		{
-			parse_then_handle_response(answer);
 		}
 	}
 }
@@ -176,6 +149,12 @@ void StompClient::handle_response(std::string command, std::map<std::string, std
 {
 	if (command == CONNECTED)
 	{
+		if (!currentUser)
+		{
+			std::cout << "Trying to connect the user but the current user is null" << std::endl;
+			return;
+		}
+		currentUser->connect();
 	}
 	else if (command == RECEIPT)
 	{

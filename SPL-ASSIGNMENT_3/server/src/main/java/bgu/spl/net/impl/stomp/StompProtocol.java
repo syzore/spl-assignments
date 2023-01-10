@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Scanner;
 
 import bgu.spl.net.api.StompMessagingProtocol;
-import bgu.spl.net.srv.Connection;
 import bgu.spl.net.srv.ConnectionResult;
 import bgu.spl.net.srv.Connections;
 

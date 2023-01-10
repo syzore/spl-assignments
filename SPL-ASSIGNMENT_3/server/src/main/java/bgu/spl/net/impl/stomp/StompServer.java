@@ -45,7 +45,7 @@ public class StompServer<T> implements Server<T> {
             while (!Thread.currentThread().isInterrupted()) {
                 Socket clientSock = serverSock.accept();
 
-                Connection<T> connection = new Connection();
+                Connection<T> connection = new Connection<>();
                 connection.setConnectionId(++currentConnectionId);
                 connections.addConnection(connection);
 
