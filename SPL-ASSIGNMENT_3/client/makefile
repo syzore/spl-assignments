@@ -3,17 +3,14 @@ LDFLAGS:=-lboost_system -lpthread
 
 all: clean StompWCIClient
 
-StompClient: bin/ConnectionHandler.o bin/stompClient.o
-	g++ -o bin/StompClient bin/ConnectionHandler.o bin/stompClient.o $(LDFLAGS)
+StompClient: bin/ConnectionHandler.o bin/StompClient.o
+	g++ -o bin/StompClient bin/ConnectionHandler.o bin/StompClient.o $(LDFLAGS)
 
-StompWCIClient: bin/ConnectionHandler.o bin/StompClient.o bin/event.o bin/stringUtil.o
-	g++ -o bin/StompWCIClient bin/ConnectionHandler.o bin/StompClient.o bin/Event.o bin/StringUtil.o $(LDFLAGS)
+StompWCIClient: bin/ConnectionHandler.o bin/StompClient.o bin/StompProtocol.o bin/event.o bin/stringUtil.o bin/User.o
+	g++ -o bin/StompWCIClient bin/ConnectionHandler.o bin/StompClient.o bin/StompProtocol.o bin/Event.o bin/StringUtil.o bin/User.o $(LDFLAGS)
 
 bin/ConnectionHandler.o: src/ConnectionHandler.cpp
 	g++ $(CFLAGS) -o bin/ConnectionHandler.o src/ConnectionHandler.cpp
-
-bin/stompClient.o: src/stompClient.cpp
-	g++ $(CFLAGS) -o bin/stompClient.o src/stompClient.cpp
 
 bin/event.o: src/event.cpp
 	g++ $(CFLAGS) -o bin/event.o src/event.cpp
@@ -23,6 +20,12 @@ bin/stringUtil.o: src/stringUtil.cpp
 
 bin/StompClient.o: src/StompClient.cpp
 	g++ $(CFLAGS) -o bin/StompClient.o src/StompClient.cpp
+
+bin/StompProtocol.o: src/StompProtocol.cpp
+	g++ $(CFLAGS) -o bin/StompProtocol.o src/StompProtocol.cpp
+
+bin/User.o: src/User.cpp
+	g++ $(CFLAGS) -o bin/User.o src/User.cpp
 
 .PHONY: clean
 clean:

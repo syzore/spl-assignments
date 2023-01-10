@@ -102,8 +102,11 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
           "When subscribing, you must include which topic you would like to subscribe to.");
     User user = connections.getConnectionById(connectionId).getUser();
     boolean success = connections.subscribe(user.getLogin(), connectionId, destination);
+
     if (success) {
-      return (T) "handleSubscribe\0";
+      Map<String, String> args = new HashMap<String, String>();
+      args.put(StompConstants.RECEIPT_ID_KEY, receiptId);
+      return buildFrame(StompConstants.RECEIPT, args, destination);
     } else {
       return handleError("Was not able to subscribe to " + destination, originalMessage, receiptId, "");
     }

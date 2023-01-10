@@ -1,11 +1,13 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
+
 #include "../include/ConnectionHandler.h"
 #include "../include/Constants.h"
-// #include "../include/StringUtil.h"
 #include "../include/StompClient.h"
 #include "../include/StompProtocol.h"
+#include "../include/threadTasks.h"
+
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -17,27 +19,21 @@ int main(int argc, char *argv[])
 				  << std::endl;
 		return -1;
 	}
+
 	std::string host = argv[1];
 	short port = atoi(argv[2]);
 
-	ConnectionHandler connectionHandler(host, port);
-	if (!connectionHandler.connect())
-	{
-		std::cerr << "Cannot connect to " << host << ":" << port << std::endl;
-		return 1;
-	}
-
-	StompClient client();
+	StompClient client(host, port);
 	// StompProtocol proto = ...
-	std::thread t1(StompClient::keyboard_handler_task, std::ref(connectionHandler));
-	std::thread t2(StompClient::socket_listener_task, std::ref(connectionHandler));
+	std::thread t1(keyboard_handler_task, std::ref(client));
+	std::thread t2(socket_listener_task, std::ref(client));
 
 	t1.join();
 	t2.join();
 	return 0;
 }
 
-StompClient::StompClient() : currentUser(nullptr), subscriptionId(0), receiptId(0), waitingForResponse(false) {}
+StompClient::StompClient(std::string host, short port) : host(host), port(port), currentUser(nullptr), connectionHandler(nullptr), subscriptionId(0), receiptId(0), waitingForResponse(false) {}
 
 StompClient::~StompClient()
 {
@@ -46,16 +42,27 @@ StompClient::~StompClient()
 		delete currentUser;
 		currentUser = nullptr;
 	}
+
+	if (connectionHandler)
+	{
+		delete connectionHandler;
+		connectionHandler = nullptr;
+	}
 }
 
-void StompClient::socket_listener_task(ConnectionHandler &connectionHandler)
+void socket_listener_task(StompClient &client)
 {
+	ConnectionHandler *connectionHandler = client.getConnectionHandler();
 	while (1)
 	{
+		while (!connectionHandler)
+		{
+			// wait..
+		}
 		std::string answer;
 		// Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
 		// We could also use: connectionHandler.getline(answer) and then get the answer without the newline char at the end
-		if (!connectionHandler.getFrame(answer))
+		if (!connectionHandler->getFrame(answer))
 		{
 			std::cout << "Disconnected. Exiting...\n"
 					  << std::endl;
@@ -75,13 +82,15 @@ void StompClient::socket_listener_task(ConnectionHandler &connectionHandler)
 		}
 		else
 		{
-			parse_then_handle_response(answer);
+			client.parse_then_handle_response(answer);
 		}
 	}
 }
 
-void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
+void keyboard_handler_task(StompClient &client)
 {
+	ConnectionHandler *connectionHandler = client.getConnectionHandler();
+
 	while (1)
 	{
 		const short bufsize = 1024;
@@ -91,7 +100,7 @@ void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 		std::string commandLine(buf);
 		std::vector<std::string> lineParts = StringUtil::split(commandLine, ' ');
 
-		std::string frame = parse_command_line(lineParts);
+		std::string frame = client.parse_command_line(lineParts);
 
 		std::cout << "encoded frame = \n"
 				  << frame << std::endl;
@@ -102,13 +111,18 @@ void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 			continue;
 		}
 
-		if (!connectionHandler.sendFrame(frame))
+		if (!connectionHandler->sendFrame(frame))
 		{
 			std::cout << "Disconnected. Exiting...\n"
 					  << std::endl;
 			break;
 		}
 	}
+}
+
+ConnectionHandler *StompClient::getConnectionHandler()
+{
+	return connectionHandler;
 }
 
 void StompClient::parse_then_handle_response(std::string answer)
@@ -191,7 +205,9 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 
 	if (command == command_login)
 	{
-		return StompProtocol::handle_login_command(lineParts, currentUser);
+		lineParts[1] = host + ":" + std::to_string(port);
+		ConnectionHandler *connectionHandler = getConnectionHandler();
+		return StompProtocol::handle_login_command(lineParts, currentUser, connectionHandler);
 	}
 	else if (command == command_logout)
 	{

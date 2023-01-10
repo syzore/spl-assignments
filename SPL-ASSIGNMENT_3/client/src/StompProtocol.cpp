@@ -6,18 +6,17 @@
 #include "../include/StompProtocol.h"
 #include "../include/User.h"
 
-int main(int argc, char *argv[])
-{
-}
+#include <boost/lexical_cast.hpp>
 
 void StompProtocol::handle_message_from_subscription(std::string answer)
 {
 	std::cout << "got new message from server: " << answer << std::endl;
 }
 
-std::string StompProtocol::handle_login_command(std::vector<std::string> lineParts, User *currentUser)
+std::string StompProtocol::handle_login_command(std::vector<std::string> lineParts, User *currentUser, ConnectionHandler *&connectionHandler)
 {
-	if (currentUser || currentUser->isConnected())
+	// re-write this.. if the user is not null or if not connected
+	if (currentUser || (currentUser && currentUser->isConnected()))
 	{
 		std::string login = lineParts[2];
 		if (login == currentUser->getName())
@@ -36,6 +35,20 @@ std::string StompProtocol::handle_login_command(std::vector<std::string> linePar
 	std::string passcode = lineParts[3];
 	std::string host = "stomp.cs.bgu.ac.il";
 	std::string accept_version = "1.2";
+
+	int colonIndex = address.find_first_of(':');
+
+	std::string ip = address.substr(0, colonIndex);
+	short port = boost::lexical_cast<short>(address.substr(colonIndex + 1, address.length()));
+	if (!connectionHandler)
+	{
+		connectionHandler = new ConnectionHandler(ip, port);
+	}
+	if (!connectionHandler->connect())
+	{
+		std::cerr << "Cannot connect to " << ip << ":" << port << std::endl;
+		return "";
+	}
 
 	currentUser = new User(login);
 

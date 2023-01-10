@@ -10,9 +10,12 @@ private:
     int receiptId;
     User *currentUser;
     bool waitingForResponse;
+    ConnectionHandler *connectionHandler;
+    std::string host;
+    short port;
 
 public:
-    StompClient() = default;
+    StompClient(std::string host, short port);
     ~StompClient();
     void keyboard_handler_task(ConnectionHandler &connectionHandler);
     void socket_listener_task(ConnectionHandler &connectionHandler);
@@ -21,6 +24,7 @@ public:
     const int getNextSubscriptionId();
     const int getNextReceiptId();
     void resetCurrentUser();
+    ConnectionHandler *getConnectionHandler();
     std::string parse_command_line(std::vector<std::string> lineParts);
     User *getCurrentUser();
 };
