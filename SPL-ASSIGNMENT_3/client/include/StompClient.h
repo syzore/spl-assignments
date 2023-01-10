@@ -14,7 +14,7 @@ public:
     StompClient() = default;
     void keyboard_handler_task(ConnectionHandler &connectionHandler);
     void socket_listener_task(ConnectionHandler &connectionHandler);
-    const int getNextId();
+    const int getNextSubscriptionId();
     const int getNextReceiptId();
     void resetCurrentUser();
     std::string parse_command_line(std::vector<std::string> lineParts);
