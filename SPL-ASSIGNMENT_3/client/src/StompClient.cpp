@@ -48,7 +48,7 @@ void StompClient::socket_listener_task(ConnectionHandler &connectionHandler)
 		std::string answer;
 		// Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
 		// We could also use: connectionHandler.getline(answer) and then get the answer without the newline char at the end
-		if (!connectionHandler.getLine(answer))
+		if (!connectionHandler.getFrame(answer))
 		{
 			std::cout << "Disconnected. Exiting...\n"
 					  << std::endl;
@@ -133,8 +133,52 @@ void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 		}
 		else
 		{
-			StompProtocol::parse_then_handle_response(answer);
+			parse_then_handle_response(answer);
 		}
+	}
+}
+
+void StompClient::parse_then_handle_response(std::string answer)
+{
+	std::istringstream iteratable(answer);
+	std::string line;
+	std::getline(iteratable, line);
+
+	// COMMAND
+	std::string command = std::string(line);
+
+	// ARGUMENTS
+	std::map<std::string, std::string> args;
+	while (std::getline(iteratable, line))
+	{
+		if (line.empty())
+			break;
+		std::cout << line << std::endl;
+		int index = line.find(':');
+		std::string key = line.substr(0, index);
+		std::string value = line.substr(index + 1, line.length());
+		args.insert({std::make_pair(key, value)});
+	}
+
+	// BODY
+	std::string body;
+	while (std::getline(iteratable, line))
+	{
+		if (line == "\0")
+			break;
+		body += line;
+	}
+
+	handle_response(command, args, body);
+}
+
+void StompClient::handle_response(std::string command, std::map<std::string, std::string> args, std::string body)
+{
+	if (command == CONNECTED)
+	{
+	}
+	else if (command == RECEIPT)
+	{
 	}
 }
 

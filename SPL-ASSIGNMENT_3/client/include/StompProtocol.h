@@ -18,6 +18,4 @@ public:
     static std::string handle_summary_command(std::vector<std::string> lineParts, User *currentUser);
     static std::string handle_report_command(std::vector<std::string> lineParts, User *currentUser);
     static std::string create_command_frame(std::string command, std::vector<std::pair<std::string, std::string>> args, std::string body);
-    static void parse_then_handle_response(std::string answer);
-    static void handle_response(std::string command, std::map<std::string, std::string> args, std::string body);
 };
