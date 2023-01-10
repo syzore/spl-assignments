@@ -6,7 +6,7 @@
 class StompClient
 {
 private:
-    int id;
+    int subscriptionId;
     int receiptId;
     User *currentUser;
 

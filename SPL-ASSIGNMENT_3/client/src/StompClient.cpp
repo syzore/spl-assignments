@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-StompClient::StompClient() : currentUser(nullptr), id(0), receiptId(0) {}
+StompClient::StompClient() : currentUser(nullptr), subscriptionId(0), receiptId(0) {}
 
 void StompClient::socket_listener_task(ConnectionHandler &connectionHandler)
 {
@@ -89,13 +89,18 @@ void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 		std::cout << "encoded frame = \n"
 				  << frame << std::endl;
 
-		if (frame != "")
-			if (!connectionHandler.sendFrame(frame))
-			{
-				std::cout << "Disconnected. Exiting...\n"
-						  << std::endl;
-				break;
-			}
+		if (frame == "")
+		{
+			// cout incorrect command?
+			continue;
+		}
+
+		if (!connectionHandler.sendFrame(frame))
+		{
+			std::cout << "Disconnected. Exiting...\n"
+					  << std::endl;
+			break;
+		}
 
 		// connectionHandler.sendLine(line) appends '\n' to the message. Therefor we send len+1 bytes.
 
@@ -133,10 +138,10 @@ void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 	}
 }
 
-const int StompClient::getNextId()
+const int StompClient::getNextSubscriptionId()
 {
-	int output = id;
-	id++;
+	int output = subscriptionId;
+	subscriptionId++;
 	return output;
 }
 
@@ -154,7 +159,7 @@ void StompClient::resetCurrentUser()
 		delete currentUser;
 		currentUser = nullptr;
 	}
-	id = 0;
+	subscriptionId = 0;
 }
 
 std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
@@ -171,7 +176,7 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 	}
 	else if (command == command_join)
 	{
-		return StompProtocol::handle_join_command(lineParts, currentUser, getNextId());
+		return StompProtocol::handle_join_command(lineParts, currentUser, getNextSubscriptionId(), getNextReceiptId());
 	}
 	else if (command == command_exit)
 	{
