@@ -24,4 +24,5 @@ const std::string accept_version_key = "accept-version";
 const std::string destination_key = "destination";
 const std::string receipt_key = "receipt";
 const std::string id_key = "id";
+const std::string EMPTY_BODY = "";
 #endif

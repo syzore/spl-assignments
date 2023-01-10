@@ -45,10 +45,6 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
                     if (nextMessage != null) {
                         T response = protocol.process(nextMessage);
                         System.out.println("response = \n" + response);
-                        String s = response.toString().contains("\u0000") ? "yes" : " no";
-                        String s2 = response.toString().contains("\0") ? "yes" : " no";
-                        System.out.println("does the response containts null? " + s);
-                        System.out.println("does the response containts null zero? " + s2);
                         if (response != null) {
                             out.write(encdec.encode(response));
                             out.flush();

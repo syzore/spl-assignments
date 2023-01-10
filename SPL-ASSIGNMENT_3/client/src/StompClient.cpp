@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
 		std::cerr << "Cannot connect to " << host << ":" << port << std::endl;
 		return 1;
 	}
-	
 
 	StompClient client();
 	// StompProtocol proto = ...
@@ -38,8 +37,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-StompClient::StompClient() : currentUser(nullptr), id(0){}
-
+StompClient::StompClient() : currentUser(nullptr), id(0), receiptId(0) {}
 
 void StompClient::socket_listener_task(ConnectionHandler &connectionHandler)
 {
@@ -70,11 +68,10 @@ void StompClient::socket_listener_task(ConnectionHandler &connectionHandler)
 		}
 		else
 		{
-			handle_message_from_subscription(answer);
+			StompProtocol::handle_message_from_subscription(answer);
 		}
 	}
 }
-
 
 void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 {
@@ -86,14 +83,14 @@ void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 		std::cin.getline(buf, bufsize);
 		std::string commandLine(buf);
 		std::vector<std::string> lineParts = StringUtil::split(commandLine, ' ');
-		
-		//std::string encodedCommand = create_command_frame(command);
+
+		std::string frame = parse_command_line(lineParts);
 
 		std::cout << "encoded frame = \n"
-				  << encodedCommand << std::endl;
+				  << frame << std::endl;
 
-		if (encodedCommand != "")
-			if (!connectionHandler.sendFrame(encodedCommand))
+		if (frame != "")
+			if (!connectionHandler.sendFrame(frame))
 			{
 				std::cout << "Disconnected. Exiting...\n"
 						  << std::endl;
@@ -131,16 +128,33 @@ void StompClient::keyboard_handler_task(ConnectionHandler &connectionHandler)
 		}
 		else
 		{
-			parse_then_handle_response(answer);
+			StompProtocol::parse_then_handle_response(answer);
 		}
 	}
 }
 
 const int StompClient::getNextId()
 {
-	int output = id; 
+	int output = id;
 	id++;
 	return output;
+}
+
+const int StompClient::getNextReceiptId()
+{
+	int output = receiptId;
+	receiptId++;
+	return output;
+}
+
+void StompClient::resetCurrentUser()
+{
+	if (currentUser)
+	{
+		delete currentUser;
+		currentUser = nullptr;
+	}
+	id = 0;
 }
 
 std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
@@ -149,23 +163,23 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 
 	if (command == command_login)
 	{
-		return StompProtocol::handle_login_command(lineParts);
+		return StompProtocol::handle_login_command(lineParts, currentUser);
 	}
 	else if (command == command_logout)
 	{
-		return StompProtocol::handle_logout_command(lineParts);
+		return StompProtocol::handle_logout_command(lineParts, currentUser, getNextReceiptId());
 	}
 	else if (command == command_join)
 	{
-		return StompProtocol::handle_join_command(lineParts);
+		return StompProtocol::handle_join_command(lineParts, currentUser, getNextId());
 	}
 	else if (command == command_exit)
 	{
-		return StompProtocol::handle_exit_command(lineParts);
+		return StompProtocol::handle_exit_command(lineParts, currentUser);
 	}
 	else if (command == command_summary)
 	{
-		return StompProtocol::handle_summary_command(lineParts);
+		return StompProtocol::handle_summary_command(lineParts, currentUser);
 	}
 	else
 	{
@@ -174,7 +188,7 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 	}
 }
 
-User StompClient::getCurrentUser()
+User *StompClient::getCurrentUser()
 {
 	return currentUser;
 }

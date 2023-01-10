@@ -4,12 +4,10 @@
 #include "../include/ConnectionHandler.h"
 #include "../include/Constants.h"
 #include "../include/StompProtocol.h"
-
+#include "../include/User.h"
 
 int main(int argc, char *argv[])
 {
-
-
 }
 
 void StompProtocol::handle_message_from_subscription(std::string answer)
@@ -17,51 +15,8 @@ void StompProtocol::handle_message_from_subscription(std::string answer)
 	std::cout << "got new message from server: " << answer << std::endl;
 }
 
-std::string StompProtocol::create_command_frame(std::string line)
+std::string StompProtocol::handle_login_command(std::vector<std::string> lineParts, User *currentUser)
 {
-	std::vector<std::string> lineParts;
-	std::string command;
-	if (line.find(' ') < line.length())
-	{
-		lineParts = StringUtil::split(line, ' ');
-		std::cout << 'line parts size = ' << lineParts.size() << std::endl;
-		command = lineParts[0];
-	}
-	else
-	{
-		command = line;
-	}
-
-	if (command == command_login)
-	{
-		return handle_login_command(lineParts);
-	}
-	else if (command == command_logout)
-	{
-		return handle_logout_command(lineParts);
-	}
-	else if (command == command_join)
-	{
-		return handle_join_command(lineParts);
-	}
-	else if (command == command_exit)
-	{
-		return handle_exit_command(lineParts);
-	}
-	else if (command == command_summary)
-	{
-		return handle_summary_command(lineParts);
-	}
-	else
-	{
-		std::cout << 'no command corresponding with ' << command << " was found..." << std::endl;
-		return "";
-	}
-}
-
-std::string StompProtocol::handle_login_command(std::vector<std::string> lineParts)
-{
-    
 	std::string address = lineParts[1];
 	std::string login = lineParts[2];
 	std::string passcode = lineParts[3];
@@ -78,31 +33,60 @@ std::string StompProtocol::handle_login_command(std::vector<std::string> linePar
 	return create_command_frame(CONNECT, args, "");
 }
 
-std::string StompProtocol::handle_logout_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_logout_command(std::vector<std::string> lineParts, User *currentUser, int receiptId)
 {
+	if (!currentUser)
+	{
+		std::cout << "You must be logged before doing anything else..." << std::endl;
+		return "";
+	}
+
+	std::vector<std::pair<std::string, std::string>> args;
+
+	args.push_back(std::pair<std::string, std::string>(receipt_key, std::to_string(receiptId)));
+
+	return create_command_frame(DISCONNECT, args, EMPTY_BODY);
 }
 
-std::string StompProtocol::handle_join_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_join_command(std::vector<std::string> lineParts, User *currentUser, int subscriptionId)
 {
+	if (!currentUser)
+	{
+		std::cout << "You must be logged before doing anything else..." << std::endl;
+		return "";
+	}
 	std::string game = lineParts[1];
-	//int id = 
 
 	std::vector<std::pair<std::string, std::string>> args;
 
 	args.push_back(std::pair<std::string, std::string>(destination_key, game));
-	
 }
 
-std::string StompProtocol::handle_exit_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_exit_command(std::vector<std::string> lineParts, User *currentUser)
 {
+	if (!currentUser)
+	{
+		std::cout << "You must be logged before doing anything else..." << std::endl;
+		return "";
+	}
 }
 
-std::string StompProtocol::handle_summary_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_summary_command(std::vector<std::string> lineParts, User *currentUser)
 {
+	if (!currentUser)
+	{
+		std::cout << "You must be logged before doing anything else..." << std::endl;
+		return "";
+	}
 }
 
-std::string StompProtocol::handle_report_command(std::vector<std::string> lineParts)
+std::string StompProtocol::handle_report_command(std::vector<std::string> lineParts, User *currentUser)
 {
+	if (!currentUser)
+	{
+		std::cout << "You must be logged before doing anything else..." << std::endl;
+		return "";
+	}
 }
 
 std::string StompProtocol::create_command_frame(std::string command, std::vector<std::pair<std::string, std::string>> args, std::string body)
@@ -163,5 +147,8 @@ void StompProtocol::handle_response(std::string command, std::map<std::string, s
 	if (command == CONNECTED)
 	{
 	}
-}
-;
+	else if (command == RECEIPT)
+	{
+		
+	}
+};

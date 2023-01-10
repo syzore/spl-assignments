@@ -1,16 +1,25 @@
 #pragma once
 #include "../include/User.h"
 
-User::User(std::string name)
+User::User(std::string name) : name(name), subscriptionsMap()
 {
-    name = name;;
-    subscriptionsMap = std::map<string, int>();
 }
 
-const string User::getName(){
+User::~User()
+{
+    if (subscriptionsMap)
+    {
+        delete subscriptionsMap;
+        subscriptionsMap = nullptr;
+    }
+}
+
+const string User::getName()
+{
     return name;
 }
 
-std::map<string, int> User::getSubscriptionsMap(){
+std::map<string, int> *User::getSubscriptionsMap()
+{
     return subscriptionsMap;
 }

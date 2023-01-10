@@ -7,13 +7,16 @@ class StompClient
 {
 private:
     int id;
-    User currentUser;
+    int receiptId;
+    User *currentUser;
 
 public:
     StompClient() = default;
-    static void keyboard_handler_task(ConnectionHandler &connectionHandler);
-    static void socket_listener_task(ConnectionHandler &connectionHandler);
+    void keyboard_handler_task(ConnectionHandler &connectionHandler);
+    void socket_listener_task(ConnectionHandler &connectionHandler);
     const int getNextId();
+    const int getNextReceiptId();
+    void resetCurrentUser();
     std::string parse_command_line(std::vector<std::string> lineParts);
-    User getCurrentUser();
+    User *getCurrentUser();
 };
