@@ -3,6 +3,8 @@
 #include "../include/ConnectionHandler.h"
 #include "../include/User.h"
 
+#include <queue>
+
 class StompClient
 {
 private:
@@ -13,6 +15,7 @@ private:
     ConnectionHandler *connectionHandler;
     std::string host;
     short port;
+    std::queue<string> lastCommandsQueue;
 
 public:
     StompClient(std::string host, short port);
@@ -26,4 +29,5 @@ public:
     ConnectionHandler *getConnectionHandler();
     std::string parse_command_line(std::vector<std::string> lineParts);
     User *getCurrentUser();
+    void closeConnection();
 };

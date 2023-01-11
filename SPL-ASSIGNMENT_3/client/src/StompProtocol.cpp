@@ -42,11 +42,13 @@ std::string StompProtocol::handle_login_command(std::vector<std::string> linePar
 	short port = boost::lexical_cast<short>(address.substr(colonIndex + 1, address.length()));
 	currentUser->setName(login);
 
+	std::cout << "connecting...." << std::endl;
 	if (!connectionHandler->connect())
 	{
 		std::cerr << "Cannot connect to " << ip << ":" << port << std::endl;
 		return "";
 	}
+	std::cout << "connected!!!" << std::endl;
 
 	std::vector<std::pair<std::string, std::string>> args;
 

@@ -41,7 +41,7 @@ void socket_listener_task(StompClient &client)
 
 	while (1)
 	{
-		while (!connectionHandler->isConnected() || lastFrame == DISCONNECT)
+		while (!connectionHandler->isConnected())
 		{
 			// wait..
 		}
@@ -49,30 +49,23 @@ void socket_listener_task(StompClient &client)
 		std::string answer;
 		// Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
 		// We could also use: connectionHandler->getline(answer) and then get the answer without the newline char at the end
+		std::cout << "Waiting for frame from server\n"
+				  << std::endl;
 		if (!connectionHandler->getFrame(answer))
 		{
 			std::cout << "Disconnected. Exiting...\n"
 					  << std::endl;
-			client.getCurrentUser()->disconnect();
-			connectionHandler->close();
-			break;
+			client.closeConnection();
+			continue;
 		}
 
 		int len = answer.length();
 		// A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
 		// we filled up to the \n char - we must make sure now that a 0 char is also present. So we truncate last character.
 		answer.resize(len - 1);
-		std::cout << "Passive Listener Reply: " << answer << " " << len << " bytes " << std::endl;
-		if (answer == "bye")
-		{
-			std::cout << "Exiting...\n"
-					  << std::endl;
-			break;
-		}
-		else
-		{
-			client.parse_then_handle_response(answer);
-		}
+		std::cout << "Frame from server: " << answer << " " << len << " bytes " << std::endl;
+
+		client.parse_then_handle_response(answer);
 	}
 }
 
@@ -104,8 +97,7 @@ void keyboard_handler_task(StompClient &client)
 		{
 			std::cout << "Disconnected. Exiting...\n"
 					  << std::endl;
-			client.getCurrentUser()->disconnect();
-			connectionHandler->close();
+			client.closeConnection();
 			break;
 		}
 	}
@@ -150,32 +142,41 @@ void StompClient::parse_then_handle_response(std::string answer)
 	handle_response(command, args, body);
 }
 
+/// @brief
+/// @param command
+/// @param args
+/// @param body
 void StompClient::handle_response(std::string command, std::map<std::string, std::string> args, std::string body)
 {
+	std::string lastCommand = lastCommandsQueue.front();
+	lastCommandsQueue.pop();
+
 	if (command == CONNECTED)
 	{
 		currentUser->connect();
 	}
 	else if (command == RECEIPT)
 	{
-		if (lastFrame == DISCONNECT)
+		if (lastCommand == DISCONNECT)
 		{
-			currentUser->disconnect();
-			// close socket
-			// clean last frme
+			closeConnection();
 		}
-		else if (lastFrame ==)
+		else if (lastCommand == SUBSCRIBE)
+		{
+		}
+		else if (lastCommand == UNSUBSCRIBE)
 		{
 		}
 	}
 	else if (command == MESSAGE)
 	{
-		if (lastFrame != SEND)
+		if (lastCommand != SEND)
 		{
 		}
 	}
 	else if (command == ERROR)
 	{
+		closeConnection();
 	}
 }
 
@@ -193,15 +194,10 @@ const int StompClient::getNextReceiptId()
 	return output;
 }
 
-void StompClient::resetCurrentUser()
-{
-	currentUser->disconnect();
-	subscriptionId = 0;
-}
-
 std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 {
 	std::string command = lineParts[0];
+	lastCommandsQueue.push(command);
 
 	if (command == command_login)
 	{
@@ -235,4 +231,12 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 User *StompClient::getCurrentUser()
 {
 	return currentUser;
+}
+
+void StompClient::closeConnection()
+{
+	currentUser->disconnect();
+	connectionHandler->close();
+	subscriptionId = 0;
+	lastCommandsQueue.empty();
 }
