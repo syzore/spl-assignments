@@ -28,12 +28,12 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     String command = scanner.nextLine();
     String nextLine = "";
     Map<String, String> key_Value_Map = new HashMap<String, String>();
-    while (scanner.hasNext()) {
+    while (scanner.hasNextLine()) {
       nextLine = scanner.nextLine();
+      System.out.println("next line = " + nextLine);
       if (!nextLine.contains(":")) {
         break;
       }
-      System.out.println("next line = " + nextLine);
       int index = nextLine.indexOf(':');
       String key = nextLine.substring(0, index);
       String value = nextLine.substring(index + 1, nextLine.length());
@@ -76,44 +76,44 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
   }
 
   private T handleDisconnect(Map<String, String> key_Value_Map, String body, String originalMessage) {
-    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
+    String receipt = key_Value_Map.get(StompConstants.RECEIPT_KEY);
     connections.disconnect(connectionId);
     Map<String, String> args = new HashMap<String, String>();
-    args.put(StompConstants.RECEIPT_ID_KEY, receiptId);
+    args.put(StompConstants.RECEIPT_ID_KEY, receipt);
     shouldTerminate = true;
     return buildFrame(StompConstants.RECEIPT, args, StompConstants.EMPTY_BODY);
   }
 
   private T handleUnsubscribe(Map<String, String> key_Value_Map, String body, String originalMessage) {
-    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
+    String receipt = key_Value_Map.get(StompConstants.RECEIPT_KEY);
     String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
     User user = connections.getConnectionById(connectionId).getUser();
     connections.subscribe(user.getLogin(), connectionId, destination);
     Map<String, String> args = new HashMap<String, String>();
-    args.put(StompConstants.RECEIPT_ID_KEY, receiptId);
+    args.put(StompConstants.RECEIPT_ID_KEY, receipt);
     return buildFrame(StompConstants.RECEIPT, args, StompConstants.EMPTY_BODY);
   }
 
   private T handleSubscribe(Map<String, String> key_Value_Map, String originalMessage) {
-    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
+    String receipt = key_Value_Map.get(StompConstants.RECEIPT_KEY);
     String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
     if (destination == null)
-      return handleError("No topic was mentioned when subscribing.", originalMessage, receiptId,
+      return handleError("No topic was mentioned when subscribing.", originalMessage, receipt,
           "When subscribing, you must include which topic you would like to subscribe to.");
     User user = connections.getConnectionById(connectionId).getUser();
     boolean success = connections.subscribe(user.getLogin(), connectionId, destination);
 
     if (success) {
       Map<String, String> args = new HashMap<String, String>();
-      args.put(StompConstants.RECEIPT_ID_KEY, receiptId);
+      args.put(StompConstants.RECEIPT_ID_KEY, receipt);
       return buildFrame(StompConstants.RECEIPT, args, destination);
     } else {
-      return handleError("Was not able to subscribe to " + destination, originalMessage, receiptId, "");
+      return handleError("Was not able to subscribe to " + destination, originalMessage, receipt, "");
     }
   }
 
   private T handleSend(Map<String, String> key_Value_Map, String body, String originalMessage) {
-    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
+    String receipt = key_Value_Map.get(StompConstants.RECEIPT_KEY);
     connections.send(body, null);
     return (T) "SEND";
   }
@@ -125,13 +125,13 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     String host = key_Value_Map.get("host");
     String login = key_Value_Map.get("login");
     String passcode = key_Value_Map.get("passcode");
-    String receiptId = key_Value_Map.get(StompConstants.RECEIPT_ID_KEY);
+    String receipt = key_Value_Map.get(StompConstants.RECEIPT_KEY);
 
     if (!acceptVersion.equals(StompConstants.ACCEPT_VERSION_VALUE)) {
-      return handleError("only version supported is 1.2", originalMessage, receiptId, "");
+      return handleError("only version supported is 1.2", originalMessage, receipt, "");
     }
     if (!host.equals(StompConstants.HOST_VALUE)) {
-      return handleError("not the host we support here", originalMessage, receiptId, "...");
+      return handleError("not the host we support here", originalMessage, receipt, "...");
     }
 
     User user = new User(login, passcode);
@@ -141,7 +141,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     if (!isRegistered) {
       connections.register(user);
     } else if (!connections.checkPasscode(user)) {
-      return handleError("Incorrect passcode", originalMessage, receiptId, "The entered password was not corrent.");
+      return handleError("Incorrect passcode", originalMessage, receipt, "The entered password was not corrent.");
     }
 
     // if he got here it means the login / registration was successful..
@@ -149,10 +149,10 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     // handle connection and shit..
     ConnectionResult result = connections.connect(user, connectionId);
     if (result == ConnectionResult.ALREADY_CONNECTED) {
-      return handleError("User is already connected", originalMessage, receiptId,
+      return handleError("User is already connected", originalMessage, receipt,
           "This user is already connected through this client.");
     } else if (result == ConnectionResult.ANOTHER_USER_CONNECTED) {
-      return handleError("Another user is already connected", originalMessage, receiptId,
+      return handleError("Another user is already connected", originalMessage, receipt,
           "Another is already connected through this client.");
     }
 

@@ -66,8 +66,6 @@ std::string StompProtocol::handle_logout_command(std::vector<std::string> linePa
 		return "";
 	}
 
-	currentUser->disconnect();
-
 	std::vector<std::pair<std::string, std::string>> args;
 
 	args.push_back(std::pair<std::string, std::string>(receipt_key, std::to_string(receiptId)));

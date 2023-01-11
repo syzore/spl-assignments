@@ -1,5 +1,8 @@
 #pragma once
 #include "../include/User.h"
+#include <iostream>
+
+using namespace std;
 
 User::User() : name(), subscriptionsMap(new std::map<string, int>()), mIsConnected(false)
 {
@@ -31,11 +34,23 @@ std::map<string, int> *User::getSubscriptionsMap()
 
 void User::connect()
 {
+    if (mIsConnected)
+    {
+        std::cout << "user named " << name << " tried to connect but is already connected" << std::endl;
+        return;
+    }
+    std::cout << "user named " << name << " connected" << std::endl;
     mIsConnected = true;
 }
 
 void User::disconnect()
 {
+    if (!mIsConnected)
+    {
+        std::cout << "user named " << name << " tried to disconnect but is already not connected" << std::endl;
+        return;
+    }
+    std::cout << "user named " << name << " disconnected" << std::endl;
     mIsConnected = false;
 }
 

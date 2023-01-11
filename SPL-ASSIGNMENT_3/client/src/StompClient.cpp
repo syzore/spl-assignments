@@ -41,7 +41,7 @@ void socket_listener_task(StompClient &client)
 
 	while (1)
 	{
-		while (!connectionHandler->isConnected())
+		while (!connectionHandler->isConnected() || lastFrame == DISCONNECT)
 		{
 			// wait..
 		}
@@ -53,6 +53,8 @@ void socket_listener_task(StompClient &client)
 		{
 			std::cout << "Disconnected. Exiting...\n"
 					  << std::endl;
+			client.getCurrentUser()->disconnect();
+			connectionHandler->close();
 			break;
 		}
 
@@ -102,6 +104,8 @@ void keyboard_handler_task(StompClient &client)
 		{
 			std::cout << "Disconnected. Exiting...\n"
 					  << std::endl;
+			client.getCurrentUser()->disconnect();
+			connectionHandler->close();
 			break;
 		}
 	}
@@ -153,6 +157,24 @@ void StompClient::handle_response(std::string command, std::map<std::string, std
 		currentUser->connect();
 	}
 	else if (command == RECEIPT)
+	{
+		if (lastFrame == DISCONNECT)
+		{
+			currentUser->disconnect();
+			// close socket
+			// clean last frme
+		}
+		else if (lastFrame ==)
+		{
+		}
+	}
+	else if (command == MESSAGE)
+	{
+		if (lastFrame != SEND)
+		{
+		}
+	}
+	else if (command == ERROR)
 	{
 	}
 }
