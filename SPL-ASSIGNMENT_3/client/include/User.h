@@ -11,10 +11,12 @@ private:
     bool mIsConnected;
 
 public:
-    User(string name);
+    User();
     ~User();
     void connect();
-    bool isConnected();
+    void disconnect();
+    const bool isConnected() const;
     const string getName();
-    std::map<string, int> *getSubscriptionsMap();
+    void setName(string name);
+    map<string, int> *getSubscriptionsMap();
 };

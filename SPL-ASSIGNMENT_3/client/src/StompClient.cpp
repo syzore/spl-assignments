@@ -33,35 +33,22 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-StompClient::StompClient(std::string host, short port) : host(host), port(port), currentUser(nullptr), connectionHandler(nullptr), subscriptionId(0), receiptId(0), waitingForResponse(false) {}
-
-StompClient::~StompClient()
-{
-	if (currentUser)
-	{
-		delete currentUser;
-		currentUser = nullptr;
-	}
-
-	if (connectionHandler)
-	{
-		delete connectionHandler;
-		connectionHandler = nullptr;
-	}
-}
+StompClient::StompClient(std::string _host, short _port) : host(_host), port(_port), currentUser(new User()), connectionHandler(new ConnectionHandler(_host, _port)), subscriptionId(0), receiptId(0), waitingForResponse(false) {}
 
 void socket_listener_task(StompClient &client)
 {
 	ConnectionHandler *connectionHandler = client.getConnectionHandler();
+
 	while (1)
 	{
-		while (!connectionHandler)
+		while (!connectionHandler->isConnected())
 		{
 			// wait..
 		}
+
 		std::string answer;
 		// Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
-		// We could also use: connectionHandler.getline(answer) and then get the answer without the newline char at the end
+		// We could also use: connectionHandler->getline(answer) and then get the answer without the newline char at the end
 		if (!connectionHandler->getFrame(answer))
 		{
 			std::cout << "Disconnected. Exiting...\n"
@@ -163,11 +150,6 @@ void StompClient::handle_response(std::string command, std::map<std::string, std
 {
 	if (command == CONNECTED)
 	{
-		if (!currentUser)
-		{
-			std::cout << "Trying to connect the user but the current user is null" << std::endl;
-			return;
-		}
 		currentUser->connect();
 	}
 	else if (command == RECEIPT)
@@ -191,11 +173,7 @@ const int StompClient::getNextReceiptId()
 
 void StompClient::resetCurrentUser()
 {
-	if (currentUser)
-	{
-		delete currentUser;
-		currentUser = nullptr;
-	}
+	currentUser->disconnect();
 	subscriptionId = 0;
 }
 

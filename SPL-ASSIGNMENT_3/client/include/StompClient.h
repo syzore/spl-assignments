@@ -16,7 +16,6 @@ private:
 
 public:
     StompClient(std::string host, short port);
-    ~StompClient();
     void keyboard_handler_task(ConnectionHandler &connectionHandler);
     void socket_listener_task(ConnectionHandler &connectionHandler);
     void parse_then_handle_response(std::string answer);

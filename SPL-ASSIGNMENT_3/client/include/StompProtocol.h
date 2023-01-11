@@ -11,7 +11,7 @@ class StompProtocol
 public:
     static void handle_message_from_subscription(std::string answer);
 
-    static std::string handle_login_command(std::vector<std::string> lineParts, User *currentUser, ConnectionHandler *&connectionHandler);
+    static std::string handle_login_command(std::vector<std::string> lineParts, User *currentUser, ConnectionHandler *connectionHandler);
     static std::string handle_logout_command(std::vector<std::string> lineParts, User *currentUser, int receiptId);
     static std::string handle_join_command(std::vector<std::string> lineParts, User *currentUser, int subscriptionId, int receiptId);
     static std::string handle_exit_command(std::vector<std::string> lineParts, User *currentUser);

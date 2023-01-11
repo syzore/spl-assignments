@@ -7,6 +7,7 @@ using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
+using std::swap;
 
 ConnectionHandler::ConnectionHandler(string host, short port) : host_(host), port_(port), io_service_(),
 																socket_(io_service_) {}
@@ -14,6 +15,11 @@ ConnectionHandler::ConnectionHandler(string host, short port) : host_(host), por
 ConnectionHandler::~ConnectionHandler()
 {
 	close();
+}
+
+const bool ConnectionHandler::isConnected() const
+{
+	return socket_.is_open();
 }
 
 bool ConnectionHandler::connect()
@@ -60,6 +66,7 @@ bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead)
 bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite)
 {
 	int tmp = 0;
+
 	boost::system::error_code error;
 	try
 	{

@@ -13,10 +13,10 @@ void StompProtocol::handle_message_from_subscription(std::string answer)
 	std::cout << "got new message from server: " << answer << std::endl;
 }
 
-std::string StompProtocol::handle_login_command(std::vector<std::string> lineParts, User *currentUser, ConnectionHandler *&connectionHandler)
+std::string StompProtocol::handle_login_command(std::vector<std::string> lineParts, User *currentUser, ConnectionHandler *connectionHandler)
 {
 	// re-write this.. if the user is not null or if not connected
-	if (currentUser || (currentUser && currentUser->isConnected()))
+	if (currentUser->isConnected())
 	{
 		std::string login = lineParts[2];
 		if (login == currentUser->getName())
@@ -40,17 +40,13 @@ std::string StompProtocol::handle_login_command(std::vector<std::string> linePar
 
 	std::string ip = address.substr(0, colonIndex);
 	short port = boost::lexical_cast<short>(address.substr(colonIndex + 1, address.length()));
-	if (!connectionHandler)
-	{
-		connectionHandler = new ConnectionHandler(ip, port);
-	}
+	currentUser->setName(login);
+
 	if (!connectionHandler->connect())
 	{
 		std::cerr << "Cannot connect to " << ip << ":" << port << std::endl;
 		return "";
 	}
-
-	currentUser = new User(login);
 
 	std::vector<std::pair<std::string, std::string>> args;
 
@@ -64,11 +60,13 @@ std::string StompProtocol::handle_login_command(std::vector<std::string> linePar
 
 std::string StompProtocol::handle_logout_command(std::vector<std::string> lineParts, User *currentUser, int receiptId)
 {
-	if (!currentUser || !currentUser->isConnected())
+	if (!currentUser->isConnected())
 	{
 		std::cout << "You must be logged in before doing anything else..." << std::endl;
 		return "";
 	}
+
+	currentUser->disconnect();
 
 	std::vector<std::pair<std::string, std::string>> args;
 
@@ -79,7 +77,7 @@ std::string StompProtocol::handle_logout_command(std::vector<std::string> linePa
 
 std::string StompProtocol::handle_join_command(std::vector<std::string> lineParts, User *currentUser, int subscriptionId, int receiptId)
 {
-	if (!currentUser || !currentUser->isConnected())
+	if (!currentUser->isConnected())
 	{
 		std::cout << "You must be logged in before doing anything else..." << std::endl;
 		return "";
@@ -95,7 +93,7 @@ std::string StompProtocol::handle_join_command(std::vector<std::string> linePart
 
 std::string StompProtocol::handle_exit_command(std::vector<std::string> lineParts, User *currentUser)
 {
-	if (!currentUser || !currentUser->isConnected())
+	if (!currentUser->isConnected())
 	{
 		std::cout << "You must be logged in before doing anything else..." << std::endl;
 		return "";
@@ -104,7 +102,7 @@ std::string StompProtocol::handle_exit_command(std::vector<std::string> linePart
 
 std::string StompProtocol::handle_summary_command(std::vector<std::string> lineParts, User *currentUser)
 {
-	if (!currentUser || !currentUser->isConnected())
+	if (!currentUser->isConnected())
 	{
 		std::cout << "You must be logged in before doing anything else..." << std::endl;
 		return "";
@@ -113,7 +111,7 @@ std::string StompProtocol::handle_summary_command(std::vector<std::string> lineP
 
 std::string StompProtocol::handle_report_command(std::vector<std::string> lineParts, User *currentUser)
 {
-	if (!currentUser || !currentUser->isConnected())
+	if (!currentUser->isConnected())
 	{
 		std::cout << "You must be logged in before doing anything else..." << std::endl;
 		return "";
