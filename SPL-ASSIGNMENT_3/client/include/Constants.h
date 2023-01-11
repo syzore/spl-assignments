@@ -16,6 +16,7 @@ const std::string command_login = "login";
 const std::string command_join = "join";
 const std::string command_exit = "exit";
 const std::string command_summary = "summary";
+const std::string command_report = "report";
 const std::string command_logout = "logout";
 const std::string login_key = "login";
 const std::string host_key = "host";

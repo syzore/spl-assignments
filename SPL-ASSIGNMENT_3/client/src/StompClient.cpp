@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	short port = atoi(argv[2]);
 
 	StompClient client(host, port);
-	// StompProtocol proto = ...
+
 	std::thread t1(keyboard_handler_task, std::ref(client));
 	std::thread t2(socket_listener_task, std::ref(client));
 
@@ -33,7 +33,9 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-StompClient::StompClient(std::string _host, short _port) : host(_host), port(_port), currentUser(new User()), connectionHandler(new ConnectionHandler(_host, _port)), subscriptionId(0), receiptId(0), waitingForResponse(false) {}
+StompClient::StompClient(std::string _host, short _port) : host(_host), port(_port), currentUser(new User()),
+														   connectionHandler(new ConnectionHandler(_host, _port)),
+														   subscriptionId(0), receiptId(0), mShouldListen(false) {}
 
 void socket_listener_task(StompClient &client)
 {
@@ -41,10 +43,14 @@ void socket_listener_task(StompClient &client)
 
 	while (1)
 	{
-		while (!connectionHandler->isConnected())
+		std::cout << "start of listener while\n"
+				  << std::endl;
+		while (!connectionHandler->isConnected() || !client.shouldListen())
 		{
 			// wait..
 		}
+		std::cout << "start of listener while after condition\n"
+				  << std::endl;
 
 		std::string answer;
 		// Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
@@ -84,14 +90,16 @@ void keyboard_handler_task(StompClient &client)
 
 		std::string frame = client.parse_command_line(lineParts);
 
-		std::cout << "encoded frame = \n"
-				  << frame << std::endl;
-
 		if (frame == "")
 		{
-			// cout incorrect command?
+			std::cout << "given command is not correct.. \n"
+					  << frame << std::endl;
+
 			continue;
 		}
+
+		std::cout << "encoded frame = \n"
+				  << frame << std::endl;
 
 		if (!connectionHandler->sendFrame(frame))
 		{
@@ -101,6 +109,16 @@ void keyboard_handler_task(StompClient &client)
 			break;
 		}
 	}
+}
+
+bool StompClient::shouldListen()
+{
+	return mShouldListen;
+}
+
+void StompClient::setShouldListen(bool shouldListen)
+{
+	mShouldListen = shouldListen;
 }
 
 ConnectionHandler *StompClient::getConnectionHandler()
@@ -142,6 +160,11 @@ void StompClient::parse_then_handle_response(std::string answer)
 	handle_response(command, args, body);
 }
 
+std::string StompClient::getLastCommand()
+{
+	return lastCommandsQueue.front();
+}
+
 /// @brief
 /// @param command
 /// @param args
@@ -155,22 +178,13 @@ void StompClient::handle_response(std::string command, std::map<std::string, std
 	{
 		currentUser->connect();
 	}
-	else if (command == RECEIPT)
+	else if (command == RECEIPT && lastCommand == command_logout)
 	{
-		if (lastCommand == DISCONNECT)
-		{
-			closeConnection();
-		}
-		else if (lastCommand == SUBSCRIBE)
-		{
-		}
-		else if (lastCommand == UNSUBSCRIBE)
-		{
-		}
+		closeConnection();
 	}
 	else if (command == MESSAGE)
 	{
-		if (lastCommand != SEND)
+		if (lastCommand != command_report)
 		{
 		}
 	}
@@ -203,23 +217,28 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 	{
 		lineParts[1] = host + ":" + std::to_string(port);
 		ConnectionHandler *connectionHandler = getConnectionHandler();
-		return StompProtocol::handle_login_command(lineParts, currentUser, connectionHandler);
+		setShouldListen(true);
+		std::string address = lineParts[1];
+		std::string login = lineParts[2];
+		std::string passcode = lineParts[3];
+		return StompProtocol::handle_login_command(login, address, passcode, currentUser, connectionHandler);
 	}
 	else if (command == command_logout)
 	{
-		return StompProtocol::handle_logout_command(lineParts, currentUser, getNextReceiptId());
+		return StompProtocol::handle_logout_command(currentUser, getNextReceiptId());
 	}
 	else if (command == command_join)
 	{
-		return StompProtocol::handle_join_command(lineParts, currentUser, getNextSubscriptionId(), getNextReceiptId());
+		std::string destination = lineParts[1];
+		return StompProtocol::handle_join_command(destination, currentUser, getNextSubscriptionId(), getNextReceiptId());
 	}
 	else if (command == command_exit)
 	{
-		return StompProtocol::handle_exit_command(lineParts, currentUser);
+		return StompProtocol::handle_exit_command(currentUser, getNextSubscriptionId(), getNextReceiptId());
 	}
 	else if (command == command_summary)
 	{
-		return StompProtocol::handle_summary_command(lineParts, currentUser);
+		return StompProtocol::handle_summary_command(currentUser);
 	}
 	else
 	{
@@ -235,6 +254,11 @@ User *StompClient::getCurrentUser()
 
 void StompClient::closeConnection()
 {
+	std::cout << "About to disable listening\n"
+			  << std::endl;
+	setShouldListen(false);
+	std::cout << "disabled listening\n"
+			  << std::endl;
 	currentUser->disconnect();
 	connectionHandler->close();
 	subscriptionId = 0;

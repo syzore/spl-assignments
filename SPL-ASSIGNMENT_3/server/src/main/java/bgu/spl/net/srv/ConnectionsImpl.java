@@ -40,9 +40,8 @@ public class ConnectionsImpl<T> implements Connections<T> {
         String key = username + "_" + id;
         String abc = subscriptionMap.get(key);
         if (abc == null)
-            System.out.println("user does not subscribe this game");
-        else{
-            //topics.remove(destination);
+            System.out.println("The user is not subscribed to " + destination);
+        else {
             subscriptionMap.remove(key, destination);
             if (!subscriptionMap.containsValue(destination))
                 topics.remove(destination);

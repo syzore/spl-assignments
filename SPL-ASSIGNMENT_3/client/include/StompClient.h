@@ -11,7 +11,7 @@ private:
     int subscriptionId;
     int receiptId;
     User *currentUser;
-    bool waitingForResponse;
+    bool mShouldListen;
     ConnectionHandler *connectionHandler;
     std::string host;
     short port;
@@ -25,9 +25,11 @@ public:
     void handle_response(std::string command, std::map<std::string, std::string> args, std::string body);
     const int getNextSubscriptionId();
     const int getNextReceiptId();
-    void resetCurrentUser();
-    ConnectionHandler *getConnectionHandler();
+    bool shouldListen();
+    void setShouldListen(bool shouldListen);
+        ConnectionHandler *getConnectionHandler();
     std::string parse_command_line(std::vector<std::string> lineParts);
     User *getCurrentUser();
     void closeConnection();
+    std::string getLastCommand();
 };

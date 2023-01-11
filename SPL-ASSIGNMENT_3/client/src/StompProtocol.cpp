@@ -13,12 +13,11 @@ void StompProtocol::handle_message_from_subscription(std::string answer)
 	std::cout << "got new message from server: " << answer << std::endl;
 }
 
-std::string StompProtocol::handle_login_command(std::vector<std::string> lineParts, User *currentUser, ConnectionHandler *connectionHandler)
+std::string StompProtocol::handle_login_command(std::string login, std::string address, std::string passcode, User *currentUser, ConnectionHandler *connectionHandler)
 {
 	// re-write this.. if the user is not null or if not connected
 	if (currentUser->isConnected())
 	{
-		std::string login = lineParts[2];
 		if (login == currentUser->getName())
 		{
 			std::cout << "You are already logged in" << std::endl;
@@ -30,9 +29,6 @@ std::string StompProtocol::handle_login_command(std::vector<std::string> linePar
 		return "";
 	}
 
-	std::string address = lineParts[1];
-	std::string login = lineParts[2];
-	std::string passcode = lineParts[3];
 	std::string host = "stomp.cs.bgu.ac.il";
 	std::string accept_version = "1.2";
 
@@ -60,7 +56,8 @@ std::string StompProtocol::handle_login_command(std::vector<std::string> linePar
 	return create_command_frame(CONNECT, args, "");
 }
 
-std::string StompProtocol::handle_logout_command(std::vector<std::string> lineParts, User *currentUser, int receiptId)
+///
+std::string StompProtocol::handle_logout_command(User *currentUser, int receiptId)
 {
 	if (!currentUser->isConnected())
 	{
@@ -75,7 +72,7 @@ std::string StompProtocol::handle_logout_command(std::vector<std::string> linePa
 	return create_command_frame(DISCONNECT, args, EMPTY_BODY);
 }
 
-std::string StompProtocol::handle_join_command(std::vector<std::string> lineParts, User *currentUser, int subscriptionId, int receiptId)
+std::string StompProtocol::handle_join_command(std::string destination, User *currentUser, int subscriptionId, int receiptId)
 {
 	if (!currentUser->isConnected())
 	{
@@ -85,13 +82,29 @@ std::string StompProtocol::handle_join_command(std::vector<std::string> linePart
 
 	std::vector<std::pair<std::string, std::string>> args;
 
-	args.push_back(std::pair<std::string, std::string>(destination_key, lineParts[1]));
+	args.push_back(std::pair<std::string, std::string>(destination_key, destination));
 	args.push_back(std::pair<std::string, std::string>(subscription_id_key, std::to_string(subscriptionId)));
 	args.push_back(std::pair<std::string, std::string>(receipt_key, std::to_string(receiptId)));
-	return create_command_frame(SUBSCRIBE, args, "");
+	return create_command_frame(SUBSCRIBE, args, EMPTY_BODY);
 }
 
-std::string StompProtocol::handle_exit_command(std::vector<std::string> lineParts, User *currentUser)
+std::string StompProtocol::handle_exit_command(User *currentUser, int subscriptionId, int receiptId)
+{
+	if (!currentUser->isConnected())
+	{
+		std::cout << "You must be logged in before doing anything else..." << std::endl;
+		return "";
+	}
+
+	std::vector<std::pair<std::string, std::string>> args;
+
+	args.push_back(std::pair<std::string, std::string>(receipt_key, std::to_string(receiptId)));
+	args.push_back(std::pair<std::string, std::string>(subscription_id_key, std::to_string(subscriptionId)));
+
+	return create_command_frame(UNSUBSCRIBE, args, EMPTY_BODY);
+}
+
+std::string StompProtocol::handle_summary_command(User *currentUser)
 {
 	if (!currentUser->isConnected())
 	{
@@ -100,16 +113,7 @@ std::string StompProtocol::handle_exit_command(std::vector<std::string> linePart
 	}
 }
 
-std::string StompProtocol::handle_summary_command(std::vector<std::string> lineParts, User *currentUser)
-{
-	if (!currentUser->isConnected())
-	{
-		std::cout << "You must be logged in before doing anything else..." << std::endl;
-		return "";
-	}
-}
-
-std::string StompProtocol::handle_report_command(std::vector<std::string> lineParts, User *currentUser)
+std::string StompProtocol::handle_report_command(User *currentUser)
 {
 	if (!currentUser->isConnected())
 	{
