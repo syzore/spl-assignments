@@ -134,9 +134,9 @@ std::string StompProtocol::create_command_frame(std::string command, std::vector
 	if (body != "")
 	{
 		frame.append("\n");
-		frame.append(body + "\n");
+		frame.append(body);
 	}
-	frame.append("\0");
+	// frame.append("\0");
 
 	return frame;
 }

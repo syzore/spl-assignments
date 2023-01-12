@@ -22,18 +22,11 @@ public class ConnectionsImpl<T> implements Connections<T> {
     }
 
     // returns true if subscription succeeded, otherwise returns false
-    public boolean subscribe(String username, int id, String destination) {
+    public void subscribe(String username, int id, String destination) {
         String key = username + "_" + id;
-        String abc = subscriptionMap.get(key);
+        subscriptionMap.putIfAbsent(key, destination);
         if (!topics.contains(destination))
             topics.add(destination);
-
-        if (abc == null) {
-            subscriptionMap.put(key, destination);
-            return true;
-        } else {
-            return false;
-        }
     }
 
     public void unsubscribe(String username, int id, String destination) {

@@ -145,7 +145,7 @@ void StompClient::parse_then_handle_response(std::string answer)
 		int index = line.find(':');
 		std::string key = line.substr(0, index);
 		std::string value = line.substr(index + 1, line.length());
-		args.insert({std::make_pair(key, value)});
+		args.insert(std::make_pair(key, value));
 	}
 
 	// BODY
@@ -234,6 +234,14 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 	}
 	else if (command == command_exit)
 	{
+		std::string destination = lineParts[1];
+		if (currentUser->getSubscriptionsMap()->erase(destination) == 0)
+		{
+			std::cout << "Cannot unsubscribed from " << destination << " because you are not subscribed to this topic\n"
+					  << std::endl;
+
+			return "";
+		}
 		return StompProtocol::handle_exit_command(currentUser, getNextSubscriptionId(), getNextReceiptId());
 	}
 	else if (command == command_summary)
@@ -254,11 +262,7 @@ User *StompClient::getCurrentUser()
 
 void StompClient::closeConnection()
 {
-	std::cout << "About to disable listening\n"
-			  << std::endl;
 	setShouldListen(false);
-	std::cout << "disabled listening\n"
-			  << std::endl;
 	currentUser->disconnect();
 	connectionHandler->close();
 	subscriptionId = 0;
