@@ -1,6 +1,7 @@
 package bgu.spl.net.impl.stomp;
 
 public class StompConstants {
+
     public static final String CONNECTED = "CONNECTED";
     public static final String MESSAGE = "MESSAGE";
     public static final String RECEIPT = "RECEIPT";

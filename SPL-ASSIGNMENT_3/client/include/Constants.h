@@ -30,4 +30,15 @@ const std::string subscription_id_key = "id";
 
 const std::string EMPTY_BODY = "";
 
+const std::string general_game_updates_key = "general game updates";
+const std::string before_halftime_key = "before halftime";
+const std::string team_a_updates_key = "team a updates";
+const std::string team_b_updates_key = "team b updates";
+const std::string description_key = "description";
+const std::string event_name_key = "event name";
+const std::string team_a_key = "team a";
+const std::string team_b_key = "team b";
+const std::string active_key = "active";
+const std::string user_key = "user";
+const std::string time_key = "time";
 #endif

@@ -3,7 +3,9 @@ package bgu.spl.net.srv;
 import bgu.spl.net.impl.stomp.User;
 
 public interface Connections<T> {
-    void subscribe(String username, int id, String destination);
+    void subscribe(String username, int subscriptionId, String destination);
+
+    int getSubscriptionId(String username, String destination);
 
     boolean send(int connectionId, T msg);
 

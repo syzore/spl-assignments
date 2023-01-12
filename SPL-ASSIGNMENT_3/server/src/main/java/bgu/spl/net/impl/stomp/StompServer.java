@@ -19,6 +19,7 @@ public class StompServer<T> implements Server<T> {
     private final Supplier<StompMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
+    private static int messegeId = 0;
 
     private int currentConnectionId = 0;
 
@@ -97,5 +98,11 @@ public class StompServer<T> implements Server<T> {
                 () -> new StompProtocol<String>(), // protocol factory
                 FrameMessageEncoderDecoder::new // message encoder decoder factory
         ).serve();
+    }
+
+    public static int getNextMessageId() {
+        int id = messegeId;
+        messegeId++;
+        return id;
     }
 }

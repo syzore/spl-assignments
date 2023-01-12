@@ -67,6 +67,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
     @Override
     public void close() throws IOException {
+        System.out.println("Socket close called from BlockingConnectionHandler");
         connected = false;
         sock.close();
     }
@@ -74,21 +75,12 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
     @Override
     public void send(T msg) {
         try (Socket sock = this.sock) {
-            synchronized (this) {
-                out = new BufferedOutputStream(sock.getOutputStream());
+            out = new BufferedOutputStream(sock.getOutputStream());
 
-                while (!protocol.shouldTerminate() && connected) {
-                    if (msg != null) {
-                        T response = protocol.process(msg);
-                        System.out.println("response = \n" + response);
-                        String s = response.toString().contains("\u0000") ? "yes" : " no";
-                        System.out.println("does the response containts null? " + s);
-                        if (response != null) {
-                            out.write(encdec.encode(response));
-                            out.flush();
-                        }
-                    }
-                }
+            if (!protocol.shouldTerminate() && connected && msg != null) {
+                System.out.println("sending message = \n" + msg);
+                out.write(encdec.encode(msg));
+                out.flush();
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block

@@ -30,7 +30,6 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     Map<String, String> key_Value_Map = new HashMap<String, String>();
     while (scanner.hasNextLine()) {
       nextLine = scanner.nextLine();
-      System.out.println("next line = " + nextLine);
       if (!nextLine.contains(":")) {
         break;
       }
@@ -110,8 +109,19 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
   private T handleSend(Map<String, String> key_Value_Map, String body, String originalMessage) {
     String receipt = key_Value_Map.get(StompConstants.RECEIPT_KEY);
-    connections.send(body, null);
-    return (T) "SEND";
+    String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
+    String user = body.substring(body.indexOf("user: "), body.indexOf("\n"));
+    int subscriptionId = connections.getSubscriptionId(user, destination);
+    int messageId = StompServer.getNextMessageId();
+
+    Map<String, String> args = new HashMap<String, String>();
+    args.put(StompConstants.SUBSCRIPTION_KEY, "" + subscriptionId);
+    args.put(StompConstants.MESSAGE_ID_KEY, "" + messageId);
+    args.put(StompConstants.DESTINATION_KEY, destination);
+
+    T frame = buildFrame(StompConstants.MESSAGE, args, body);
+    connections.send(destination, frame);
+    return null;
   }
 
   private T handleConnect(Map<String, String> key_Value_Map, String originalMessage) {

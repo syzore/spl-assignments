@@ -4,7 +4,7 @@
 
 using namespace std;
 
-User::User() : name(), subscriptionsMap(new std::map<string, int>()), mIsConnected(false)
+User::User() : mIsConnected(false), name(), subscriptionsMap(new std::map<string, int>()), eventsReportQueue(new queue<string>())
 {
 }
 
@@ -32,6 +32,11 @@ std::map<string, int> *User::getSubscriptionsMap()
     return subscriptionsMap;
 }
 
+std::queue<string> *User::getEventsReportQueue()
+{
+    return eventsReportQueue;
+}
+
 void User::connect()
 {
     if (mIsConnected)
@@ -52,6 +57,7 @@ void User::disconnect()
     }
     std::cout << "user named " << name << " disconnected" << std::endl;
     mIsConnected = false;
+    eventsReportQueue->empty();
 }
 
 const bool User::isConnected() const

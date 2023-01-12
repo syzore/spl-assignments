@@ -1,14 +1,16 @@
 #pragma once
 #include "../include/StringUtil.h"
 #include <map>
+#include <queue>
 using namespace std;
 
 class User
 {
 private:
-    std::map<string, int> *subscriptionsMap;
-    string name;
     bool mIsConnected;
+    string name;
+    map<string, int> *subscriptionsMap;
+    queue<string> *eventsReportQueue;
 
 public:
     User();
@@ -19,4 +21,5 @@ public:
     const string getName();
     void setName(string name);
     map<string, int> *getSubscriptionsMap();
+    queue<string> *getEventsReportQueue();
 };

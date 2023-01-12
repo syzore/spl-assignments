@@ -10,14 +10,18 @@ import bgu.spl.net.impl.stomp.User;
 public class ConnectionsImpl<T> implements Connections<T> {
 
     private Vector<String> topics;
+
+    // <username_subscriptionId, topic>
     private Map<String, String> subscriptionMap;
     private Map<Integer, Connection<T>> connectionsIdMap;
+    private Map<Integer, String> usernameConnectionIdMap;
     private Map<String, String> usersDatabase;
 
     public ConnectionsImpl() {
         this.topics = new Vector<>();
         this.subscriptionMap = new WeakHashMap<String, String>();
         this.connectionsIdMap = new WeakHashMap<Integer, Connection<T>>();
+        this.usernameConnectionIdMap = new WeakHashMap<Integer, String>();
         this.usersDatabase = new WeakHashMap<String, String>();
     }
 
@@ -42,6 +46,18 @@ public class ConnectionsImpl<T> implements Connections<T> {
     }
 
     @Override
+    public int getSubscriptionId(String username, String destination) {
+        for (Entry<String, String> set : subscriptionMap.entrySet()) {
+            String key = set.getKey();
+            String name = key.substring(0, key.indexOf('_'));
+            if (set.getValue().equals(destination) && name.equals(username)) {
+                return Integer.parseInt(key.substring(key.indexOf("_") + 1, key.length() - 1), 10);
+            }
+        }
+        return -1;
+    }
+
+    @Override
     public boolean send(int connectionId, T msg) {
         Connection<T> connection = getConnectionById(connectionId);
         if (connection != null)
@@ -52,13 +68,26 @@ public class ConnectionsImpl<T> implements Connections<T> {
     @Override
     public void send(String channel, T msg) {
         // get vector of all connectionIds that are subscribed to this channel..
-        // for each connectionId send(connectionId, msg)
+        Vector<String> usernameVector = new Vector<String>();
+        for (Entry<String, String> set : subscriptionMap.entrySet()) {
+            if (set.getValue().equals(channel)) {
+                String name = set.getKey().substring(0, set.getKey().indexOf('_'));
+                usernameVector.add(name);
+            }
+        }
+        for (Entry<Integer, String> set : usernameConnectionIdMap.entrySet()) {
+            if (usernameVector.contains(set.getValue())) {
+                send(set.getKey(), msg);
+            }
+        }
     }
 
     @Override
     public void disconnect(int connectionId) {
-        if (connectionsIdMap.containsKey(connectionId))
+        if (connectionsIdMap.containsKey(connectionId)) {
             connectionsIdMap.remove(connectionId);
+            usernameConnectionIdMap.remove(connectionId);
+        }
     }
 
     @Override
@@ -73,12 +102,8 @@ public class ConnectionsImpl<T> implements Connections<T> {
         } else {
             connection.setUser(user);
             user.connect();
-
-            System.out.println("testing user connection ---");
-            Connection<T> connectionTest = getConnectionById(connectionId);
-            System.out.println("is user not null, as expected? " + connectionTest.getUser() != null);
         }
-
+        usernameConnectionIdMap.put(connectionId, user.getLogin());
         return ConnectionResult.CONNECTED;
     }
 

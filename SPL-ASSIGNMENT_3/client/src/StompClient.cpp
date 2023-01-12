@@ -7,6 +7,7 @@
 #include "../include/StompClient.h"
 #include "../include/StompProtocol.h"
 #include "../include/threadTasks.h"
+#include "../include/event.h"
 
 using namespace std;
 
@@ -101,6 +102,24 @@ void keyboard_handler_task(StompClient &client)
 					  << std::endl;
 			client.closeConnection();
 			break;
+		}
+
+		std::queue<std::string> *framesQueue = client.getCurrentUser()->getEventsReportQueue();
+		while (framesQueue->size() > 0)
+		{
+			frame = framesQueue->front();
+			framesQueue->pop();
+
+			std::cout << "encoded frame from queue = \n"
+					  << frame << std::endl;
+
+			if (!connectionHandler->sendFrame(frame))
+			{
+				std::cout << "Disconnected. Exiting...\n"
+						  << std::endl;
+				client.closeConnection();
+				break;
+			}
 		}
 	}
 }
@@ -269,7 +288,15 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 	}
 	else if (command == command_report)
 	{
-		return StompProtocol::handle_report_command(currentUser);
+		std::string file = lineParts[1];
+		names_and_events nae = parseEventsFile(file);
+
+		for (size_t i = 0; i < nae.events.size() - 1; i++)
+		{
+			lastCommandsQueue.push(command);
+		}
+
+		return StompProtocol::handle_report_command(currentUser, nae);
 	}
 	else
 	{
@@ -285,6 +312,8 @@ User *StompClient::getCurrentUser()
 
 void StompClient::closeConnection()
 {
+	std::cout << "close connection called inside stomp client..." << std::endl;
+
 	setShouldListen(false);
 	currentUser->disconnect();
 	connectionHandler->close();
