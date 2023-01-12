@@ -27,9 +27,10 @@ public:
     const int getNextReceiptId();
     bool shouldListen();
     void setShouldListen(bool shouldListen);
-        ConnectionHandler *getConnectionHandler();
+    ConnectionHandler *getConnectionHandler();
     std::string parse_command_line(std::vector<std::string> lineParts);
     User *getCurrentUser();
     void closeConnection();
-    std::string getLastCommand();
+    std::string peekAtLastCommand();
+    std::string removeLastCommand();
 };

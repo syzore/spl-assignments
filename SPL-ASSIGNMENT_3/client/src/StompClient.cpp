@@ -43,20 +43,12 @@ void socket_listener_task(StompClient &client)
 
 	while (1)
 	{
-		std::cout << "start of listener while\n"
-				  << std::endl;
 		while (!connectionHandler->isConnected() || !client.shouldListen())
 		{
 			// wait..
 		}
-		std::cout << "start of listener while after condition\n"
-				  << std::endl;
 
 		std::string answer;
-		// Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
-		// We could also use: connectionHandler->getline(answer) and then get the answer without the newline char at the end
-		std::cout << "Waiting for frame from server\n"
-				  << std::endl;
 		if (!connectionHandler->getFrame(answer))
 		{
 			std::cout << "Disconnected. Exiting...\n"
@@ -65,11 +57,8 @@ void socket_listener_task(StompClient &client)
 			continue;
 		}
 
-		int len = answer.length();
-		// A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
-		// we filled up to the \n char - we must make sure now that a 0 char is also present. So we truncate last character.
-		answer.resize(len - 1);
-		std::cout << "Frame from server: " << answer << " " << len << " bytes " << std::endl;
+		answer.resize(answer.length() - 1);
+		std::cout << "Frame from server: " << answer << std::endl;
 
 		client.parse_then_handle_response(answer);
 	}
@@ -88,12 +77,17 @@ void keyboard_handler_task(StompClient &client)
 		std::string commandLine(buf);
 		std::vector<std::string> lineParts = StringUtil::split(commandLine, ' ');
 
+		std::cout << "given lineParts size = " << lineParts.size() << "\n"
+				  << std::endl;
+
 		std::string frame = client.parse_command_line(lineParts);
 
-		if (frame == "")
+		if (frame == EMPTY_BODY)
 		{
 			std::cout << "given command is not correct.. \n"
 					  << frame << std::endl;
+
+			client.removeLastCommand();
 
 			continue;
 		}
@@ -160,9 +154,16 @@ void StompClient::parse_then_handle_response(std::string answer)
 	handle_response(command, args, body);
 }
 
-std::string StompClient::getLastCommand()
+std::string StompClient::peekAtLastCommand()
 {
 	return lastCommandsQueue.front();
+}
+
+std::string StompClient::removeLastCommand()
+{
+	std::string lastCommand = lastCommandsQueue.front();
+	lastCommandsQueue.pop();
+	return lastCommand;
 }
 
 /// @brief
@@ -171,8 +172,10 @@ std::string StompClient::getLastCommand()
 /// @param body
 void StompClient::handle_response(std::string command, std::map<std::string, std::string> args, std::string body)
 {
-	std::string lastCommand = lastCommandsQueue.front();
-	lastCommandsQueue.pop();
+	std::string lastCommand = removeLastCommand();
+
+	std::cout << "handling " << command << " command. last command sent by user was " << lastCommand << "\n"
+			  << std::endl;
 
 	if (command == CONNECTED)
 	{
@@ -210,8 +213,15 @@ const int StompClient::getNextReceiptId()
 
 std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 {
+	if (lineParts.size() == 0)
+		return EMPTY_BODY;
+
 	std::string command = lineParts[0];
+
 	lastCommandsQueue.push(command);
+
+	std::cout << "last command pushed to the queue is \"" << command << "\"\n"
+			  << std::endl;
 
 	if (command == command_login)
 	{
@@ -230,15 +240,15 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 	else if (command == command_join)
 	{
 		std::string destination = lineParts[1];
-		
-		std::map<string, int>* subsMap = currentUser->getSubscriptionsMap();
+
+		std::map<string, int> *subsMap = currentUser->getSubscriptionsMap();
 		if (subsMap->count(destination) != 0)
 		{
 			std::cout << "you are already subscribe this topic";
 			return EMPTY_BODY;
 		}
 		int subsId = getNextSubscriptionId();
-		subsMap->insert(std::make_pair(destination,subsId));
+		subsMap->insert(std::make_pair(destination, subsId));
 		return StompProtocol::handle_join_command(destination, currentUser, getNextSubscriptionId(), getNextReceiptId());
 	}
 	else if (command == command_exit)
@@ -249,13 +259,17 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 			std::cout << "Cannot unsubscribed from " << destination << " because you are not subscribed to this topic\n"
 					  << std::endl;
 
-			return "";
+			return EMPTY_BODY;
 		}
 		return StompProtocol::handle_exit_command(currentUser, getNextSubscriptionId(), getNextReceiptId());
 	}
 	else if (command == command_summary)
 	{
 		return StompProtocol::handle_summary_command(currentUser);
+	}
+	else if (command == command_report)
+	{
+		return StompProtocol::handle_report_command(currentUser);
 	}
 	else
 	{
