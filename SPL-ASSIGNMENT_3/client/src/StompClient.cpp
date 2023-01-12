@@ -230,6 +230,15 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 	else if (command == command_join)
 	{
 		std::string destination = lineParts[1];
+		
+		std::map<string, int>* subsMap = currentUser->getSubscriptionsMap();
+		if (subsMap->count(destination) != 0)
+		{
+			std::cout << "you are already subscribe this topic";
+			return EMPTY_BODY;
+		}
+		int subsId = getNextSubscriptionId();
+		subsMap->insert(std::make_pair(destination,subsId));
 		return StompProtocol::handle_join_command(destination, currentUser, getNextSubscriptionId(), getNextReceiptId());
 	}
 	else if (command == command_exit)
