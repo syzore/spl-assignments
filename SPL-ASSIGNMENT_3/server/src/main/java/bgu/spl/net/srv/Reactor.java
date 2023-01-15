@@ -11,15 +11,18 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.api.StompMessagingProtocol;
 
 public class Reactor<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<MessagingProtocol<T>> protocolFactory;
+    private final Supplier<StompMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> readerFactory;
     private final ActorThreadPool pool;
     private Selector selector;
+    private static int messegeId = 0;
+    private int currentConnectionId = 0;
+    private Connections<T> connections;
 
     private Thread selectorThread;
     private final ConcurrentLinkedQueue<Runnable> selectorTasks = new ConcurrentLinkedQueue<>();
@@ -27,7 +30,7 @@ public class Reactor<T> implements Server<T> {
     public Reactor(
             int numThreads,
             int port,
-            Supplier<MessagingProtocol<T>> protocolFactory,
+            Supplier<StompMessagingProtocol<T>> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> readerFactory) {
 
         this.pool = new ActorThreadPool(numThreads);
@@ -39,6 +42,8 @@ public class Reactor<T> implements Server<T> {
     @Override
     public void serve() {
         selectorThread = Thread.currentThread();
+        connections = new ConnectionsImpl<>();
+
         try (Selector selector = Selector.open();
                 ServerSocketChannel serverSock = ServerSocketChannel.open()) {
 
@@ -47,7 +52,7 @@ public class Reactor<T> implements Server<T> {
             serverSock.bind(new InetSocketAddress(port));
             serverSock.configureBlocking(false);
             serverSock.register(selector, SelectionKey.OP_ACCEPT);
-            System.out.println("Server started");
+            System.out.println("Reactor server started");
 
             while (!Thread.currentThread().isInterrupted()) {
 
@@ -99,7 +104,15 @@ public class Reactor<T> implements Server<T> {
                 readerFactory.get(),
                 protocolFactory.get(),
                 clientChan,
-                this);
+                this,
+                connections,
+                ++currentConnectionId);
+
+        Connection<T> connection = new Connection<>();
+        connection.setConnectionId(currentConnectionId);
+        connections.addConnection(connection);
+        connection.setHandler(handler);
+
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }
 
@@ -130,4 +143,9 @@ public class Reactor<T> implements Server<T> {
         selector.close();
     }
 
+    public static int getNextMessageId() {
+        int id = messegeId;
+        messegeId++;
+        return id;
+    }
 }
