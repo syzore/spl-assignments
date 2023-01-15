@@ -11,6 +11,7 @@ import bgu.spl.net.srv.BlockingConnectionHandler;
 import bgu.spl.net.srv.Connection;
 import bgu.spl.net.srv.Connections;
 import bgu.spl.net.srv.ConnectionsImpl;
+import bgu.spl.net.srv.Reactor;
 import bgu.spl.net.srv.Server;
 
 public class StompServer<T> implements Server<T> {
@@ -20,7 +21,6 @@ public class StompServer<T> implements Server<T> {
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
     private static int messegeId = 0;
-
     private int currentConnectionId = 0;
 
     public StompServer(
@@ -92,8 +92,18 @@ public class StompServer<T> implements Server<T> {
         };
     }
 
+    public static <T> Server<T> reactor(
+            int numberOfThreads,
+            int port,
+            Supplier<StompMessagingProtocol<T>> protocolFactory,
+            Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory) {
+
+        return new Reactor<T>(numberOfThreads, port, protocolFactory, encoderDecoderFactory);
+    }
+
     public static void main(String[] args) {
-        threadPerClient(
+        reactor(
+                3,
                 7777, // port
                 () -> new StompProtocol<String>(), // protocol factory
                 FrameMessageEncoderDecoder::new // message encoder decoder factory
