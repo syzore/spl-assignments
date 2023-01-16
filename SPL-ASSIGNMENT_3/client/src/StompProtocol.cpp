@@ -131,18 +131,6 @@ std::string StompProtocol::handle_exit_command(User *currentUser, int subscripti
 /// @brief
 /// @param currentUser
 /// @return
-std::string StompProtocol::handle_summary_command(User *currentUser)
-{
-	if (!currentUser->isConnected())
-	{
-		std::cout << "You must be logged in before doing anything else..." << std::endl;
-		return EMPTY_BODY;
-	}
-}
-
-/// @brief
-/// @param currentUser
-/// @return
 std::string StompProtocol::handle_report_command(User *currentUser, names_and_events nae)
 {
 	if (!currentUser->isConnected())

@@ -22,6 +22,14 @@ Event::~Event()
 {
 }
 
+const std::string Event::get_game_name() const
+{
+    std::string result = get_team_a_name();
+    result.append("_");
+    result.append(get_team_b_name());
+    return result;
+}
+
 const std::string &Event::get_team_a_name() const
 {
     return this->team_a_name;
@@ -79,17 +87,19 @@ std::string Event::eventBodyBuilder(std::string user_name)
     args.push_back(std::pair<std::string, std::string>(general_game_updates_key, EMPTY_BODY));
     for (std::pair<std::string, std::string> game_update : game_updates)
     {
-        args.push_back(std::pair<std::string, std::string>(game_update.first, game_update.second));
+        args.push_back(std::pair<std::string, std::string>("\t" + game_update.first, game_update.second));
     }
+    args.push_back(std::pair<std::string, std::string>(team_a_updates_key, EMPTY_BODY));
     for (std::pair<std::string, std::string> team_a_update : team_a_updates)
     {
-        args.push_back(std::pair<std::string, std::string>(team_a_update.first, team_a_update.second));
+        args.push_back(std::pair<std::string, std::string>("\t" + team_a_update.first, team_a_update.second));
     }
+    args.push_back(std::pair<std::string, std::string>(team_b_updates_key, EMPTY_BODY));
     for (std::pair<std::string, std::string> team_b_update : team_b_updates)
     {
-        args.push_back(std::pair<std::string, std::string>(team_b_update.first, team_b_update.second));
+        args.push_back(std::pair<std::string, std::string>("\t" + team_b_update.first, team_b_update.second));
     }
-    args.push_back(std::pair<std::string, std::string>(description_key, description));
+    args.push_back(std::pair<std::string, std::string>("\n" + description_key, description));
 
     for (std::pair<std::string, std::string> pair : args)
     {
@@ -146,4 +156,83 @@ names_and_events parseEventsFile(std::string json_path)
     names_and_events events_and_names{team_a_name, team_b_name, events};
 
     return events_and_names;
+}
+
+Event parseEventString(std::string eventString)
+{
+    std::istringstream iteratable(eventString);
+    std::string line;
+    std::getline(iteratable, line);
+
+    // ARGUMENTS
+    std::map<std::string, std::string> args;
+    std::map<std::string, std::map<std::string, std::string>> updates;
+    while (std::getline(iteratable, line))
+    {
+        if (line.empty())
+            continue;
+
+        std::cout << line << std::endl;
+        int index = line.find(':');
+        if (index == std::string::npos)
+            continue;
+
+        std::string key = line.substr(0, index);
+        if (key.find("updates") != std::string::npos)
+        {
+            std::map<std::string, std::string> values;
+            while (std::getline(iteratable, line))
+            {
+                int colon_index = line.find(':');
+                if (colon_index == std::string::npos)
+                    break;
+
+                int tab_index = line.find('\t');
+                char c = line.at(0);
+                if (c != '\t')
+                {
+                    for (size_t i = 0; i <= line.size(); i++)
+                    {
+                        iteratable.unget();
+                    }
+
+                    break;
+                }
+                std::string update_key = line.substr(tab_index + 1, colon_index - (tab_index + 1));
+                std::string update_value = line.substr(colon_index + 2, line.length());
+                values.insert({update_key, update_value});
+            }
+            updates.insert({key, values});
+        }
+        else
+        {
+            std::string value = line.substr(index + 2, line.length());
+            args.insert({key, value});
+        }
+    }
+    std::string team_a_name = args["team a"];
+    std::string team_b_name = args["team b"];
+    std::string name = args["event name"];
+    std::string time_string = args["time"];
+    int time = std::stoi(time_string);
+    std::string description = args["description"];
+    std::map<std::string, std::string> game_updates;
+    for (auto &update : updates["general game updates"])
+    {
+        game_updates[update.first] = update.second;
+    }
+
+    std::map<std::string, std::string> team_a_updates;
+    for (auto &update : updates["team a updates"])
+    {
+        team_a_updates[update.first] = update.second;
+    }
+    std::map<std::string, std::string> team_b_updates;
+
+    for (auto &update : updates["team b updates"])
+    {
+        team_b_updates[update.first] = update.second;
+    }
+
+    return Event(team_a_name, team_b_name, name, time, game_updates, team_a_updates, team_b_updates, description);
 }

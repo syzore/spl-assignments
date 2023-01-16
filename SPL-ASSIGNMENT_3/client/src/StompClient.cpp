@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <set>
 
 #include "../include/ConnectionHandler.h"
 #include "../include/Constants.h"
@@ -36,7 +38,8 @@ int main(int argc, char *argv[])
 
 StompClient::StompClient(std::string _host, short _port) : host(_host), port(_port), currentUser(new User()),
 														   connectionHandler(new ConnectionHandler(_host, _port)),
-														   subscriptionId(0), receiptId(0), mShouldListen(false) {}
+														   subscriptionId(0), receiptId(0), mShouldListen(false),
+														   userGamesMap() {}
 
 void socket_listener_task(StompClient &client)
 {
@@ -165,9 +168,7 @@ void StompClient::parse_then_handle_response(std::string answer)
 	std::string body;
 	while (std::getline(iteratable, line))
 	{
-		if (line == "\0")
-			break;
-		body += line;
+		body += line + "\n";
 	}
 
 	handle_response(command, args, body);
@@ -206,13 +207,50 @@ void StompClient::handle_response(std::string command, std::map<std::string, std
 	}
 	else if (command == MESSAGE)
 	{
-		if (lastCommand != command_report)
-		{
-		}
+		handleReceivedReport(body);
 	}
 	else if (command == ERROR)
 	{
 		closeConnection();
+	}
+}
+
+void StompClient::handleReceivedReport(std::string report_body)
+{
+	// std::map<std::string, vector<Game>> userGamesMap;
+
+	int first_index = report_body.find_first_of(': ') + 1;
+	int second_index = report_body.find_first_of('\n');
+	std::string name = report_body.substr(first_index, second_index - first_index);
+
+	Event event = parseEventString(report_body);
+	std::string game_name = event.get_game_name();
+	if (userGamesMap.find(name) == userGamesMap.end())
+	{
+		// if the user is not in the map
+		Game game(game_name);
+		game.addEvent(event);
+		userGamesMap.insert({name, {game}});
+	}
+	else
+	{
+		std::vector<Game> games = userGamesMap[name];
+		auto it = find_if(games.begin(), games.end(), [&game_name](const Game &obj)
+						  { return obj.getGameName() == game_name; });
+
+		if (it != games.end())
+		{
+			// the game is in the user's vector
+			auto index = std::distance(games.begin(), it);
+			userGamesMap[name].at(index).addEvent(event);
+		}
+		else
+		{
+			// the game is NOT in the user's vector
+			Game game(game_name);
+			game.addEvent(event);
+			userGamesMap[name].insert(userGamesMap[name].begin(), game);
+		}
 	}
 }
 
@@ -284,7 +322,12 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 	}
 	else if (command == command_summary)
 	{
-		return StompProtocol::handle_summary_command(currentUser);
+		std::string game_name = lineParts[1];
+		std::string user_name = lineParts[2];
+		std::string file_name = lineParts[3];
+
+		handle_summary_command(game_name, user_name, file_name);
+		return EMPTY_BODY;
 	}
 	else if (command == command_report)
 	{
@@ -298,16 +341,66 @@ std::string StompClient::parse_command_line(std::vector<std::string> lineParts)
 
 		return StompProtocol::handle_report_command(currentUser, nae);
 	}
+	else if (command == "test")
+	{
+		for (auto const &user : userGamesMap)
+		{
+			std::cout << "user: " << user.first << "\n"
+					  << std::endl;
+
+			for (Game game : user.second)
+			{
+				std::cout << game.toString() << "\n"
+						  << std::endl;
+			}
+		}
+
+		return EMPTY_BODY;
+	}
 	else
 	{
 		std::cout << "no command corresponding with " << command << " was found..." << std::endl;
-		return "";
+		return EMPTY_BODY;
 	}
 }
 
 User *StompClient::getCurrentUser()
 {
 	return currentUser;
+}
+
+/// @brief will print the game updates it got from {user_name} for {game_name} into the provided {file_name}.
+/// @param game_name name of the game we need to save to file.
+/// @param user_name nave of the user holding the game summary.
+/// @param file_name is the path to the file name we need to save the game summary to.
+void StompClient::handle_summary_command(std::string game_name, std::string user_name, std::string file_name)
+{
+	try
+	{
+		std::vector<Game> user_saved_games = userGamesMap.at(user_name);
+		for (Game game : user_saved_games)
+		{
+			if (game.getGameName() == game_name)
+			{
+				fstream out;
+				out.open(file_name, ios::out | ios::trunc);
+
+				out << game.toString();
+
+				out.close();
+
+				return;
+			}
+		}
+
+		std::cerr << "requested game " << game_name << " was not found for this user.." << '\n';
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << "requested user " << user_name << " is not found in our databases.." << '\n';
+		std::cerr << e.what() << '\n';
+		return;
+	}
 }
 
 void StompClient::closeConnection()
