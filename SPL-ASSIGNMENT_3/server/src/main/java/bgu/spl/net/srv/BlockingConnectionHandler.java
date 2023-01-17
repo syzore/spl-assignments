@@ -30,33 +30,24 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
     @Override
     public void run() {
-        System.out.println("entered handler run");
         try (Socket sock = this.sock) { // just for automatic closing
             int read = -1;
 
-            synchronized (this) {
-                in = new BufferedInputStream(sock.getInputStream());
-                out = new BufferedOutputStream(sock.getOutputStream());
+            in = new BufferedInputStream(sock.getInputStream());
+            out = new BufferedOutputStream(sock.getOutputStream());
 
-                protocol.start(connectionId, connections);
+            protocol.start(connectionId, connections);
 
-                while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
-                    T nextMessage = encdec.decodeNextByte((byte) read);
-                    if (nextMessage != null) {
-                        T response = protocol.process(nextMessage);
-                        System.out.println("response = \n" + response);
-                        if (response != null) {
-                            out.write(encdec.encode(response));
-                            out.flush();
-                        }
-                        System.out.println("response sent to client.");
+            while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
+                T nextMessage = encdec.decodeNextByte((byte) read);
+                if (nextMessage != null) {
+                    T response = protocol.process(nextMessage);
+                    if (response != null) {
+                        out.write(encdec.encode(response));
+                        out.flush();
                     }
                 }
             }
-
-            System.out.println("should terminate = " + protocol.shouldTerminate());
-            System.out.println("connected = " + connected);
-            System.out.println("read = " + read);
 
         } catch (IOException ex) {
             System.out.println("error when assigning socket " + ex);
@@ -67,23 +58,23 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
     @Override
     public void close() throws IOException {
-        System.out.println("Socket close called from BlockingConnectionHandler");
         connected = false;
         sock.close();
     }
 
     @Override
     public void send(T msg) {
-        try (Socket sock = this.sock) {
-            out = new BufferedOutputStream(sock.getOutputStream());
+        try {
+            if (out == null) {
+                return;
+            }
 
             if (!protocol.shouldTerminate() && connected && msg != null) {
-                System.out.println("sending message = \n" + msg);
                 out.write(encdec.encode(msg));
                 out.flush();
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            System.out.println("error when sending msg " + e);
             e.printStackTrace();
         }
     }

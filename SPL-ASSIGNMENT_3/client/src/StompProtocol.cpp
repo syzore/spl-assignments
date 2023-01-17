@@ -9,23 +9,15 @@
 
 #include <boost/lexical_cast.hpp>
 
-/// @brief
-/// @param answer
-void StompProtocol::handle_message_from_subscription(std::string answer)
-{
-	std::cout << "got new message from server: " << answer << std::endl;
-}
-
-/// @brief
-/// @param login
-/// @param address
-/// @param passcode
-/// @param currentUser
-/// @param connectionHandler
-/// @return
+/// @brief Creates a new connection handler object with the given address and creates a CONNECT STOMP frame.
+/// @param login the username for login.
+/// @param address tcp address in ip:port format.
+/// @param passcode the user password for login.
+/// @param currentUser the user trying to log in.
+/// @param connectionHandler the connection handler object used to connect to the server.
+/// @return CONNECT STOMP frame or an empty body in case of an error.
 std::string StompProtocol::handle_login_command(std::string login, std::string address, std::string passcode, User *currentUser, ConnectionHandler *connectionHandler)
 {
-	// re-write this.. if the user is not null or if not connected
 	if (currentUser->isConnected())
 	{
 		if (login == currentUser->getName())
@@ -39,58 +31,57 @@ std::string StompProtocol::handle_login_command(std::string login, std::string a
 		return EMPTY_BODY;
 	}
 
-	std::string host = "stomp.cs.bgu.ac.il";
-	std::string accept_version = "1.2";
-
 	int colonIndex = address.find_first_of(':');
-
 	std::string ip = address.substr(0, colonIndex);
-	short port = boost::lexical_cast<short>(address.substr(colonIndex + 1, address.length()));
+	short port = boost::lexical_cast<short>(address.substr(colonIndex + 1, address.length() - colonIndex));
 	currentUser->setName(login);
 
-	std::cout << "connecting...." << std::endl;
+	std::cout << "Connecting to " << ip << ":" << port << std::endl;
+	// auto ch = new ConnectionHandler(ip, port);
+	// connectionHandler = ch;
+
 	if (!connectionHandler->connect())
 	{
 		std::cerr << "Cannot connect to " << ip << ":" << port << std::endl;
 		return EMPTY_BODY;
 	}
-	std::cout << "connected!!!" << std::endl;
+	std::cout << "Connected!!!" << std::endl;
 
-	std::vector<std::pair<std::string, std::string>> args;
+	std::map<std::string, std::string> args;
 
-	args.push_back(std::pair<std::string, std::string>(host_key, host));
-	args.push_back(std::pair<std::string, std::string>(passcode_key, passcode));
-	args.push_back(std::pair<std::string, std::string>(accept_version_key, accept_version));
-	args.push_back(std::pair<std::string, std::string>(login_key, login));
+	args.insert({host_key, host_value});
+	args.insert({passcode_key, passcode});
+	args.insert({accept_version_key, accept_version_value});
+	args.insert({login_key, login});
 
-	return create_command_frame(CONNECT, args, "");
+	return create_command_frame(CONNECT, args, EMPTY_BODY);
 }
 
-/// @brief
-/// @param currentUser
-/// @param receiptId
-/// @return
+/// @brief Creates a DISCONNECT STOMP frame.
+/// @param currentUser is the current user trying to disconnect.
+/// @param receiptId receipt id.
+/// @return DISCONNECT STOMP frame or an empty body in case of an error.
 std::string StompProtocol::handle_logout_command(User *currentUser, int receiptId)
 {
 	if (!currentUser->isConnected())
 	{
-		std::cout << "You must be logged in before doing anything else..." << std::endl;
+		std::cout << "You must be logged in before logging out..." << std::endl;
 		return EMPTY_BODY;
 	}
 
-	std::vector<std::pair<std::string, std::string>> args;
+	std::map<std::string, std::string> args;
 
-	args.push_back(std::pair<std::string, std::string>(receipt_key, std::to_string(receiptId)));
+	args.insert({receipt_key, std::to_string(receiptId)});
 
 	return create_command_frame(DISCONNECT, args, EMPTY_BODY);
 }
 
-/// @brief
-/// @param destination
-/// @param currentUser
-/// @param subscriptionId
-/// @param receiptId
-/// @return
+/// @brief Creates a SUBSCRIBE STOMP frame.
+/// @param destination the topic the user is asking to subscribe to.
+/// @param currentUser the user asking to subscribe.
+/// @param subscriptionId the subscription is associated with the selected topic (unique withing the user contex alone).
+/// @param receiptId recepit id.
+/// @return SUBSCRIBE STOMP frame or an empty body in case of an error.
 std::string StompProtocol::handle_join_command(std::string destination, User *currentUser, int subscriptionId, int receiptId)
 {
 	if (!currentUser->isConnected())
@@ -99,20 +90,28 @@ std::string StompProtocol::handle_join_command(std::string destination, User *cu
 		return EMPTY_BODY;
 	}
 
-	std::vector<std::pair<std::string, std::string>> args;
+	if (currentUser->isSubscribed(destination))
+	{
+		std::cout << "You are already subscribed to this topic..." << std::endl;
+		return EMPTY_BODY;
+	}
 
-	args.push_back(std::pair<std::string, std::string>(destination_key, destination));
-	args.push_back(std::pair<std::string, std::string>(subscription_id_key, std::to_string(subscriptionId)));
-	args.push_back(std::pair<std::string, std::string>(receipt_key, std::to_string(receiptId)));
+	currentUser->getSubscriptionsMap()->insert({destination, subscriptionId});
+
+	std::map<std::string, std::string> args;
+
+	args.insert({destination_key, destination});
+	args.insert({subscription_id_key, std::to_string(subscriptionId)});
+	args.insert({receipt_key, std::to_string(receiptId)});
 	return create_command_frame(SUBSCRIBE, args, EMPTY_BODY);
 }
 
-/// @brief
-/// @param currentUser
-/// @param subscriptionId
-/// @param receiptId
-/// @return
-std::string StompProtocol::handle_exit_command(User *currentUser, int subscriptionId, int receiptId)
+/// @brief Creates a UNSUBSCRIBE STOMP frame.
+/// @param currentUser the user asking to unsubscribe.
+/// @param subscriptionId the subscription is associated with the selected topic (unique withing the user contex alone).
+/// @param receiptId recepit id.
+/// @return UNSUBSCRIBE STOMP frame or an empty body in case of an error.
+std::string StompProtocol::handle_exit_command(User *currentUser, std::string destination, int subscriptionId, int receiptId)
 {
 	if (!currentUser->isConnected())
 	{
@@ -120,30 +119,30 @@ std::string StompProtocol::handle_exit_command(User *currentUser, int subscripti
 		return EMPTY_BODY;
 	}
 
-	std::vector<std::pair<std::string, std::string>> args;
+	if (currentUser->isNotSubscribed(destination))
+	{
+		std::cout << "Cannot unsubscribed from " << destination << " because you are not subscribed to this topic\n"
+				  << std::endl;
 
-	args.push_back(std::pair<std::string, std::string>(receipt_key, std::to_string(receiptId)));
-	args.push_back(std::pair<std::string, std::string>(subscription_id_key, std::to_string(subscriptionId)));
+		return EMPTY_BODY;
+	}
+
+	currentUser->getSubscriptionsMap()->erase(destination);
+
+	std::map<std::string, std::string>
+		args;
+
+	args.insert({receipt_key, std::to_string(receiptId)});
+	args.insert({subscription_id_key, std::to_string(subscriptionId)});
 
 	return create_command_frame(UNSUBSCRIBE, args, EMPTY_BODY);
 }
 
-/// @brief
-/// @param currentUser
-/// @return
-std::string StompProtocol::handle_summary_command(User *currentUser)
-{
-	if (!currentUser->isConnected())
-	{
-		std::cout << "You must be logged in before doing anything else..." << std::endl;
-		return EMPTY_BODY;
-	}
-}
-
-/// @brief
-/// @param currentUser
-/// @return
-std::string StompProtocol::handle_report_command(User *currentUser, names_and_events nae)
+/// @brief handls report command, prepares a single or multiple frames in accordance to the given events.
+/// @param currentUser current user sending the events.
+/// @param names_and_events_ holds the name of the game and the events that the user is wishing to report.
+/// @return the first event frame to send.
+std::string StompProtocol::handle_report_command(User *currentUser, names_and_events names_and_events_)
 {
 	if (!currentUser->isConnected())
 	{
@@ -151,18 +150,17 @@ std::string StompProtocol::handle_report_command(User *currentUser, names_and_ev
 		return EMPTY_BODY;
 	}
 
-	std::string destination = nae.team_a_name + "_" + nae.team_b_name;
-	if (currentUser->getSubscriptionsMap()->count(destination) == 0)
+	std::string destination = names_and_events_.team_a_name + "_" + names_and_events_.team_b_name;
+	if (currentUser->isNotSubscribed(destination))
 	{
 		std::cout << "You must be subscribed to this channel inorder to report it..." << std::endl;
 		return EMPTY_BODY;
 	}
 
-	std::vector<std::pair<std::string, std::string>> args;
-	args.push_back(std::pair<std::string, std::string>(destination_key, destination));
-
-	std::vector<Event> events = nae.events;
-
+	// Create all report frames.
+	std::map<std::string, std::string> args;
+	args.insert({destination_key, destination});
+	std::vector<Event> events = names_and_events_.events;
 	std::queue<std::string> *eventsReportQueue = currentUser->getEventsReportQueue();
 	for (Event event : events)
 	{
@@ -171,17 +169,18 @@ std::string StompProtocol::handle_report_command(User *currentUser, names_and_ev
 		eventsReportQueue->push(frame);
 	}
 
+	// Return the first one.
 	std::string firstFrame = eventsReportQueue->front();
 	eventsReportQueue->pop();
 	return firstFrame;
 }
 
-/// @brief
-/// @param command
-/// @param args
-/// @param body
-/// @return
-std::string StompProtocol::create_command_frame(std::string command, std::vector<std::pair<std::string, std::string>> args, std::string body)
+/// @brief Creates a STOMP frame from a set of arguments.
+/// @param command the main STOMP command.
+/// @param args the map of arguments (as key:value pairs).
+/// @param body the body of the message.
+/// @return a ready STOMP frame.
+std::string StompProtocol::create_command_frame(std::string command, std::map<std::string, std::string> args, std::string body)
 {
 	std::string frame;
 	frame.append(command + "\n");
@@ -190,12 +189,11 @@ std::string StompProtocol::create_command_frame(std::string command, std::vector
 		frame.append(pair.first + ":" + pair.second + "\n");
 	}
 
-	if (body != "")
+	if (body != EMPTY_BODY)
 	{
 		frame.append("\n");
 		frame.append(body);
 	}
-	// frame.append("\0");
 
 	return frame;
 }

@@ -81,7 +81,7 @@ public class Reactor<T> implements Server<T> {
             ex.printStackTrace();
         }
 
-        System.out.println("server closed!!!");
+        System.out.println("Server closed!!!");
         pool.shutdown();
     }
 

@@ -6859,8 +6859,7 @@ class json_sax_dom_parser
         errored = true;
         static_cast<void>(ex);
         if (allow_exceptions)
-        {
-            JSON_THROW(ex);
+        {            JSON_THROW(ex);
         }
         return false;
     }
@@ -23375,7 +23374,6 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
         switch (m_type)
         {
             case value_t::null:
-                std::cout << "about to return null in json.hpp" << std::endl;
                 return "null";
             case value_t::object:
                 return "object";

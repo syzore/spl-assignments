@@ -20,6 +20,8 @@ public:
     const bool isConnected() const;
     const string getName();
     void setName(string name);
+    const bool isNotSubscribed(std::string game_name) const;
+    const bool isSubscribed(std::string game_name) const;
     map<string, int> *getSubscriptionsMap();
     queue<string> *getEventsReportQueue();
 };
