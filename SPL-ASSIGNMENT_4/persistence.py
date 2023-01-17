@@ -1,24 +1,28 @@
 import sqlite3
 import atexit
 from dbtools import Dao
- 
+
 # Data Transfer Objects:
+
+
 class Employee(object):
     def __init__(self, id, name, salary, branch):
         self.id = id
         self.name = name
         self.salary = salary
         self.branch = branch
-    #TODO: implement
+    # TODO: implement
     pass
- 
+
+
 class Supplier(object):
     def __init__(self, id, name, contact_information):
         self.id = id
         self.name = name
         self.contact_information = contact_information
-    #TODO: implement
+    # TODO: implement
     pass
+
 
 class Product(object):
     def __init__(self, id, description, price, quantity):
@@ -26,16 +30,18 @@ class Product(object):
         self.description = description
         self.price = price
         self.quantity = quantity
-    #TODO: implement
+    # TODO: implement
     pass
+
 
 class Branche(object):
     def __init__(self, id, location, number_of_employees):
         self.id = id
         self.location = location
         self.number_of_employees = number_of_employees
-    #TODO: implement
+    # TODO: implement
     pass
+
 
 class Activitie(object):
     def __init__(self, product_id, quantity, activator_id, date):
@@ -43,21 +49,21 @@ class Activitie(object):
         self.quantity = quantity
         self.activator_id = activator_id
         self.date = date
-    #TODO: implement
+    # TODO: implement
     pass
- 
- 
-#Repository
+
+
+# Repository
 class Repository(object):
     def __init__(self):
         self._conn = sqlite3.connect('bgumart.db')
         self._conn.text_factory = bytes
-        #TODO: complete
- 
+        # TODO: complete
+
     def _close(self):
         self._conn.commit()
         self._conn.close()
- 
+
     def create_tables(self):
         self._conn.executescript("""
             CREATE TABLE employees (
@@ -95,13 +101,14 @@ class Repository(object):
 
             CREATE TABLE empTotalIncome (
                 employee_id     INTEGER REFERENCES employees(id),
-                total_income    INTEGER NOT NULL,
+                total_income    INTEGER NOT NULL
             );
         """)
 
     def execute_command(self, script: str) -> list:
         return self._conn.cursor().execute(script).fetchall()
- 
+
+
 # singleton
 repo = Repository()
 atexit.register(repo._close)
