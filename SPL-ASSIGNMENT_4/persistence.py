@@ -92,6 +92,11 @@ class Repository(object):
                 activator_id    INTEGER NOT NULL,
                 date            TEXT    NOT NULL
             );
+
+            CREATE TABLE empTotalIncome (
+                employee_id     INTEGER REFERENCES employees(id),
+                total_income    INTEGER NOT NULL,
+            );
         """)
 
     def execute_command(self, script: str) -> list:

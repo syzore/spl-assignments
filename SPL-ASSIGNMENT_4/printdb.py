@@ -44,6 +44,7 @@ def printEmployeesReport():
     print("Employees report")
     # need to add total sales income
     empsByName = repo.execute_command("""SELECT e.name,e.salary,b.location FROM employees AS e JOIN branches AS b ON e.branche=b.id  ORDER BY e.name ASC""")
+    
     for row in empsByName:
         tmp =(str)(row).replace("b'", "")
         tmp = tmp.replace("'","")
@@ -61,13 +62,13 @@ def printActivityReport():
 def main():
     printActivities()
 
-    #printBranches()
+    printBranches()
       
-    #printProducts()
+    printProducts()
 
-    #printSuppliers()
+    printSuppliers()
    
-    #printEmployeesReport()
+    printEmployeesReport()
     
     printActivityReport()
 

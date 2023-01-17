@@ -32,8 +32,12 @@ def add_employee(splittedline: List[str]):
     id, name, salary, branche_id = splittedline
     repo.execute_command(
         f"INSERT INTO employees values ({id}, '{name}', {salary}, {branche_id})")
+    repo.execute_command(
+        f"INSERT INTO empTotalIncome values ({id}, 0)")
 
     pass
+
+
 
 
 
@@ -44,20 +48,4 @@ adders = {"B": add_branche,
           "E": add_employee}
 
 
-def main(args: List[str]):
-    inputfilename = args[1]
-    # delete the database file if it exists
-    repo._close()
-    # uncomment if needed
-    if os.path.isfile("bgumart.db"):
-        os.remove("bgumart.db")
-    repo.__init__()
-    repo.create_tables()
-    with open(inputfilename) as inputfile:
-        for line in inputfile:
-            splittedline: List[str] = line.strip().split(",")
-            adders.get(splittedline[0])(splittedline[1:])
 
-
-if __name__ == '__main__':
-    main(sys.argv)
