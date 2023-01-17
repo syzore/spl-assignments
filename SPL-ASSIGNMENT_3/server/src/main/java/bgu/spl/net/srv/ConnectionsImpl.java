@@ -51,7 +51,9 @@ public class ConnectionsImpl<T> implements Connections<T> {
             String key = set.getKey();
             String name = key.substring(0, key.indexOf('_'));
             if (set.getValue().equals(destination) && name.equals(username)) {
-                return Integer.parseInt(key.substring(key.indexOf("_") + 1, key.length() - 1), 10);
+                int underscore_index = key.indexOf("_");
+                String subIdString = key.substring(underscore_index + 1, key.length());
+                return Integer.parseInt(subIdString, 10);
             }
         }
         return -1;
@@ -114,7 +116,6 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     @Override
     public void addConnection(Connection<T> connection) {
-        System.out.println("adding connection " + connection + " with id " + connection.getConnectionId());
         connectionsIdMap.put(new Integer(connection.getConnectionId()), connection);
     }
 

@@ -23,6 +23,7 @@ private:
 
 public:
     StompClient(std::string host, short port);
+    ~StompClient();
     void keyboard_handler_task(ConnectionHandler &connectionHandler);
     void socket_listener_task(ConnectionHandler &connectionHandler);
     void parse_then_handle_response(std::string answer);
@@ -30,9 +31,10 @@ public:
     void handleReceivedReport(std::string report_body);
     const int getNextSubscriptionId();
     const int getNextReceiptId();
-    bool shouldListen();
+    const bool shouldListen() const;
     void setShouldListen(bool shouldListen);
     ConnectionHandler *getConnectionHandler();
+    void setConnectionHandler(ConnectionHandler *connectionHandler);
     std::string parse_command_line(std::vector<std::string> lineParts);
     User *getCurrentUser();
     void closeConnection();

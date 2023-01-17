@@ -70,7 +70,7 @@ const std::string &Event::get_description() const
     return this->description;
 }
 
-Event::Event(const std::string &frame_body) : team_a_name(""), team_b_name(""), name(""), time(0), game_updates(), team_a_updates(), team_b_updates(), description("")
+Event::Event(const std::string &frame_body) : team_a_name(), team_b_name(), name(), time(0), game_updates(), team_a_updates(), team_b_updates(), description()
 {
 }
 
@@ -172,8 +172,7 @@ Event parseEventString(std::string eventString)
         if (line.empty())
             continue;
 
-        std::cout << line << std::endl;
-        int index = line.find(':');
+        const std::size_t index = line.find(':');
         if (index == std::string::npos)
             continue;
 

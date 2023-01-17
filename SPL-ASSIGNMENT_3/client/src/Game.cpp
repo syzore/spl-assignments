@@ -1,4 +1,3 @@
-#pragma once
 #include "../include/Game.h"
 
 using namespace std;
@@ -144,7 +143,7 @@ const string Game::toString() const
         result.append(std::to_string(time) + " - " + event.get_name() + ":\n\n");
 
         result.append(event.get_description() + "\n\n\n");
-    } 
+    }
 
     return result;
 }

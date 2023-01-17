@@ -15,6 +15,12 @@ User::~User()
         delete subscriptionsMap;
         subscriptionsMap = nullptr;
     }
+
+    if (eventsReportQueue)
+    {
+        delete eventsReportQueue;
+        eventsReportQueue = nullptr;
+    }
 }
 
 const string User::getName()
@@ -41,10 +47,10 @@ void User::connect()
 {
     if (mIsConnected)
     {
-        std::cout << "user named " << name << " tried to connect but is already connected" << std::endl;
+        std::cout << "User named " << name << " tried to connect but is already connected." << std::endl;
         return;
     }
-    std::cout << "user named " << name << " connected" << std::endl;
+    std::cout << "User named " << name << " connected." << std::endl;
     mIsConnected = true;
 }
 
@@ -52,10 +58,10 @@ void User::disconnect()
 {
     if (!mIsConnected)
     {
-        std::cout << "user named " << name << " tried to disconnect but is already not connected" << std::endl;
+        std::cout << "User named " << name << " tried to disconnect but is not connected." << std::endl;
         return;
     }
-    std::cout << "user named " << name << " disconnected" << std::endl;
+    std::cout << "User named " << name << " disconnected." << std::endl;
     mIsConnected = false;
     eventsReportQueue->empty();
 }
@@ -63,4 +69,14 @@ void User::disconnect()
 const bool User::isConnected() const
 {
     return mIsConnected;
+}
+
+const bool User::isSubscribed(std::string game_name) const
+{
+    return subscriptionsMap->count(game_name) != 0;
+}
+
+const bool User::isNotSubscribed(std::string game_name) const
+{
+    return subscriptionsMap->count(game_name) == 0;
 }

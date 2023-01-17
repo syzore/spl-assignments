@@ -65,12 +65,11 @@ public class StompServer<T> implements Server<T> {
         } catch (IOException ex) {
         }
 
-        System.out.println("server closed!!!");
+        System.out.println("Server closed!!!");
     }
 
     @Override
     public void close() throws IOException {
-        System.out.println("socket closing");
         if (sock != null)
             sock.close();
     }
@@ -108,8 +107,16 @@ public class StompServer<T> implements Server<T> {
                 () -> new StompProtocol<String>(), // protocol factory
                 FrameMessageEncoderDecoder::new // message encoder decoder factory
         ).serve();
+
+        // threadPerClient(
+        // 7777,
+        // () -> new StompProtocol<String>(), //
+        // FrameMessageEncoderDecoder::new //
+        // ).serve();
     }
 
+    // summary Germany_Japan meni
+    // /workspaces/spl-assignments/SPL-ASSIGNMENT_3/client/data/events1_out.txt
     public static int getNextMessageId() {
         int id = messegeId;
         messegeId++;

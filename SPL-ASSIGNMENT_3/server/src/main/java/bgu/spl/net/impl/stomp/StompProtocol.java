@@ -22,7 +22,8 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
 
   @Override
   public T process(T message) {
-    System.out.println("protocol process message = " + message);
+    if (message.equals(""))
+      return null;
     String msg = message.toString();
     Scanner scanner = new Scanner(msg);
     String command = scanner.nextLine();
@@ -43,31 +44,19 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
       body = body + scanner.nextLine() + "\n";
     }
 
-    System.out.println("body = " + body);
     scanner.close();
-    T result;
 
     switch (command) {
       case "CONNECT":
-        result = handleConnect(key_Value_Map, msg);
-        System.out.println(result);
-        return result;
+        return handleConnect(key_Value_Map, msg);
       case "SEND":
-        result = handleSend(key_Value_Map, body, msg);
-        System.out.println(result);
-        return result;
+        return handleSend(key_Value_Map, body, msg);
       case "SUBSCRIBE":
-        result = handleSubscribe(key_Value_Map, msg);
-        System.out.println(result);
-        return result;
+        return handleSubscribe(key_Value_Map, msg);
       case "UNSUBSCRIBE":
-        result = handleUnsubscribe(key_Value_Map, body, msg);
-        System.out.println(result);
-        return result;
+        return handleUnsubscribe(key_Value_Map, body, msg);
       case "DISCONNECT":
-        result = handleDisconnect(key_Value_Map, body, msg);
-        System.out.println(result);
-        return result;
+        return handleDisconnect(key_Value_Map, body, msg);
       default:
         return handleError("command not found.", msg, key_Value_Map.get(StompConstants.RECEIPT_ID_KEY),
             "The frame should contain a command.");
@@ -79,7 +68,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     connections.disconnect(connectionId);
     Map<String, String> args = new HashMap<String, String>();
     args.put(StompConstants.RECEIPT_ID_KEY, receipt);
-    shouldTerminate = true;
+    shouldTerminate();
     return buildFrame(StompConstants.RECEIPT, args, StompConstants.EMPTY_BODY);
   }
 
@@ -110,7 +99,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
   private T handleSend(Map<String, String> key_Value_Map, String body, String originalMessage) {
     String receipt = key_Value_Map.get(StompConstants.RECEIPT_KEY);
     String destination = key_Value_Map.get(StompConstants.DESTINATION_KEY);
-    String user = body.substring(body.indexOf("user: "), body.indexOf("\n"));
+    String user = body.substring(body.indexOf(":") + 2, body.indexOf("\n"));
     int subscriptionId = connections.getSubscriptionId(user, destination);
     int messageId = StompServer.getNextMessageId();
 
@@ -125,8 +114,6 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
   }
 
   private T handleConnect(Map<String, String> key_Value_Map, String originalMessage) {
-    System.out.println("handle connect");
-
     String acceptVersion = key_Value_Map.get("accept-version");
     String host = key_Value_Map.get("host");
     String login = key_Value_Map.get("login");
@@ -134,10 +121,12 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
     String receipt = key_Value_Map.get(StompConstants.RECEIPT_KEY);
 
     if (!acceptVersion.equals(StompConstants.ACCEPT_VERSION_VALUE)) {
-      return handleError("only version supported is 1.2", originalMessage, receipt, "");
+      return handleError("Only version supported is 1.2", originalMessage, receipt,
+          "The only supported version is 1.2, change your version and try again.");
     }
     if (!host.equals(StompConstants.HOST_VALUE)) {
-      return handleError("not the host we support here", originalMessage, receipt, "...");
+      return handleError("Not the host we support here", originalMessage, receipt,
+          "Change to a supported host and try again.");
     }
 
     User user = new User(login, passcode);
@@ -169,7 +158,7 @@ public class StompProtocol<T> implements StompMessagingProtocol<T> {
   }
 
   private T handleError(String message, String originalMessage, String receiptId, String explanation) {
-    shouldTerminate = true;
+    shouldTerminate();
     Map<String, String> errorMap = new HashMap<String, String>();
     errorMap.put(StompConstants.MESSAGE_KEY, message);
     if (receiptId != null && !receiptId.isEmpty()) {
