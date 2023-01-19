@@ -32,8 +32,6 @@ def add_employee(splittedline: List[str]):
     id, name, salary, branche_id = splittedline
     repo.execute_command(
         f"INSERT INTO employees values ({id}, '{name}', {salary}, {branche_id})")
-    repo.execute_command(
-        f"INSERT INTO empTotalIncome values ({id}, 0)")
 
     pass
 

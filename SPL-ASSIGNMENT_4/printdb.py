@@ -1,13 +1,32 @@
 from persistence import *
 
 
-def printActivities():
+def printRow(row):
+    mList = list(row)
+    for i, parameter in enumerate(mList):
+        if isinstance(mList[i], bytes):
+            mList[i] = mList[i].decode()
+    print(tuple(mList))
+
+
+def printActivities(employees_id_to_total_income_map):
     print("Activities")
     acts = repo.execute_command(
         """SELECT * FROM activities ORDER BY date ASC""")
     for row in acts:
-        tmp = (str)(row).replace("b", "")
-        print(tmp)
+        if (row[1] < 0):
+            product_id = row[0]
+            quantity = row[1]
+            employee_id = row[2]
+            acts = repo.execute_command(
+                f"SELECT price FROM products WHERE id = {product_id}")
+            product_price = acts[0][0] * -1
+            earnings = quantity * product_price
+            if employee_id in employees_id_to_total_income_map:
+                employees_id_to_total_income_map[employee_id] += earnings
+            else:
+                employees_id_to_total_income_map[employee_id] = earnings
+        printRow(row)
 
 
 def printBranches():
@@ -15,36 +34,32 @@ def printBranches():
     branches = repo.execute_command(
         """SELECT * FROM branches ORDER BY id ASC""")
     for row in branches:
-        tmp = (str)(row).replace("b", "")
-        print(tmp)
+        printRow(row)
 
 
 def printEmployees():
     print("Employees")
     emps = repo.execute_command("""SELECT * FROM employees ORDER BY id ASC""")
     for row in emps:
-        tmp = (str)(row).replace("b", "")
-        print(tmp)
+        printRow(row)
 
 
 def printProducts():
     print("Products")
     prods = repo.execute_command("""SELECT * FROM products ORDER BY id ASC""")
     for row in prods:
-        tmp = (str)(row).replace("b", "")
-        print(tmp)
+        printRow(row)
 
 
 def printSuppliers():
     print("Suppliers")
     supps = repo.execute_command("""SELECT * FROM suppliers ORDER BY id ASC""")
     for row in supps:
-        tmp = (str)(row).replace("b", "")
-        print(tmp)
+        printRow(row)
 
 
-def printEmployeesReport():
-    print("Employees report")
+def printEmployeesReport(employees_id_to_total_income_map):
+    print("\nEmployees report")
     empsByName = repo.execute_command(
         """SELECT e.name,e.salary,b.location FROM employees AS e JOIN branches AS b ON e.branche=b.id  ORDER BY e.name ASC""")
 
@@ -57,14 +72,15 @@ def printEmployeesReport():
         if isinstance(name, bytes):
             name = name.decode('utf_8', 'strict')
         employee_id = repo.execute_command(
-            f"SELECT id FROM employees Where name = '{name}'")
-        total_income = repo.execute_command(
-            f"SELECT total_income FROM empTotalIncome Where employee_id = {employee_id[0][0]}")
-        print(total_income[0][0])
+            f"SELECT id FROM employees Where name = '{name}'")[0][0]
+        if employee_id in employees_id_to_total_income_map:
+            print(employees_id_to_total_income_map[employee_id])
+        else:
+            print(0)
 
 
 def printActivityReport():
-    print("Activity report")
+    print("\nActivities report")
     acts = repo.execute_command(
         """SELECT a.date AS date, p.description, a.quantity, a.activator_id FROM activities AS a JOIN products AS p ON a.product_id=p.id ORDER BY date ASC""")
     for row in acts:
@@ -95,7 +111,9 @@ def printActivityReport():
 
 
 def main():
-    printActivities()
+    employees_id_to_total_income_map = {}
+
+    printActivities(employees_id_to_total_income_map)
 
     printBranches()
 
@@ -105,7 +123,7 @@ def main():
 
     printSuppliers()
 
-    printEmployeesReport()
+    printEmployeesReport(employees_id_to_total_income_map)
 
     printActivityReport()
 

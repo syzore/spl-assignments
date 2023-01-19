@@ -12,7 +12,7 @@ def handle_sale(splittedline: List[str]):
         f"SELECT quantity FROM products WHERE id = {int(product_id)}")
     currentQuantity = act[0][0]
     repo.execute_command(
-        f"UPDATE products SET quantity={currentQuantity - int(quantity)} WHERE id = {int(product_id)}")
+        f"UPDATE products SET quantity={currentQuantity + int(quantity)} WHERE id = {int(product_id)}")
 
 
 def handle_supply(splittedline: List[str]):
