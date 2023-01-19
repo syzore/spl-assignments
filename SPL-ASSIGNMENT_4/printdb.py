@@ -45,7 +45,6 @@ def printSuppliers():
 
 def printEmployeesReport():
     print("Employees report")
-    # need to add total sales income
     empsByName = repo.execute_command(
         """SELECT e.name,e.salary,b.location FROM employees AS e JOIN branches AS b ON e.branche=b.id  ORDER BY e.name ASC""")
 
@@ -66,7 +65,6 @@ def printEmployeesReport():
 
 def printActivityReport():
     print("Activity report")
-    # need to relate to sales/supplier case and update the table
     acts = repo.execute_command(
         """SELECT a.date AS date, p.description, a.quantity, a.activator_id FROM activities AS a JOIN products AS p ON a.product_id=p.id ORDER BY date ASC""")
     for row in acts:
@@ -93,8 +91,6 @@ def printActivityReport():
             l[3] = None
             l.append(s_name[0][0].decode('utf_8', 'strict'))
 
-        # tmp =(str)(row).replace("b'", "")
-        # tmp = tmp.replace("'","")
         print(tuple(l))
 
 
@@ -112,9 +108,6 @@ def main():
     printEmployeesReport()
 
     printActivityReport()
-
-    # TODO: implement
-    pass
 
 
 if __name__ == '__main__':

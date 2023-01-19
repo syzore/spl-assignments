@@ -11,8 +11,6 @@ class Employee(object):
         self.name = name
         self.salary = salary
         self.branch = branch
-    # TODO: implement
-    pass
 
 
 class Supplier(object):
@@ -20,8 +18,6 @@ class Supplier(object):
         self.id = id
         self.name = name
         self.contact_information = contact_information
-    # TODO: implement
-    pass
 
 
 class Product(object):
@@ -30,8 +26,6 @@ class Product(object):
         self.description = description
         self.price = price
         self.quantity = quantity
-    # TODO: implement
-    pass
 
 
 class Branche(object):
@@ -39,8 +33,6 @@ class Branche(object):
         self.id = id
         self.location = location
         self.number_of_employees = number_of_employees
-    # TODO: implement
-    pass
 
 
 class Activitie(object):
@@ -49,8 +41,6 @@ class Activitie(object):
         self.quantity = quantity
         self.activator_id = activator_id
         self.date = date
-    # TODO: implement
-    pass
 
 
 # Repository
@@ -97,11 +87,6 @@ class Repository(object):
                 quantity        INTEGER NOT NULL,
                 activator_id    INTEGER NOT NULL,
                 date            TEXT    NOT NULL
-            );
-
-            CREATE TABLE empTotalIncome (
-                employee_id     INTEGER REFERENCES employees(id),
-                total_income    INTEGER NOT NULL
             );
         """)
 
